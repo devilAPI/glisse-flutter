@@ -57,6 +57,7 @@ void paintContentLens(
     rimShine: draw.rimShine,
     rimOpacity: draw.rimOpacity,
     softensBend: draw.softensBend,
+    magnifyOffset: draw.magnifyOffset,
     magnification: draw.magnification,
   ).apply(shader, image: image);
   canvas.drawRect(draw.rect.inflate(1), Paint()..shader = shader);

@@ -273,7 +273,12 @@ class LensDraw {
     this.magnification = 1,
     this.outerBackdrop,
     this.screenSize = Size.zero,
+    this.magnifyOffset = Offset.zero,
   });
+
+  /// Where the magnified spot lies from the lens's middle, in local px: a
+  /// loupe held above a finger shows what's under the finger.
+  final Offset magnifyOffset;
 
   /// For [LensTexture.backdrop]: the layer of the glass this glass sits in,
   /// in the view's device px, which Impeller binds as the backdrop instead
@@ -445,8 +450,8 @@ class LensDraw {
     f(outer?.height ?? 0);
     f(screenSize.width);
     f(screenSize.height);
-    f(0);
-    f(0);
+    f(magnifyOffset.dx);
+    f(magnifyOffset.dy);
 
     if (image != null) shader.setImageSampler(0, image);
   }

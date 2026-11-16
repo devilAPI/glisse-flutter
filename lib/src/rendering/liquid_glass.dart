@@ -45,7 +45,11 @@ class GlassStyle {
     this.amount = 1,
     this.mode = GlassMode.auto,
     this.magnification = 1,
+    this.magnifyOffset = Offset.zero,
   });
+
+  /// Where the magnified spot lies from the glass's middle, in local px.
+  final Offset magnifyOffset;
 
   final Color tint;
   final Color edge;
@@ -83,6 +87,7 @@ class GlassStyle {
     double? amount,
     GlassMode? mode,
     double? magnification,
+    Offset? magnifyOffset,
   }) {
     return GlassStyle(
       tint: tint ?? this.tint,
@@ -99,6 +104,7 @@ class GlassStyle {
       amount: amount ?? this.amount,
       mode: mode ?? this.mode,
       magnification: magnification ?? this.magnification,
+      magnifyOffset: magnifyOffset ?? this.magnifyOffset,
     );
   }
 
@@ -118,11 +124,12 @@ class GlassStyle {
       other.rim == rim &&
       other.amount == amount &&
       other.mode == mode &&
-      other.magnification == magnification;
+      other.magnification == magnification &&
+      other.magnifyOffset == magnifyOffset;
 
   @override
   int get hashCode => Object.hash(tint, edge, drop, rimShine, blur, saturation, brightness, bend, dispersion, spec, rim,
-      amount, mode, magnification);
+      amount, mode, magnification, magnifyOffset);
 }
 
 /// The render object behind every piece of Glisse glass: a rounded
@@ -300,6 +307,7 @@ class RenderLiquidGlass extends RenderProxyBox {
       rimShine: s.rimShine,
       filterInverse: inverse,
       magnification: s.magnification,
+      magnifyOffset: s.magnifyOffset,
       outerBackdrop: outerBackdrop,
       screenSize: texture == LensTexture.backdrop ? _screenSize : Size.zero,
     );

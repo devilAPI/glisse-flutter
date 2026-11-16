@@ -8,11 +8,20 @@ import '../rendering/liquid_glass.dart';
 /// The glass of a magnifying lens: clear, unfrosted, with a lit rim that
 /// bends the edge of what it magnifies.
 class _LensGlass extends StatelessWidget {
-  const _LensGlass({required this.size, required this.radius, required this.magnification, this.child});
+  const _LensGlass({
+    required this.size,
+    required this.radius,
+    required this.magnification,
+    this.focus = Offset.zero,
+    this.child,
+  });
 
   final Size size;
   final double radius;
   final double magnification;
+
+  /// Where the magnified spot lies from the lens's middle.
+  final Offset focus;
   final Widget? child;
 
   @override
@@ -46,6 +55,7 @@ class _LensGlass extends StatelessWidget {
             dispersion: theme.glassDispersion,
             spec: LensSpec.glass,
             magnification: magnification,
+            magnifyOffset: focus,
           ),
           child: child,
         ),
@@ -162,7 +172,7 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
 
 /// A loupe that rises over a long press and follows the finger, as iOS's
 /// text loupe: a glass capsule a little above the finger, magnifying what's
-/// under it.
+/// under the finger.
 ///
 /// Like [GlassMagnifier], it magnifies a [GlassBackdrop]'s background, or
 /// on Impeller the live backdrop, which includes [child].
@@ -214,6 +224,9 @@ class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // Long presses anywhere in the region count, over the child's content
+      // or not, and still reach the child.
+      behavior: HitTestBehavior.translucent,
       onLongPressStart: (d) => _show(d.localPosition),
       onLongPressMoveUpdate: (d) => setState(() => _at = d.localPosition),
       onLongPressEnd: (_) => _hide(),
@@ -248,6 +261,8 @@ class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerPr
                 size: widget.size,
                 radius: double.infinity,
                 magnification: widget.magnification,
+                // Held above the finger, it shows what's under the finger.
+                focus: Offset(0, widget.lift),
               ),
             ),
         ],

@@ -39,7 +39,7 @@ uniform vec4 uRim;      // rim mode (0 none, 1 glass, 2 selection, 3 bright sele
 uniform vec4 uFilter;   // Mode 2: local x = a fx + b fy + c from the fragment's coordinates; w: enabled.
 uniform vec4 uFilterY;  // Mode 2: local y = d fx + e fy + f.
 uniform vec4 uOuter;    // Mode 2: the glass this glass sits in, whose layer may be the backdrop: x, y, width, height (device px).
-uniform vec4 uScreen;   // Mode 2: the view's size (device px); unused; unused.
+uniform vec4 uScreen;   // Mode 2: the view's size (device px); then the magnified spot's offset from the middle (local px).
 
 uniform sampler2D uTexture;
 
@@ -284,7 +284,7 @@ void main() {
     float zoom = uRim.w;
     if (zoom > 0.0 && zoom != 1.0) {
       vec2 centre = uRect.xy + uRect.zw * 0.5;
-      q = centre + (p - centre) / zoom;
+      q = centre + uScreen.zw + (p - centre) / zoom;
     }
     vec4 plain = frost(q, soften ? 0.0 : uFrost.x);
     float sigma = soften ? uFrost.x * amount : uFrost.x;
