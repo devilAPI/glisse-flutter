@@ -9,6 +9,7 @@ import 'hairline.dart';
 /// Several buttons joined into one capsule of glass, as iOS 26's toolbars
 /// group them. Each [GlassButtonGroupItem] lights up on its own when pressed.
 class GlassButtonGroup extends StatelessWidget {
+  /// Creates a group of buttons in one capsule.
   const GlassButtonGroup({super.key, required this.children, this.separators = false, this.height = 40});
 
   /// Usually [GlassButtonGroupItem]s.
@@ -16,6 +17,8 @@ class GlassButtonGroup extends StatelessWidget {
 
   /// Whether to draw hairlines between the items.
   final bool separators;
+
+  /// The capsule's height.
   final double height;
 
   @override
@@ -56,6 +59,7 @@ class _GroupScope extends InheritedWidget {
 
 /// One button in a [GlassButtonGroup]: an icon, or a short label.
 class GlassButtonGroupItem extends StatefulWidget {
+  /// Creates an item; it needs an [icon] or a [label].
   const GlassButtonGroupItem({
     super.key,
     this.icon,
@@ -67,16 +71,25 @@ class GlassButtonGroupItem extends StatefulWidget {
     this.focusNode,
   }) : assert(icon != null || label != null);
 
+  /// Shown in the item, such as a glyph.
   final Widget? icon;
+
+  /// Shown in the item as text; use a short one.
   final Widget? label;
 
   /// Null disables the item.
   final VoidCallback? onPressed;
+
+  /// Names the item for assistive technology.
   final String? semanticLabel;
 
   /// Shows the item in the accent, as a toggled tool.
   final bool selected;
+
+  /// Colours the item. Defaults to the theme.
   final Color? tint;
+
+  /// The item's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
 
   @override

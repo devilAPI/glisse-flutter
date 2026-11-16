@@ -21,6 +21,7 @@ GlassStyle themedGlass(GlassThemeData theme, {Color? tint, bool shadow = true}) 
 /// Makes a control take focus and answer space and enter, with a ring while
 /// it has keyboard focus.
 class GlassFocusable extends StatefulWidget {
+  /// Makes [child] focusable and activatable while [enabled].
   const GlassFocusable({
     super.key,
     required this.enabled,
@@ -32,11 +33,22 @@ class GlassFocusable extends StatefulWidget {
     this.onFocusRing,
   });
 
+  /// Whether the control takes focus and shows a pointer cursor.
   final bool enabled;
+
+  /// Called when space or enter is pressed while the control has focus.
   final VoidCallback? onActivate;
+
+  /// The corner radius of the control, in logical px, which the ring follows.
   final double radius;
+
+  /// The control.
   final Widget child;
+
+  /// The focus node to use; null makes one.
   final FocusNode? focusNode;
+
+  /// Whether to take focus when first built.
   final bool autofocus;
 
   /// Called when the ring shows or hides, for controls that draw their own.

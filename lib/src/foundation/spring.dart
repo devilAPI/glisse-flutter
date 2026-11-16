@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 /// Each frame it steps by the spring's exact solution, so it is stable at any
 /// frame rate. [stiffness] and [damping] are per unit mass.
 class GlassSpring extends ChangeNotifier implements ValueListenable<double> {
+  /// Creates a spring at rest on [value], driven by a ticker from [vsync].
   GlassSpring({
     required TickerProvider vsync,
     double value = 0,
@@ -36,14 +37,19 @@ class GlassSpring extends ChangeNotifier implements ValueListenable<double> {
   @override
   double get value => _value;
 
+  /// The value the spring is heading for.
   double get target => _target;
 
+  /// How fast [value] is changing, in units per second.
   double get velocity => _velocity;
 
+  /// Whether the spring is still moving, so its ticker is running.
   bool get isMoving => _ticker.isActive;
 
+  /// How hard the spring pulls towards [target], per unit mass.
   double get stiffness => _stiffness;
 
+  /// How strongly the spring resists its own motion, per unit mass.
   double get damping => _damping;
 
   /// Changes how the spring moves from now on, keeping where it is and how fast.

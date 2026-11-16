@@ -23,11 +23,16 @@ const double _pressScale = 0.72;
 /// A range of values, from [start] to [end].
 @immutable
 class GlassRange {
+  /// Creates a range from [start] to [end].
   const GlassRange(this.start, this.end);
 
+  /// The low end.
   final double start;
+
+  /// The high end.
   final double end;
 
+  /// A copy with the given ends replaced.
   GlassRange copyWith({double? start, double? end}) => GlassRange(start ?? this.start, end ?? this.end);
 
   @override
@@ -43,6 +48,7 @@ class GlassRange {
 /// A slider with two knobs, picking a range: white knobs on GlassSlider's
 /// rail, the accent filling between them. The knobs can meet but not cross.
 class GlassRangeSlider extends StatefulWidget {
+  /// Creates a range slider showing [values] between [min] and [max].
   const GlassRangeSlider({
     super.key,
     required this.values,
@@ -66,12 +72,20 @@ class GlassRangeSlider extends StatefulWidget {
 
   /// Called as either knob moves. Null disables the slider.
   final ValueChanged<GlassRange>? onChanged;
+
+  /// The value at the left end of the rail.
   final double min;
+
+  /// The value at the right end of the rail.
   final double max;
 
   /// Snaps the values to this many equal steps, if set.
   final int? divisions;
+
+  /// Called when a knob is first held, with the range as it stands.
   final ValueChanged<GlassRange>? onChangeStart;
+
+  /// Called when a knob is let go, with the range as it stands.
   final ValueChanged<GlassRange>? onChangeEnd;
 
   /// The fill's colour. Defaults to the theme's accent.

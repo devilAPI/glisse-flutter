@@ -8,6 +8,7 @@ import '../rendering/liquid_glass.dart';
 /// A text field on glass, as Glisse's `Input`: a 40px capsule whose frost
 /// brightens while it has focus, with an optional leading icon.
 class GlassInput extends StatefulWidget {
+  /// Creates a glass text field.
   const GlassInput({
     super.key,
     this.controller,
@@ -29,7 +30,10 @@ class GlassInput extends StatefulWidget {
     this.mode = GlassMode.auto,
   });
 
+  /// Holds the text; null makes one that the field looks after.
   final TextEditingController? controller;
+
+  /// The focus node to use; null makes one that the field looks after.
   final FocusNode? focusNode;
 
   /// Shown, muted, while the field is empty.
@@ -37,12 +41,26 @@ class GlassInput extends StatefulWidget {
 
   /// Shown before the text, such as a person or envelope glyph.
   final Widget? icon;
+
+  /// Called with the text each time it changes.
   final ValueChanged<String>? onChanged;
+
+  /// Called with the text when the user submits it.
   final ValueChanged<String>? onSubmitted;
+
+  /// Whether the field takes input; off, it is dimmed.
   final bool enabled;
+
+  /// Whether to hide the text, as for a password.
   final bool obscureText;
+
+  /// Whether to take focus when first built.
   final bool autofocus;
+
+  /// The keyboard to show; null leaves it to the platform.
   final TextInputType? keyboardType;
+
+  /// The action key the keyboard shows; null leaves it to the platform.
   final TextInputAction? textInputAction;
 
   /// Shows a clear button while there's text, as a search field does.
@@ -50,9 +68,17 @@ class GlassInput extends StatefulWidget {
 
   /// The widest the field grows to.
   final double maxWidth;
+
+  /// The field's height, in logical px; its corners are a capsule.
   final double height;
+
+  /// Whether the keyboard suggests corrections.
   final bool autocorrect;
+
+  /// Filters or reshapes what is typed.
   final List<TextInputFormatter>? inputFormatters;
+
+  /// How the glass reads what's behind it.
   final GlassMode mode;
 
   @override
@@ -211,6 +237,7 @@ class _GlassInputState extends State<GlassInput> {
 /// A [GlassInput] for searching: a magnifier icon, a "Search" placeholder and
 /// a clear button.
 class GlassSearchField extends StatelessWidget {
+  /// Creates a search field.
   const GlassSearchField({
     super.key,
     this.controller,
@@ -224,14 +251,31 @@ class GlassSearchField extends StatelessWidget {
     this.mode = GlassMode.auto,
   });
 
+  /// Holds the text; null makes one that the field looks after.
   final TextEditingController? controller;
+
+  /// The focus node to use; null makes one that the field looks after.
   final FocusNode? focusNode;
+
+  /// Shown, muted, while the field is empty.
   final String placeholder;
+
+  /// Called with the text each time it changes.
   final ValueChanged<String>? onChanged;
+
+  /// Called with the text when the user submits it.
   final ValueChanged<String>? onSubmitted;
+
+  /// Whether the field takes input; off, it is dimmed.
   final bool enabled;
+
+  /// Whether to take focus when first built.
   final bool autofocus;
+
+  /// The widest the field grows to.
   final double maxWidth;
+
+  /// How the glass reads what's behind it.
   final GlassMode mode;
 
   @override
@@ -289,7 +333,11 @@ class GlassGlyph extends StatelessWidget {
       : this._(_Glyph.minus, color: color, size: size);
 
   final _Glyph _kind;
+
+  /// The stroke colour.
   final Color color;
+
+  /// The side of the glyph's square box, in logical px.
   final double size;
 
   @override

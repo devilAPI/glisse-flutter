@@ -13,12 +13,16 @@ import 'overlay_scope.dart';
 class GlassPopoverController extends ChangeNotifier {
   bool _open = false;
 
+  /// Whether the popover is open, or opening.
   bool get isOpen => _open;
 
+  /// Opens the popover.
   void show() => _set(true);
 
+  /// Closes the popover.
   void hide() => _set(false);
 
+  /// Opens the popover if it is closed, else closes it.
   void toggle() => _set(!_open);
 
   void _set(bool open) {
@@ -29,11 +33,18 @@ class GlassPopoverController extends ChangeNotifier {
 }
 
 /// Which side of the anchor a [GlassPopover] prefers.
-enum GlassPopoverDirection { below, above }
+enum GlassPopoverDirection {
+  /// Under the anchor.
+  below,
+
+  /// Over the anchor.
+  above,
+}
 
 /// A card of glass that springs out of its anchor, below it or above it when
 /// there's no room, and closes on a tap anywhere else or on Escape.
 class GlassPopover extends StatefulWidget {
+  /// Springs a card built by [popoverBuilder] out of [child].
   const GlassPopover({
     super.key,
     required this.child,
@@ -51,6 +62,8 @@ class GlassPopover extends StatefulWidget {
 
   /// The anchor.
   final Widget child;
+
+  /// Builds the card's content.
   final WidgetBuilder popoverBuilder;
 
   /// Opens and closes it; without one, a tap on the anchor does.
@@ -58,6 +71,8 @@ class GlassPopover extends StatefulWidget {
 
   /// Whether a tap on the anchor opens and closes it.
   final bool tapToToggle;
+
+  /// Which side of the anchor the card prefers; it flips if there's no room.
   final GlassPopoverDirection direction;
 
   /// Where along the anchor the card lines up: its left edge ([Alignment.centerLeft]),
@@ -66,9 +81,17 @@ class GlassPopover extends StatefulWidget {
 
   /// The space between the anchor and the card.
   final double gap;
+
+  /// The card's width, in logical px; null sizes it to its content.
   final double? width;
+
+  /// Space between the card's edge and its content.
   final EdgeInsetsGeometry padding;
+
+  /// The card's corner radius, in logical px.
   final double radius;
+
+  /// Called with true when the card opens and false when it closes.
   final ValueChanged<bool>? onOpenChanged;
 
   @override
@@ -251,6 +274,7 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
 /// A small label of glass over its child, shown while a mouse rests on it or
 /// a finger presses it long.
 class GlassTooltip extends StatefulWidget {
+  /// Shows [message] over [child] while it is hovered or long-pressed.
   const GlassTooltip({
     super.key,
     required this.message,
@@ -259,7 +283,10 @@ class GlassTooltip extends StatefulWidget {
     this.showDuration = const Duration(milliseconds: 1500),
   });
 
+  /// The label's text, also its semantic tooltip.
   final String message;
+
+  /// The widget the label hangs over.
   final Widget child;
 
   /// How long a mouse rests before it shows.

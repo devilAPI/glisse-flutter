@@ -24,6 +24,7 @@ enum GlassAvatarStatus {
 /// A circle of glass showing a person: their picture, their initials, or an
 /// icon, with an optional status dot cut into its rim.
 class GlassAvatar extends StatelessWidget {
+  /// Creates a glass avatar; [size] must be positive.
   const GlassAvatar({
     super.key,
     this.image,
@@ -47,6 +48,8 @@ class GlassAvatar extends StatelessWidget {
 
   /// The circle's diameter.
   final double size;
+
+  /// The status dot cut into the rim. Defaults to none.
   final GlassAvatarStatus status;
 
   /// The glass's frost. Defaults to the theme's.
@@ -215,6 +218,7 @@ class _PersonPainter extends CustomPainter {
 /// A row of overlapping avatars, each cut away where the next one sits, with
 /// a glass "+N" after the first [max].
 class GlassAvatarGroup extends StatelessWidget {
+  /// Creates a group of avatars; [overlap] must be from 0 up to but not including 1.
   const GlassAvatarGroup({
     super.key,
     required this.children,
@@ -230,10 +234,14 @@ class GlassAvatarGroup extends StatelessWidget {
 
   /// How many to show before the rest become "+N". Null shows them all.
   final int? max;
+
+  /// Each avatar's diameter.
   final double size;
 
   /// How much each avatar covers the one before, as a share of [size].
   final double overlap;
+
+  /// Names the group for assistive technology.
   final String? semanticLabel;
 
   @override

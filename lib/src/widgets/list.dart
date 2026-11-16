@@ -10,6 +10,7 @@ import 'hairline.dart';
 /// parted by hairlines that start where their text does, under a muted
 /// [header] and over a muted [footer].
 class GlassListSection extends StatelessWidget {
+  /// Creates a list section of [children].
   const GlassListSection({
     super.key,
     this.header,
@@ -18,11 +19,16 @@ class GlassListSection extends StatelessWidget {
     this.borderRadius = 26,
   });
 
+  /// Shown above the rows, in muted text.
   final Widget? header;
+
+  /// Shown below the rows, in muted text.
   final Widget? footer;
 
   /// The rows, usually [GlassListTile]s.
   final List<Widget> children;
+
+  /// The card's corner radius, in logical pixels.
   final double borderRadius;
 
   @override
@@ -81,6 +87,7 @@ class GlassListSection extends StatelessWidget {
 /// a [subtitle], and a [trailing] value or control. Tappable rows light up
 /// while pressed.
 class GlassListTile extends StatefulWidget {
+  /// Creates a list row.
   const GlassListTile({
     super.key,
     this.leading,
@@ -93,9 +100,17 @@ class GlassListTile extends StatefulWidget {
 
   /// Sized 28px across, such as an icon on a coloured square.
   final Widget? leading;
+
+  /// The row's main text.
   final Widget title;
+
+  /// Muted text under the [title].
   final Widget? subtitle;
+
+  /// Shown at the end, such as a value or a control.
   final Widget? trailing;
+
+  /// Called when the row is tapped. Null leaves the row inert.
   final VoidCallback? onTap;
 
   /// Shows a chevron at the end, for a row that leads somewhere.

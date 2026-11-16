@@ -25,6 +25,7 @@ const double _thumbHeight = 92 * _scale;
 /// An on/off switch, as iOS 26's: a white knob that, held, lifts into a glass
 /// lens bending the track under its rim, and can be dragged across.
 class GlassSwitch extends StatefulWidget {
+  /// Creates a switch.
   const GlassSwitch({
     super.key,
     required this.value,
@@ -35,6 +36,7 @@ class GlassSwitch extends StatefulWidget {
     this.autofocus = false,
   });
 
+  /// Whether the switch is on.
   final bool value;
 
   /// Called with the new value. Null disables the switch.
@@ -42,8 +44,14 @@ class GlassSwitch extends StatefulWidget {
 
   /// The track's colour when on. Defaults to the theme's green.
   final Color? activeColor;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

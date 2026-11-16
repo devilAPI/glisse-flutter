@@ -418,4 +418,37 @@ void main() {
       expect(months, [DateTime(2026, 7)]);
     });
   });
+
+  group('final review', () {
+    test('lens specs with the same values are equal', () {
+      LensSpec make() =>
+          LensSpec(strength: 0.5 + 0.0 * DateTime.now().millisecond, dispersion: 1, depth: 12, dome: 0.3);
+      expect(make(), make());
+      expect(make().hashCode, make().hashCode);
+      expect(make(), isNot(make().copyWith(strength: 0.6)));
+    });
+
+    testWidgets('a backdrop copies only for glass that can read the copy', (tester) async {
+      await setUpGlass(tester);
+      Widget page(GlassMode mode) => MaterialApp(
+            home: GlassBackdrop(
+              background: const Stripes(),
+              child: Center(child: Glass(mode: mode, width: 120, height: 60)),
+            ),
+          );
+      GlassBackdropController controller() => GlassBackdrop.maybeOf(tester.element(find.byType(Glass)))!;
+
+      await tester.pumpWidget(page(GlassMode.frost));
+      await tester.pump();
+      expect(controller().hasUsers, isFalse);
+
+      await tester.pumpWidget(page(GlassMode.auto));
+      await tester.pump();
+      expect(controller().hasUsers, isTrue);
+
+      await tester.pumpWidget(page(GlassMode.backdropFilter));
+      await tester.pump();
+      expect(controller().hasUsers, isFalse);
+    });
+  });
 }

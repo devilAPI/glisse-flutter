@@ -15,6 +15,7 @@ import 'control_utils.dart';
 /// [page] may be fractional, as a `PageController`'s is mid-swipe: the pill
 /// then follows it exactly. A whole-page jump springs.
 class GlassPageIndicator extends StatefulWidget {
+  /// Creates a page indicator; [count] must be positive.
   const GlassPageIndicator({
     super.key,
     required this.count,
@@ -24,7 +25,10 @@ class GlassPageIndicator extends StatefulWidget {
     this.semanticLabel,
   }) : assert(count > 0);
 
+  /// How many pages there are.
   final int count;
+
+  /// The current page, from 0 to [count] - 1; may be fractional.
   final double page;
 
   /// Called with the page whose dot was tapped.
@@ -32,6 +36,8 @@ class GlassPageIndicator extends StatefulWidget {
 
   /// The current dot's colour; defaults to the theme's foreground.
   final Color? color;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   @override

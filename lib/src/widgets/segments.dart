@@ -21,9 +21,13 @@ import '../rendering/shadows.dart';
 /// One choice: a tab bar's tab, which may have an icon, or a segment.
 @immutable
 class GlassSegment<T> {
+  /// Creates a choice that stands for [value] and reads [label].
   const GlassSegment({required this.value, required this.label, this.icon});
 
+  /// What choosing this segment gives.
   final T value;
+
+  /// The text shown for it.
   final String label;
 
   /// An icon drawn above the label, as in an iOS tab bar.
@@ -31,7 +35,13 @@ class GlassSegment<T> {
 }
 
 /// Which of the two a [SegmentsView] draws.
-enum SegmentsKind { tabBar, segmented }
+enum SegmentsKind {
+  /// A tab bar, with an optional icon over each label.
+  tabBar,
+
+  /// A segmented control, as in a form.
+  segmented,
+}
 
 // Springs: the slide's stiffness and damping, then the lift's.
 const List<double> _rest = [1024, 58.9, 676, 47.8];
@@ -83,6 +93,7 @@ class _MoveIntent extends Intent {
 /// A row of choices under a selection that lifts into a lens while held.
 /// Only [GlassTabBar] and [GlassSegmentedControl] use it.
 class SegmentsView<T> extends StatefulWidget {
+  /// Creates a view of [items] in the style of [kind].
   const SegmentsView({
     super.key,
     required this.kind,
@@ -93,11 +104,22 @@ class SegmentsView<T> extends StatefulWidget {
     this.mode = GlassMode.auto,
   });
 
+  /// Which of the two to draw.
   final SegmentsKind kind;
+
+  /// The choices, in order.
   final List<GlassSegment<T>> items;
+
+  /// The chosen value; null, or one that matches no item, leaves none chosen.
   final T? value;
+
+  /// Called with the value of the segment chosen. Null disables the bar.
   final ValueChanged<T>? onChanged;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// How the glass reads what's behind it.
   final GlassMode mode;
 
   @override

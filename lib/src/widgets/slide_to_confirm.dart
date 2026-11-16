@@ -21,6 +21,7 @@ const double _inset = 4;
 /// Let go past [threshold] of the way and the knob snaps to the end, shows a
 /// tick and calls [onConfirmed]; let go short of it and it springs back.
 class GlassSlideToConfirm extends StatefulWidget {
+  /// Creates a slide to confirm; [threshold] must be above 0 and at most 1, and [height] at least 32.
   const GlassSlideToConfirm({
     super.key,
     required this.onConfirmed,
@@ -51,6 +52,8 @@ class GlassSlideToConfirm extends StatefulWidget {
 
   /// How far along, from 0 to 1, the knob must be let go to confirm.
   final double threshold;
+
+  /// The track's height.
   final double height;
 
   /// The fill behind the knob. Defaults to the theme's accent.
@@ -61,7 +64,11 @@ class GlassSlideToConfirm extends StatefulWidget {
 
   /// Defaults to [label].
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

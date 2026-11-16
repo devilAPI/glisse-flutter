@@ -14,15 +14,23 @@ import '../rendering/shadows.dart';
 /// [GlassBackdrop] the page set, so each overlay captures them when it opens
 /// and gives them to its own content.
 class GlassOverlayContext {
+  /// Captures what [context] gives glass: its theme, backdrop, text style and text direction.
   GlassOverlayContext.of(BuildContext context)
       : theme = GlassTheme.of(context),
         backdrop = GlassBackdrop.maybeOf(context),
         textStyle = DefaultTextStyle.of(context).style,
         direction = Directionality.maybeOf(context) ?? TextDirection.ltr;
 
+  /// The page's glass theme.
   final GlassThemeData theme;
+
+  /// The page's backdrop, if it has one.
   final GlassBackdropController? backdrop;
+
+  /// The page's text style.
   final TextStyle textStyle;
+
+  /// The page's text direction; left to right if it set none.
   final TextDirection direction;
 
   /// [child], with what the page gave.
@@ -45,6 +53,7 @@ class GlassOverlayContext {
 
 /// A curve that follows a damped spring from 0 to 1, landing exactly on 1.
 class GlassSpringCurve extends Curve {
+  /// Creates a curve of a spring with the given [stiffness] and [dampingRatio] (1 is critical damping), run for [duration] seconds.
   GlassSpringCurve({double stiffness = 400, double dampingRatio = 0.8, this.duration = 0.5})
       : _simulation = SpringSimulation(
           SpringDescription(mass: 1, stiffness: stiffness, damping: dampingRatio * 2 * math.sqrt(stiffness)),
@@ -65,6 +74,7 @@ class GlassSpringCurve extends Curve {
 /// A surface's soft shadow, drawn only outside its rounded rect, as CSS's
 /// box-shadow: glass shows no shadow through itself.
 class GlassSurfaceShadow extends StatelessWidget {
+  /// Creates a shadow cast round a rounded rect of [radius] under [child].
   const GlassSurfaceShadow({
     super.key,
     required this.radius,
@@ -74,10 +84,19 @@ class GlassSurfaceShadow extends StatelessWidget {
     this.blur = 40,
   });
 
+  /// The corner radius, in logical pixels.
   final double radius;
+
+  /// The shadow's colour. Defaults to the theme's shadow colour.
   final Color? color;
+
+  /// How far the shadow is shifted, in logical pixels.
   final Offset offset;
+
+  /// How far the shadow spreads, in logical pixels.
   final double blur;
+
+  /// What the shadow falls behind.
   final Widget child;
 
   @override

@@ -33,33 +33,7 @@ void paintContentLens(
   required ui.Image image,
   required Rect imageRect,
 }) {
-  final uv = uvFor(imageRect: imageRect);
-  LensDraw(
-    rect: draw.rect,
-    shape: draw.shape,
-    radius: draw.radius,
-    spec: draw.spec,
-    devicePixelRatio: draw.devicePixelRatio,
-    reach: draw.reach,
-    dispersion: draw.dispersion,
-    blur: draw.blur,
-    saturation: draw.saturation,
-    brightness: draw.brightness,
-    texture: LensTexture.image,
-    uv: uv,
-    clearOutside: true,
-    shine: draw.shine,
-    light: draw.light,
-    inkPage: draw.inkPage,
-    tint: draw.tint,
-    edge: draw.edge,
-    rim: draw.rim,
-    rimShine: draw.rimShine,
-    rimOpacity: draw.rimOpacity,
-    softensBend: draw.softensBend,
-    magnifyOffset: draw.magnifyOffset,
-    magnification: draw.magnification,
-  ).apply(shader, image: image);
+  draw.onImage(uvFor(imageRect: imageRect)).apply(shader, image: image);
   canvas.drawRect(draw.rect.inflate(1), Paint()..shader = shader);
 }
 

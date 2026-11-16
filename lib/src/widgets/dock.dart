@@ -9,6 +9,7 @@ import 'glass.dart';
 /// One app in a [GlassDock].
 @immutable
 class GlassDockItem {
+  /// Creates a dock item.
   const GlassDockItem({required this.icon, required this.label, this.onPressed, this.running = false});
 
   /// Drawn to fill the item's square, such as an app icon.
@@ -16,6 +17,8 @@ class GlassDockItem {
 
   /// Shown over the item while it's hovered.
   final String label;
+
+  /// Called when the item is tapped. Null disables it.
   final VoidCallback? onPressed;
 
   /// Marks the item with a dot underneath, as a running app.
@@ -26,6 +29,7 @@ class GlassDockItem {
 /// each by how close it is, show their name while hovered, and bounce when
 /// opened. A finger dragged along it swells them too.
 class GlassDock extends StatefulWidget {
+  /// Creates a dock.
   const GlassDock({
     super.key,
     required this.items,
@@ -34,6 +38,7 @@ class GlassDock extends StatefulWidget {
     this.spacing = 8,
   });
 
+  /// The apps, in order.
   final List<GlassDockItem> items;
 
   /// Each icon's size at rest.
@@ -41,6 +46,8 @@ class GlassDock extends StatefulWidget {
 
   /// How much the icon under the pointer swells.
   final double magnification;
+
+  /// The gap between icons.
   final double spacing;
 
   @override

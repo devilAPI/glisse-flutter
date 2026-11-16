@@ -14,6 +14,7 @@ import 'hairline.dart';
 /// An iOS stepper on glass: a capsule split into − and +, each lighting up
 /// under a finger. Held, a half repeats, faster the longer it's held.
 class GlassStepper extends StatefulWidget {
+  /// Creates a stepper; [max] must not be below [min], and [step] must be positive.
   const GlassStepper({
     super.key,
     required this.value,
@@ -27,15 +28,28 @@ class GlassStepper extends StatefulWidget {
   })  : assert(max >= min),
         assert(step > 0);
 
+  /// The current value, from [min] to [max].
   final double value;
 
   /// Null disables the stepper.
   final ValueChanged<double>? onChanged;
+
+  /// The lowest value.
   final double min;
+
+  /// The highest value.
   final double max;
+
+  /// How much one press adds or takes away.
   final double step;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

@@ -10,6 +10,7 @@ import '../rendering/liquid_glass.dart';
 /// Over a [GlassBackdrop] it bends the backdrop on every platform; on
 /// Impeller it bends whatever is behind it; elsewhere it frosts.
 class Glass extends StatelessWidget {
+  /// Creates a glass pane.
   const Glass({
     super.key,
     this.child,
@@ -27,12 +28,19 @@ class Glass extends StatelessWidget {
     this.mode = GlassMode.auto,
   });
 
+  /// What the pane shows on top of the glass.
   final Widget? child;
 
   /// The corners' radius; [double.infinity] for a capsule.
   final double borderRadius;
+
+  /// Space between the glass's edge and [child].
   final EdgeInsetsGeometry? padding;
+
+  /// The pane's width, in logical px; null sizes it to its parent and [child].
   final double? width;
+
+  /// The pane's height, in logical px; null sizes it to its parent and [child].
   final double? height;
 
   /// The frost's colour, over what the glass shows. Defaults to the theme's glass.
@@ -55,6 +63,9 @@ class Glass extends StatelessWidget {
 
   /// Whether to cast the small drop shadow.
   final bool shadow;
+
+  /// How the glass reads what's behind it. [GlassMode.auto] leaves that to
+  /// the theme's [GlassThemeData.mode].
   final GlassMode mode;
 
   @override

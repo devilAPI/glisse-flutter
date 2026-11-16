@@ -72,6 +72,7 @@ class _LensGlass extends StatelessWidget {
 /// the lens in it. It magnifies a [GlassBackdrop]'s background (or, on
 /// Impeller, the live backdrop); give the parent one.
 class GlassMagnifier extends StatefulWidget {
+  /// Creates a magnifier.
   const GlassMagnifier({
     super.key,
     this.size = 120,
@@ -91,6 +92,8 @@ class GlassMagnifier extends StatefulWidget {
 
   /// The lens's corner radius; [double.infinity] for a circle or capsule.
   final double borderRadius;
+
+  /// The lens's width over its height.
   final double aspectRatio;
 
   /// Where the lens's top-left corner sits in the area. Leave it null for
@@ -198,6 +201,7 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
 /// Like [GlassMagnifier], it magnifies a [GlassBackdrop]'s background, or
 /// on Impeller the live backdrop, which includes [child].
 class GlassLoupeRegion extends StatefulWidget {
+  /// Creates a loupe region around [child].
   const GlassLoupeRegion({
     super.key,
     required this.child,
@@ -206,10 +210,13 @@ class GlassLoupeRegion extends StatefulWidget {
     this.lift = 72,
   });
 
+  /// What the loupe magnifies.
   final Widget child;
 
   /// The loupe's size.
   final Size size;
+
+  /// How much the loupe enlarges what is under the finger.
   final double magnification;
 
   /// How far above the finger the loupe's middle sits.

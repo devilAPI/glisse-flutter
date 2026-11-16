@@ -20,6 +20,7 @@ import 'input.dart';
 /// On its own it sits on a card of glass. Set [inset] to false to put it in
 /// a [GlassListSection] as one of its rows.
 class GlassDisclosure extends StatefulWidget {
+  /// Creates a disclosure section.
   const GlassDisclosure({
     super.key,
     required this.title,
@@ -37,6 +38,7 @@ class GlassDisclosure extends StatefulWidget {
     this.focusNode,
   });
 
+  /// The header row's main line.
   final Widget title;
 
   /// Shown when expanded.
@@ -44,6 +46,8 @@ class GlassDisclosure extends StatefulWidget {
 
   /// Sized 28px across, as a [GlassListTile]'s.
   final Widget? leading;
+
+  /// Shown under the [title], in smaller type.
   final Widget? subtitle;
 
   /// Whether it's open, for a section the parent controls.
@@ -57,15 +61,21 @@ class GlassDisclosure extends StatefulWidget {
 
   /// Whether it sits on a card of glass of its own.
   final bool inset;
+
+  /// The corner radius of its card; unused when [inset] is false.
   final double borderRadius;
 
   /// The space round [child]. Defaults to a list row's insets; pass
   /// [EdgeInsets.zero] for a child of rows.
   final EdgeInsetsGeometry? childPadding;
+
+  /// Whether the header responds to input.
   final bool enabled;
 
   /// Whether to keep [child] built while it's closed.
   final bool maintainState;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
 
   @override

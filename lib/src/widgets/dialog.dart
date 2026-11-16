@@ -93,6 +93,7 @@ class _GlassDialogRoute<T> extends PopupRoute<T> {
 
 /// A button at the foot of a [GlassAlertDialog].
 class GlassDialogAction {
+  /// Creates a dialog action.
   const GlassDialogAction({
     required this.child,
     this.onPressed,
@@ -102,6 +103,7 @@ class GlassDialogAction {
     this.result,
   });
 
+  /// The label, usually a [Text].
   final Widget child;
 
   /// What `showGlassDialog` returns when this action dismisses the dialog.
@@ -123,6 +125,7 @@ class GlassDialogAction {
 /// An alert on glass, as iOS 26's: a rounded pane with a title, a message,
 /// and capsule buttons side by side when there are two, stacked otherwise.
 class GlassAlertDialog extends StatelessWidget {
+  /// Creates an alert dialog.
   const GlassAlertDialog({
     super.key,
     this.title,
@@ -131,9 +134,16 @@ class GlassAlertDialog extends StatelessWidget {
     this.width = 290,
   });
 
+  /// The heading, above [content].
   final Widget? title;
+
+  /// The message under the [title].
   final Widget? content;
+
+  /// The buttons: side by side when there are two, stacked otherwise.
   final List<GlassDialogAction> actions;
+
+  /// The dialog's width.
   final double width;
 
   Widget _button(BuildContext context, GlassDialogAction action) {

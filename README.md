@@ -12,6 +12,14 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 
 **Try it in the browser: https://devilapi.github.io/glisse-flutter/**
 
+## Documentation
+
+- [Widget catalogue](doc/widgets.md): every widget, with an example.
+- [Theming](doc/theming.md): the colours and tuning, and how glass follows dark mode.
+- [How it works](doc/architecture.md): the shader, the three ways glass reads its backdrop, and the tests.
+- [API reference](https://devilapi.github.io/glisse-flutter/api/): every class and parameter.
+- [Contributing](CONTRIBUTING.md), [Changelog](CHANGELOG.md), [Credits](CREDITS.md).
+
 ## Widgets
 
 **Ported from Glisse**, with the same measurements, springs and lenses:
@@ -45,7 +53,9 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 ```yaml
 dependencies:
   glisse:
-    git: https://github.com/devilAPI/glisse-flutter
+    git:
+      url: https://github.com/devilAPI/glisse-flutter
+      ref: v0.2.0
 ```
 
 ## Use
@@ -187,4 +197,10 @@ The goldens are rendered with real Roboto from the Flutter SDK, so they double a
 
 ## Credits
 
-Glisse, its measurements of iOS 26.1, and its design are by [Kelvin Zhang](https://kelvinzhang.ca), MIT licensed. Glisse in turn credits Aave's web glass and [kube.io's study of Liquid Glass refraction](https://kube.io/blog/liquid-glass-css-svg/). This port is MIT licensed too.
+Glisse, its measurements of iOS 26.1, and its design are by [Kelvin Zhang](https://kelvinzhang.ca), MIT licensed. Glisse in turn credits Aave's web glass and [kube.io's study of Liquid Glass refraction](https://kube.io/blog/liquid-glass-css-svg/). [CREDITS.md](CREDITS.md) lists what was carried over from Glisse and what was written for this port.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE). It keeps Glisse's copyright notice alongside this port's.
+
+This project isn't affiliated with Apple, or with Kelvin Zhang. Liquid Glass is a trademark of Apple Inc.

@@ -16,12 +16,14 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed --line-length 120 lib test example/lib
+      - run: dart format --output=none --set-exit-if-changed --line-length 120 lib test example/lib example/integration_test
       - run: flutter analyze
       - run: flutter test
       - name: Build the gallery for the web
         working-directory: example
         run: flutter build web --release --base-href /glisse-flutter/
+      - name: Build the API reference next to the gallery
+        run: dart doc --output example/build/web/api
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name == 'push'
         with:

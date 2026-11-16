@@ -10,6 +10,22 @@
 
 * `GlassListSection` indents the hairline under a `GlassDisclosure` row with a leading icon, as it does under a `GlassListTile`.
 * The gallery no longer throws when its window starts out narrow.
+* `GlassSpring.jump` respects `reduceMotion`, so tapped knobs and badges no longer bounce when animations are off.
+* Glass inside frosted glass on Impeller bends its backdrop, instead of falling back to a plain blur.
+* Glass on Impeller places its backdrop by the size of the view it's in, rather than the app's first view, so it works in multi-view apps.
+* A `GlassBackdrop` copies its background only while some glass under it can read the copy. Glass in `frost` or `backdropFilter` mode no longer triggers copies.
+* Glass whose backdrop can't be placed, as inside a fading route, frosts with the same Gaussian rings as other glass, instead of a 3×3 box that showed ghost copies at large blurs.
+* The rim's bend fades in over one device pixel at any pixel ratio or lens scale.
+* `LensSpec.darkStrength` takes effect on dark pages.
+* `GlassShaders.load` tries again after a failed load, and reports the real error.
+* `LensSpec` has value equality, so a spec built afresh each frame no longer repaints glass or rebuilds what's inside it. The lens-arc cache is bounded.
+* Many smaller fixes from review: a context menu removed while open, disclosures and context menus disabled mid-press, a context menu reopened while closing, the rating's arrow keys from a fractional value, and the calendar's `onMonthChanged`.
+
+### Documentation
+
+* New guides: a [widget catalogue](doc/widgets.md) with an example for every widget, [theming](doc/theming.md) and [how it works](doc/architecture.md). The analyzer checks every example.
+* An API reference, published with the gallery at https://devilapi.github.io/glisse-flutter/api/.
+* [CREDITS.md](CREDITS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 0.1.0
 

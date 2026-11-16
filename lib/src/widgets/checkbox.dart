@@ -14,6 +14,7 @@ const double _box = 22;
 /// A checkbox of glass: a 22px rounded square that fills with the accent and
 /// draws a white tick in when checked. With [tristate], `null` shows a dash.
 class GlassCheckbox extends StatefulWidget {
+  /// Creates a glass checkbox; [value] may be null only with [tristate].
   const GlassCheckbox({
     super.key,
     required this.value,
@@ -25,14 +26,25 @@ class GlassCheckbox extends StatefulWidget {
     this.autofocus = false,
   }) : assert(tristate || value != null);
 
+  /// Whether it's checked; null, with [tristate], shows a dash.
   final bool? value;
 
   /// Null disables the checkbox.
   final ValueChanged<bool?>? onChanged;
+
+  /// Whether [value] may be null, as a third state.
   final bool tristate;
+
+  /// The fill when checked. Defaults to the theme's accent.
   final Color? activeColor;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// Takes keyboard focus; made for it if null.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override
@@ -225,6 +237,7 @@ Path _trim(Path path, double t) {
 /// A radio button of glass: a 22px circle that fills with the accent and
 /// springs a white dot in when selected.
 class GlassRadio<T> extends StatefulWidget {
+  /// Creates a glass radio button.
   const GlassRadio({
     super.key,
     required this.value,
@@ -236,14 +249,25 @@ class GlassRadio<T> extends StatefulWidget {
     this.autofocus = false,
   });
 
+  /// What choosing this radio sets [groupValue] to.
   final T value;
+
+  /// The group's chosen value; the radio is selected when it equals [value].
   final T? groupValue;
 
   /// Null disables the radio.
   final ValueChanged<T>? onChanged;
+
+  /// The fill when selected. Defaults to the theme's accent.
   final Color? activeColor;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// Takes keyboard focus; made for it if null.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

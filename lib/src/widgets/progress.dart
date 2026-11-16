@@ -10,12 +10,19 @@ import 'control_utils.dart';
 /// A progress bar: a 6px rail with the accent filling it, lit along its top
 /// like glass. Without a [value] it shows a sweep, for work of unknown length.
 class GlassProgressBar extends StatefulWidget {
+  /// Creates a progress bar; leave [value] null for an indeterminate one.
   const GlassProgressBar({super.key, this.value, this.color, this.height = 6, this.semanticLabel});
 
   /// From 0 to 1, or null while unknown.
   final double? value;
+
+  /// The fill's colour. Defaults to the theme's accent.
   final Color? color;
+
+  /// The rail's height, in logical pixels.
   final double height;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   @override
@@ -141,13 +148,19 @@ class _BarPainter extends CustomPainter {
 /// iOS's activity indicator: spokes round a centre, the brightest one
 /// turning, each fading behind it.
 class GlassActivityIndicator extends StatefulWidget {
+  /// Creates an activity indicator of [spokes] spokes.
   const GlassActivityIndicator({super.key, this.radius = 10, this.color, this.animating = true, this.spokes = 8});
 
+  /// The size of the indicator, from centre to tip, in logical pixels.
   final double radius;
 
   /// Defaults to the theme's muted colour.
   final Color? color;
+
+  /// Whether the spokes turn.
   final bool animating;
+
+  /// How many spokes it has.
   final int spokes;
 
   @override
@@ -222,13 +235,20 @@ class _SpokesPainter extends CustomPainter {
 
 /// A ring of progress on a disc of glass.
 class GlassProgressRing extends StatefulWidget {
+  /// Creates a progress ring showing [value].
   const GlassProgressRing(
       {super.key, required this.value, this.size = 36, this.strokeWidth = 4, this.color, this.child});
 
   /// From 0 to 1.
   final double value;
+
+  /// The disc's width and height, in logical pixels.
   final double size;
+
+  /// The ring's thickness, in logical pixels.
   final double strokeWidth;
+
+  /// The ring's colour. Defaults to the theme's accent.
   final Color? color;
 
   /// Shown in the middle, such as a stop glyph or a percentage.

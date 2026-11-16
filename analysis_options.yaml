@@ -7,5 +7,6 @@ linter:
     - avoid_print
     - always_declare_return_types
     - unawaited_futures
+    - public_member_api_docs
 formatter:
   page_width: 120

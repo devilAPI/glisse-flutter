@@ -25,6 +25,7 @@ import 'overlay_scope.dart';
 /// The lifted preview builds [child] a second time, in the app's overlay;
 /// give a [previewBuilder] to show something else, such as a larger image.
 class GlassContextMenu extends StatefulWidget {
+  /// Creates a context menu around [child].
   const GlassContextMenu({
     super.key,
     required this.child,
@@ -36,6 +37,7 @@ class GlassContextMenu extends StatefulWidget {
     this.onOpenChanged,
   });
 
+  /// The widget a long press or right-click opens the menu from.
   final Widget child;
 
   /// The rows: [GlassMenuItem]s and [GlassMenuSeparator]s.

@@ -25,6 +25,7 @@ const double _inset = 18;
 /// A slider, as iOS 26's: a white knob on a rail that, held, lifts into a
 /// glass lens showing the track thicker, as if magnified, bent at its rim.
 class GlassSlider extends StatefulWidget {
+  /// Creates a slider at [value], from [min] to [max].
   const GlassSlider({
     super.key,
     required this.value,
@@ -40,22 +41,37 @@ class GlassSlider extends StatefulWidget {
     this.autofocus = false,
   }) : assert(divisions == null || divisions > 0);
 
+  /// The current value, from [min] to [max].
   final double value;
 
   /// Called as the value changes. Null disables the slider.
   final ValueChanged<double>? onChanged;
+
+  /// The value at the left end of the rail.
   final double min;
+
+  /// The value at the right end of the rail.
   final double max;
 
   /// Snaps the value to this many equal steps, if set.
   final int? divisions;
+
+  /// Called when the knob is first held, with the value as it stands.
   final ValueChanged<double>? onChangeStart;
+
+  /// Called when the knob is let go, with the value as it stands.
   final ValueChanged<double>? onChangeEnd;
 
   /// The fill's colour. Defaults to the theme's accent.
   final Color? activeColor;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// Takes keyboard focus; made for it if null.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

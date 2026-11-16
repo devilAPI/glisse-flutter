@@ -23,6 +23,7 @@ const double _dragRange = 200;
 /// Drag up or right to turn it up, or drag round its rim; a scroll wheel and
 /// the arrow keys turn it too.
 class GlassKnob extends StatefulWidget {
+  /// Creates a knob; [size] must be at least 32.
   const GlassKnob({
     super.key,
     required this.value,
@@ -42,16 +43,25 @@ class GlassKnob extends StatefulWidget {
   })  : assert(divisions == null || divisions > 0),
         assert(size >= 32);
 
+  /// The current value, from [min] to [max].
   final double value;
 
   /// Called as the value changes. Null disables the knob.
   final ValueChanged<double>? onChanged;
+
+  /// The value at the arc's start.
   final double min;
+
+  /// The value at the arc's end.
   final double max;
 
   /// Snaps the value to this many equal steps, if set.
   final int? divisions;
+
+  /// Called with the value when a drag starts.
   final ValueChanged<double>? onChangeStart;
+
+  /// Called with the value when a drag ends.
   final ValueChanged<double>? onChangeEnd;
 
   /// The knob's diameter, arc included.
@@ -62,11 +72,17 @@ class GlassKnob extends StatefulWidget {
 
   /// Shown in the middle of the dial, such as the value.
   final Widget? child;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   /// How a screen reader reads a value. Defaults to a percentage of the range.
   final String Function(double value)? semanticFormatter;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

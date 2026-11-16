@@ -8,9 +8,13 @@ import 'glass.dart';
 /// One destination in a [GlassSidebar].
 @immutable
 class GlassSidebarItem {
+  /// Creates a sidebar item.
   const GlassSidebarItem({required this.icon, required this.label, this.trailing});
 
+  /// Shown at the row's start.
   final Widget icon;
+
+  /// The row's text.
   final String label;
 
   /// Shown at the row's end, such as a count.
@@ -20,6 +24,7 @@ class GlassSidebarItem {
 /// A tall pane of glass listing destinations, as iPadOS and macOS 26's
 /// sidebars: the selection is a plate that springs from row to row.
 class GlassSidebar extends StatefulWidget {
+  /// Creates a sidebar.
   const GlassSidebar({
     super.key,
     required this.items,
@@ -30,15 +35,22 @@ class GlassSidebar extends StatefulWidget {
     this.rowHeight = 36,
   });
 
+  /// The destinations, in order.
   final List<GlassSidebarItem> items;
 
   /// The selected item's index, or -1 for none.
   final int selected;
+
+  /// Called with the index of the item chosen.
   final ValueChanged<int> onSelected;
 
   /// Shown above the items, such as a title or a search field.
   final Widget? header;
+
+  /// The sidebar's width.
   final double width;
+
+  /// Each row's height.
   final double rowHeight;
 
   @override

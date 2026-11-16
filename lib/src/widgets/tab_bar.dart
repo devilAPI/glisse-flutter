@@ -9,6 +9,7 @@ export 'segments.dart' show GlassSegment;
 /// between them, follows a drag, and lifts into a lens while held. Tabs with
 /// an icon show it above a small label, the selected one in the accent.
 class GlassTabBar<T> extends StatelessWidget {
+  /// Creates a tab bar.
   const GlassTabBar({
     super.key,
     required this.items,
@@ -18,6 +19,7 @@ class GlassTabBar<T> extends StatelessWidget {
     this.mode = GlassMode.auto,
   });
 
+  /// The tabs, in order.
   final List<GlassSegment<T>> items;
 
   /// The selected tab's value, or null for none.
@@ -25,7 +27,11 @@ class GlassTabBar<T> extends StatelessWidget {
 
   /// Called when a tab is chosen, even the selected one again. Null disables the bar.
   final ValueChanged<T>? onChanged;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// How the glass reads what is behind it.
   final GlassMode mode;
 
   @override

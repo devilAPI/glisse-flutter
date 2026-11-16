@@ -18,6 +18,7 @@ sealed class GlassMenuEntry {
 
 /// A row of a [GlassMenu].
 class GlassMenuItem extends GlassMenuEntry {
+  /// Creates a menu row; [onSelected] runs when it's chosen.
   const GlassMenuItem({
     required this.label,
     this.icon,
@@ -26,30 +27,43 @@ class GlassMenuItem extends GlassMenuEntry {
     this.enabled = true,
   });
 
+  /// The row's text.
   final Widget label;
 
   /// Shown before the label, at 16px.
   final Widget? icon;
+
+  /// Called when the row is chosen. Null disables it.
   final VoidCallback? onSelected;
 
   /// Marks an action that deletes or can't be undone, in red.
   final bool destructive;
+
+  /// Whether the row can be chosen; false greys it out.
   final bool enabled;
 }
 
 /// A thin line between groups of a [GlassMenu]'s rows.
 class GlassMenuSeparator extends GlassMenuEntry {
+  /// Creates a menu separator.
   const GlassMenuSeparator();
 }
 
 /// Which edge of its trigger a [GlassMenu] lines up with as it opens across it.
-enum GlassMenuAlign { start, end }
+enum GlassMenuAlign {
+  /// The trigger's start edge.
+  start,
+
+  /// The trigger's end edge.
+  end,
+}
 
 /// A menu of actions behind a glass button, as iOS 26's: the glass grows out
 /// of the trigger while the rows scale up from its centre and come into
 /// focus. Held, the menu swells and follows the finger a little, and a plate
 /// slides between the rows under it; letting go over a row chooses it.
 class GlassMenu extends StatefulWidget {
+  /// Creates a menu opened from a glass button.
   const GlassMenu({
     super.key,
     required this.items,
@@ -58,6 +72,7 @@ class GlassMenu extends StatefulWidget {
     this.align = GlassMenuAlign.end,
   });
 
+  /// The rows, in order.
   final List<GlassMenuEntry> items;
 
   /// Names the trigger and the menu for assistive technology.
@@ -186,9 +201,13 @@ class _GlassMenuState extends State<GlassMenu> with TickerProviderStateMixin {
 
 /// The ellipsis a [GlassMenu]'s trigger shows by default: three dots.
 class GlassEllipsis extends StatelessWidget {
+  /// Creates an ellipsis, [size] logical pixels across.
   const GlassEllipsis({super.key, this.size, this.color});
 
+  /// Its width and height, in logical pixels. Defaults to the ambient icon size, or 20.
   final double? size;
+
+  /// Its colour. Defaults to the ambient icon colour.
   final Color? color;
 
   @override

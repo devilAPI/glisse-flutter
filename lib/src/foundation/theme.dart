@@ -8,6 +8,7 @@ import '../rendering/liquid_glass.dart' show GlassMode;
 /// properties (`--lg-*`) set them for a light and a dark page.
 @immutable
 class GlassThemeData {
+  /// Creates a theme from every colour and tuning value.
   const GlassThemeData({
     required this.brightness,
     required this.foreground,
@@ -115,6 +116,7 @@ class GlassThemeData {
   factory GlassThemeData.fallback(Brightness brightness) =>
       brightness == Brightness.dark ? GlassThemeData.dark() : GlassThemeData.light();
 
+  /// Whether this theme is for a light or a dark page.
   final Brightness brightness;
 
   /// Text and icons on glass.
@@ -208,11 +210,19 @@ class GlassThemeData {
   /// How far glass's colours split: at 1, red bends a fifth further than blue.
   final double glassDispersion;
 
-  /// Overrides for the lenses of each widget, as `--lg-*-bend` do.
+  /// Overrides [glassBend] for a switch's lens, as `--lg-switch-bend` does.
   final double? switchBend;
+
+  /// Overrides [glassBend] for a slider's lens, as `--lg-slider-bend` does.
   final double? sliderBend;
+
+  /// Overrides [glassBend] for a segmented control's lens, as `--lg-segment-bend` does.
   final double? segmentBend;
+
+  /// Overrides [glassBend] for a tab bar's lens, as `--lg-tab-bend` does.
   final double? tabBend;
+
+  /// Overrides [glassDispersion] for a tab bar's lens.
   final double? tabDispersion;
 
   /// The base text style of labels on glass.
@@ -221,8 +231,10 @@ class GlassThemeData {
   /// How glass reads what's behind it, for glass that doesn't say.
   final GlassMode mode;
 
+  /// Whether [brightness] is dark.
   bool get isDark => brightness == Brightness.dark;
 
+  /// A copy with the given fields replaced.
   GlassThemeData copyWith({
     Brightness? brightness,
     Color? foreground,
@@ -364,8 +376,10 @@ class GlassThemeData {
 /// [GlassBrightness]'s, else the app's Material `Theme`'s, else its
 /// `CupertinoTheme`'s, else the platform's.
 class GlassTheme extends InheritedWidget {
+  /// Applies [data] to [child] and the widgets below it.
   const GlassTheme({super.key, required this.data, required super.child});
 
+  /// The theme the widgets below read.
   final GlassThemeData data;
 
   /// The nearest [GlassThemeData], or the default for the ambient brightness.
@@ -399,9 +413,13 @@ class GlassTheme extends InheritedWidget {
 /// Lets an app's own theme (such as Material's) tell Glisse which page it
 /// is on, without building a full [GlassThemeData].
 class GlassBrightness extends StatelessWidget {
+  /// Tells the widgets in [child] to use [brightness].
   const GlassBrightness({super.key, required this.brightness, required this.child});
 
+  /// The brightness of the page below.
   final Brightness brightness;
+
+  /// The widgets that follow [brightness].
   final Widget child;
 
   @override

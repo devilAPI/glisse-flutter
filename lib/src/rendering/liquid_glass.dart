@@ -31,6 +31,7 @@ enum GlassMode {
 /// How a piece of glass looks, beyond its shape.
 @immutable
 class GlassStyle {
+  /// Creates a glass style from its colours, frost and lens.
   const GlassStyle({
     required this.tint,
     required this.edge,
@@ -52,27 +53,49 @@ class GlassStyle {
   /// Where the magnified spot lies from the glass's middle, in local px.
   final Offset magnifyOffset;
 
+  /// The frost laid over what the glass shows.
   final Color tint;
+
+  /// The colour of the 0.5px line round the glass's edge.
   final Color edge;
+
+  /// The colour of the glass's small drop shadow.
   final Color drop;
+
+  /// How bright the painted rim is.
   final double rimShine;
+
+  /// The frost's blur, a deviation in logical px.
   final double blur;
+
+  /// How much the glass saturates what it shows; 1 for no change.
   final double saturation;
+
+  /// How much the glass brightens what it shows; 1 for no change.
   final double brightness;
 
   /// The lens's strength, overriding [spec]'s.
   final double bend;
+
+  /// How much further red bends than blue, as [LensSpec.dispersion].
   final double dispersion;
+
+  /// How the lens bends.
   final LensSpec spec;
+
+  /// The rim painted over the glass.
   final LensRim rim;
 
   /// How far the glass bends now, from 0 to 1.
   final double amount;
+
+  /// How the glass reads what's behind it.
   final GlassMode mode;
 
   /// How much the glass magnifies what's under its middle; 1 for none.
   final double magnification;
 
+  /// A copy with the given fields replaced.
   GlassStyle copyWith({
     Color? tint,
     Color? edge,
@@ -137,19 +160,24 @@ class GlassStyle {
 /// rectangle that bends, frosts, tints and lights what's behind it, then
 /// paints its child.
 class RenderLiquidGlass extends RenderProxyBox {
+  /// Creates glass with corners of [radius], drawn in [style] at [devicePixelRatio].
   RenderLiquidGlass({
     required double radius,
     required GlassStyle style,
     required double devicePixelRatio,
     GlassBackdropController? backdrop,
+    bool dark = false,
     RenderBox? child,
   })  : _radius = radius,
         _style = style,
         _devicePixelRatio = devicePixelRatio,
         _backdrop = backdrop,
+        _dark = dark,
         super(child);
 
   double _radius;
+
+  /// The corners' radius, in logical px.
   double get radius => _radius;
   set radius(double value) {
     if (value == _radius) return;
@@ -158,14 +186,31 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   GlassStyle _style;
+
+  /// How the glass looks.
   GlassStyle get style => _style;
   set style(GlassStyle value) {
     if (value == _style) return;
+    final relisten = attached && _wantsCopy(value.mode) != _wantsCopy(_style.mode);
+    if (relisten) _unlisten();
     _style = value;
+    if (relisten) _listen();
+    markNeedsPaint();
+  }
+
+  bool _dark;
+
+  /// Whether the glass is on a dark page, where its lens may bend by its
+  /// spec's [LensSpec.darkStrength].
+  set dark(bool value) {
+    if (value == _dark) return;
+    _dark = value;
     markNeedsPaint();
   }
 
   double _devicePixelRatio;
+
+  /// Device pixels per logical pixel.
   set devicePixelRatio(double value) {
     if (value == _devicePixelRatio) return;
     _devicePixelRatio = value;
@@ -173,6 +218,8 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   GlassBackdropController? _backdrop;
+
+  /// The [GlassBackdrop] copy to bend, if there is one.
   set backdrop(GlassBackdropController? value) {
     if (value == _backdrop) return;
     if (attached) _unlisten();
@@ -194,25 +241,31 @@ class RenderLiquidGlass extends RenderProxyBox {
   ui.FragmentShader? _shader;
   ui.FragmentShader? _filterShader;
   final LayerHandle<ClipRRectLayer> _clipLayer = LayerHandle<ClipRRectLayer>();
-  final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
   final LayerHandle<BackdropFilterLayer> _filterLayer = LayerHandle<BackdropFilterLayer>();
 
   GlassBackdropController? _listening;
+  bool _using = false;
+
+  // Only glass that may bend the copy asks the backdrop to take one.
+  static bool _wantsCopy(GlassMode mode) => mode == GlassMode.auto || mode == GlassMode.captured;
 
   void _listen() {
     final backdrop = _backdrop;
     if (backdrop == null || !backdrop.isActive) return;
     backdrop.addListener(markNeedsPaint);
-    backdrop.addUser();
+    _using = _wantsCopy(_style.mode);
+    if (_using) backdrop.addUser();
     _listening = backdrop;
   }
 
   void _unlisten() {
     final backdrop = _listening;
+    final using = _using;
     _listening = null;
+    _using = false;
     if (backdrop == null || !backdrop.isActive) return;
     backdrop.removeListener(markNeedsPaint);
-    backdrop.removeUser();
+    if (using) backdrop.removeUser();
   }
 
   void _onShaderReady() => markNeedsPaint();
@@ -281,7 +334,6 @@ class RenderLiquidGlass extends RenderProxyBox {
   @override
   void dispose() {
     _clipLayer.layer = null;
-    _clipRectLayer.layer = null;
     _filterLayer.layer = null;
     _shader?.dispose();
     _filterShader?.dispose();
@@ -306,12 +358,16 @@ class RenderLiquidGlass extends RenderProxyBox {
     return GlassMode.frost;
   }
 
-  // The layer of the nearest glass around this one that bends the live
+  // The layer of the nearest glass around this one that filters the live
   // backdrop: Impeller binds that layer, not the view, as this glass's
   // backdrop. In the view's device px.
   Rect? _outerLayerRect() {
     for (var node = parent; node != null; node = node.parent) {
-      if (node is RenderLiquidGlass && node._lastMode == GlassMode.backdropFilter && node.hasSize) {
+      // Frosted glass pushes a backdrop filter too, so it is as much a layer
+      // of its own as glass that bends the live backdrop.
+      if (node is RenderLiquidGlass &&
+          (node._lastMode == GlassMode.backdropFilter || node._lastMode == GlassMode.frost) &&
+          node.hasSize) {
         final box = MatrixUtils.transformRect(node.getTransformTo(null), Offset.zero & node.size);
         return Rect.fromLTRB(
           box.left * _devicePixelRatio,
@@ -324,9 +380,13 @@ class RenderLiquidGlass extends RenderProxyBox {
     return null;
   }
 
+  // The size, in device px, of the view this glass is in: the backdrop
+  // Impeller binds when no glass around this one filters it.
   Size get _screenSize {
-    final view = ui.PlatformDispatcher.instance.implicitView;
-    return view?.physicalSize ?? Size.zero;
+    for (RenderObject? node = this; node != null; node = node.parent) {
+      if (node is RenderView) return node.flutterView.physicalSize;
+    }
+    return ui.PlatformDispatcher.instance.implicitView?.physicalSize ?? Size.zero;
   }
 
   LensDraw _draw({
@@ -349,7 +409,7 @@ class RenderLiquidGlass extends RenderProxyBox {
       radius: _effectiveRadius,
       spec: spec,
       devicePixelRatio: _devicePixelRatio,
-      reach: spec.reachOf(size, strengthOverride: s.bend, dark: false) * s.amount.clamp(0.0, 1.0),
+      reach: spec.reachOf(size, strengthOverride: s.bend, dark: _dark) * s.amount.clamp(0.0, 1.0),
       dispersion: s.dispersion,
       blur: texture == LensTexture.none ? 0 : blur,
       saturation: saturation,
@@ -384,16 +444,13 @@ class RenderLiquidGlass extends RenderProxyBox {
     switch (mode) {
       case GlassMode.captured:
         _clipLayer.layer = null;
-        _clipRectLayer.layer = null;
         _filterLayer.layer = null;
         _paintCaptured(context.canvas, offset);
         super.paint(context, offset);
       case GlassMode.backdropFilter:
-        _clipRectLayer.layer = null;
         _paintFiltered(context, offset);
       case GlassMode.frost:
       case GlassMode.auto:
-        _clipRectLayer.layer = null;
         _paintFrosted(context, offset);
     }
   }
@@ -506,6 +563,7 @@ class RenderLiquidGlass extends RenderProxyBox {
 /// copy, not the glass around it, so it takes on the outer glass's frost and
 /// tint too, and looks as it would through it.
 class LiquidGlassBox extends StatelessWidget {
+  /// Draws glass of [radius] in [style] behind [child].
   const LiquidGlassBox({
     super.key,
     required this.radius,
@@ -515,7 +573,11 @@ class LiquidGlassBox extends StatelessWidget {
 
   /// The corners' radius; [double.infinity] for a capsule.
   final double radius;
+
+  /// How the glass looks.
   final GlassStyle style;
+
+  /// What the glass holds, painted over it.
   final Widget? child;
 
   @override
@@ -558,6 +620,7 @@ class _LiquidGlassRender extends SingleChildRenderObjectWidget {
         style: style,
         devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
         backdrop: GlassBackdrop.maybeOf(context),
+        dark: GlassTheme.of(context).isDark,
       )..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
 
   @override
@@ -567,6 +630,7 @@ class _LiquidGlassRender extends SingleChildRenderObjectWidget {
       ..style = style
       ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1
       ..backdrop = GlassBackdrop.maybeOf(context)
+      ..dark = GlassTheme.of(context).isDark
       ..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
   }
 }

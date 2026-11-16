@@ -7,6 +7,7 @@ import 'pressable.dart';
 /// One icon in a [GlassToolbar] or [GlassButtonGroup]: a 44px circle with no
 /// glass of its own, lit while pressed, filled while [selected].
 class GlassToolbarItem extends StatefulWidget {
+  /// Creates a toolbar item that shows [icon].
   const GlassToolbarItem({
     super.key,
     required this.icon,
@@ -17,10 +18,13 @@ class GlassToolbarItem extends StatefulWidget {
     this.size = 44,
   });
 
+  /// The glyph shown, at 22px.
   final Widget icon;
 
   /// Null disables the item.
   final VoidCallback? onPressed;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   /// Fills the item, as for a toggled tool.
@@ -29,6 +33,8 @@ class GlassToolbarItem extends StatefulWidget {
   /// The icon's colour; defaults to the theme's foreground, or its accent
   /// when selected.
   final Color? tint;
+
+  /// The item's width and height, in logical pixels.
   final double size;
 
   @override
@@ -104,8 +110,10 @@ class _GlassToolbarItemState extends State<GlassToolbarItem> {
 
 /// Room between groups of items in a [GlassToolbar].
 class GlassToolbarSpacer extends StatelessWidget {
+  /// Creates a gap of [extent] logical pixels.
   const GlassToolbarSpacer({super.key, this.extent = 12});
 
+  /// The gap's width and height, in logical pixels.
   final double extent;
 
   @override
@@ -117,6 +125,7 @@ class GlassToolbarSpacer extends StatelessWidget {
 ///
 /// Given a bounded width, a `Spacer` among the children pushes them apart.
 class GlassToolbar extends StatelessWidget {
+  /// Creates a toolbar of [children].
   const GlassToolbar({
     super.key,
     required this.children,
@@ -125,7 +134,10 @@ class GlassToolbar extends StatelessWidget {
     this.padding = 4,
   });
 
+  /// The items, in order.
   final List<Widget> children;
+
+  /// The axis the children run along.
   final Axis direction;
 
   /// The inset of the items from the glass's rim.

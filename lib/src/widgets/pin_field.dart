@@ -15,6 +15,7 @@ const double _radius = 12;
 /// awaiting the next one is outlined. A pasted or autofilled code fills
 /// every box at once.
 class GlassPinField extends StatefulWidget {
+  /// Creates a code field; [length] must be positive.
   const GlassPinField({
     super.key,
     this.length = 6,
@@ -36,7 +37,11 @@ class GlassPinField extends StatefulWidget {
 
   /// How many characters the code has.
   final int length;
+
+  /// Holds the code. Creates its own if null.
   final TextEditingController? controller;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
 
   /// Called as the code is typed or deleted.
@@ -51,7 +56,11 @@ class GlassPinField extends StatefulWidget {
   /// Tints the boxes with the theme's destructive colour, and shakes them
   /// when it turns on.
   final bool error;
+
+  /// Whether it takes input.
   final bool enabled;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   /// Takes only the digits 0 to 9, dropping anything else typed or pasted.
@@ -59,7 +68,11 @@ class GlassPinField extends StatefulWidget {
 
   /// The keyboard to ask for; a number pad for [digitsOnly].
   final TextInputType? keyboardType;
+
+  /// Each box's width.
   final double boxWidth;
+
+  /// Each box's height.
   final double boxHeight;
 
   /// The gap between boxes.

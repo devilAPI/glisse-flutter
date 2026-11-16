@@ -11,6 +11,7 @@ import 'input.dart';
 /// With [largeTitle] the title sits under the buttons, large and leading,
 /// as at the top of an iOS list.
 class GlassNavigationBar extends StatelessWidget {
+  /// Creates a navigation bar.
   const GlassNavigationBar({
     super.key,
     this.leading,
@@ -22,13 +23,20 @@ class GlassNavigationBar extends StatelessWidget {
 
   /// Such as a [GlassBackButton].
   final Widget? leading;
+
+  /// Shown between the buttons, or large under them with [largeTitle].
   final Widget? title;
 
   /// Trailing buttons: [GlassButton]s, or a `GlassButtonGroup` (height 44) to share one capsule.
   final List<Widget> actions;
+
+  /// Whether the title sits large under the buttons.
   final bool largeTitle;
+
+  /// The space round the bar.
   final EdgeInsetsGeometry padding;
 
+  /// The height of the row of buttons, without the large title.
   static const double height = 44;
 
   @override
@@ -90,10 +98,13 @@ class GlassNavigationBar extends StatelessWidget {
 /// A back button for a [GlassNavigationBar]: a chevron in a glass circle,
 /// or a capsule with a [label].
 class GlassBackButton extends StatelessWidget {
+  /// Creates a back button.
   const GlassBackButton({super.key, this.onPressed, this.label});
 
   /// Defaults to popping the nearest route.
   final VoidCallback? onPressed;
+
+  /// Text beside the chevron. Null shows a circle with the chevron alone.
   final String? label;
 
   @override

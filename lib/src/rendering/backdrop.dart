@@ -20,6 +20,7 @@ import 'package:flutter/widgets.dart';
 /// )
 /// ```
 class GlassBackdrop extends StatefulWidget {
+  /// Lays [background] under [child] and keeps a copy of it for glass to bend.
   const GlassBackdrop({
     super.key,
     required this.background,
@@ -125,8 +126,10 @@ class GlassBackdropController extends ChangeNotifier {
     if (_users == 1) _render?._requestCapture();
   }
 
+  /// Glass stops reading the copy, undoing one [addUser].
   void removeUser() => _users = (_users - 1).clamp(0, 1 << 30);
 
+  /// Whether any glass is reading the copy.
   bool get hasUsers => _users > 0;
 
   void _setImage(ui.Image image) {
@@ -172,6 +175,7 @@ class _CaptureBoundary extends SingleChildRenderObjectWidget {
 /// A repaint boundary that copies itself after every frame in which anything
 /// under it changed: its layer is asked to add itself to the scene only then.
 class RenderGlassCapture extends RenderProxyBox {
+  /// Creates a boundary that copies itself for [controller] at [pixelRatio].
   RenderGlassCapture({
     required GlassBackdropController controller,
     required double pixelRatio,
@@ -183,6 +187,8 @@ class RenderGlassCapture extends RenderProxyBox {
   }
 
   GlassBackdropController _controller;
+
+  /// The controller that receives the copies.
   set controller(GlassBackdropController value) {
     if (value == _controller) return;
     if (_controller._render == this) _controller._render = null;
@@ -192,6 +198,8 @@ class RenderGlassCapture extends RenderProxyBox {
   }
 
   double _pixelRatio;
+
+  /// The copy's resolution, in device pixels per logical pixel.
   set pixelRatio(double value) {
     if (value == _pixelRatio) return;
     _pixelRatio = value;
@@ -199,6 +207,8 @@ class RenderGlassCapture extends RenderProxyBox {
   }
 
   bool _enabled;
+
+  /// Whether to copy at all.
   set enabled(bool value) {
     if (value == _enabled) return;
     _enabled = value;

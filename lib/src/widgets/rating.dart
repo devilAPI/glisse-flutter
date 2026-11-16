@@ -16,6 +16,7 @@ const Color glassRatingAmber = Color(0xFFFFB800);
 /// With [onChanged] null the rating only shows [value], which may be any
 /// fraction, such as an average of 4.3.
 class GlassRating extends StatefulWidget {
+  /// Creates a star rating; [count] and [size] must be positive and [spacing] not negative.
   const GlassRating({
     super.key,
     required this.value,
@@ -56,8 +57,14 @@ class GlassRating extends StatefulWidget {
 
   /// The empty stars' colour. Defaults to the theme's track.
   final Color? emptyColor;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

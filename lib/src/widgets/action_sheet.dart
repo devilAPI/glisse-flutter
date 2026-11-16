@@ -10,6 +10,7 @@ import 'overlay_scope.dart';
 
 /// A row of a [GlassActionSheet].
 class GlassActionSheetAction {
+  /// Creates a row for an action sheet.
   const GlassActionSheetAction({
     required this.child,
     this.result,
@@ -140,6 +141,7 @@ class _GlassActionSheetRoute<T> extends PopupRoute<T> {
 /// go over one chooses it. Choosing pops the sheet's route with the action's
 /// `result`. Usually shown with [showGlassActionSheet].
 class GlassActionSheet extends StatefulWidget {
+  /// Creates an action sheet.
   const GlassActionSheet({
     super.key,
     this.title,
@@ -149,8 +151,13 @@ class GlassActionSheet extends StatefulWidget {
     this.semanticLabel = 'Actions',
   });
 
+  /// Shown at the top of the sheet, above [message].
   final Widget? title;
+
+  /// Shown under the [title], in smaller type.
   final Widget? message;
+
+  /// The rows, in order, parted by hairlines.
   final List<GlassActionSheetAction> actions;
 
   /// Shown on its own below the group, in bold.

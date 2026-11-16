@@ -20,6 +20,7 @@ enum GlassButtonVariant {
 ///
 /// With an [icon] and no [child] it's a circle; give it a [semanticLabel].
 class GlassButton extends StatefulWidget {
+  /// Creates a glass button. Give it a [child], an [icon], or both.
   const GlassButton({
     super.key,
     this.child,
@@ -44,6 +45,8 @@ class GlassButton extends StatefulWidget {
 
   /// Null disables the button.
   final VoidCallback? onPressed;
+
+  /// How the button is filled.
   final GlassButtonVariant variant;
 
   /// Marks an action that deletes or can't be undone: shorthand for a red [tint].
@@ -51,8 +54,14 @@ class GlassButton extends StatefulWidget {
 
   /// Tints a glass button's label, or a filled button's fill.
   final Color? tint;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// Takes keyboard focus; made for it if null.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   /// The button's height; an icon-only button is as wide.
@@ -60,6 +69,8 @@ class GlassButton extends StatefulWidget {
 
   /// Overrides the padding round the label.
   final EdgeInsetsGeometry? padding;
+
+  /// How the glass reads what's behind it.
   final GlassMode mode;
 
   @override
@@ -199,10 +210,16 @@ class _GlassButtonState extends State<GlassButton> {
 
 /// Lays [PressGlow] over its child while the nearest [GlassPressable] is pressed.
 class GlassPressableGlow extends StatelessWidget {
+  /// Creates a glow over [child], rounded to [radius].
   const GlassPressableGlow({super.key, required this.radius, required this.child, this.enabled = true});
 
+  /// The corner radius of the glow, in logical pixels.
   final double radius;
+
+  /// What the glow lies over.
   final Widget child;
+
+  /// Whether the glow shows; false leaves [child] bare.
   final bool enabled;
 
   @override

@@ -23,13 +23,16 @@ const _Feel _touch = _Feel(15, (515, 27.3), (250, 11.8));
 
 /// Where a press is and whether one is under way, for a pressable's glow.
 class PressState {
+  /// Creates a press state.
   const PressState({required this.pressed, required this.position});
 
+  /// Whether a press is under way.
   final bool pressed;
 
   /// Where the pointer is, as a share of the box (0 to 1 each way).
   final Offset position;
 
+  /// No press, with the pointer at the middle.
   static const PressState idle = PressState(pressed: false, position: Offset(0.5, 0.5));
 }
 
@@ -37,6 +40,7 @@ class PressState {
 /// stretches towards a drag with a rubbery give, and springs back past its
 /// size when let go.
 class GlassPressable extends StatefulWidget {
+  /// Creates a pressable around [child].
   const GlassPressable({
     super.key,
     required this.child,
@@ -45,8 +49,13 @@ class GlassPressable extends StatefulWidget {
     this.builder,
   });
 
+  /// What presses.
   final Widget child;
+
+  /// Whether it responds to presses; false leaves [child] still.
   final bool enabled;
+
+  /// Called when the press starts, moves or ends.
   final ValueChanged<PressState>? onPressChanged;
 
   /// Builds over the child with the press's state, as for a glow.
@@ -187,10 +196,16 @@ class _GlassPressableState extends State<GlassPressable> with TickerProviderStat
 
 /// The soft light under a finger on pressed glass, as Glisse's `::after`.
 class PressGlow extends StatelessWidget {
+  /// Creates a glow for a press in [state], rounded to [radius].
   const PressGlow({super.key, required this.state, required this.radius, this.strength = 1});
 
+  /// The press the glow follows.
   final PressState state;
+
+  /// The corner radius of the glow, in logical pixels.
   final double radius;
+
+  /// The glow's opacity while pressed, 0 to 1.
   final double strength;
 
   @override

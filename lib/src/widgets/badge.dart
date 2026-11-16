@@ -7,6 +7,7 @@ import '../foundation/theme.dart';
 /// pops in on a bouncy spring when [show] turns on, and shrinks away when off.
 /// Without a [label] it's a dot.
 class GlassBadge extends StatefulWidget {
+  /// Creates a badge over [child].
   const GlassBadge({
     super.key,
     required this.child,
@@ -16,8 +17,13 @@ class GlassBadge extends StatefulWidget {
     this.offset = const Offset(6, -6),
   });
 
+  /// What the badge sits on.
   final Widget child;
+
+  /// The text in the badge, such as a count. Null shows a dot.
   final String? label;
+
+  /// Whether the badge is shown.
   final bool show;
 
   /// Defaults to the theme's destructive red.

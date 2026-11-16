@@ -9,6 +9,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 /// How a lens bends what's under it, as Glisse's `LensOptions`.
 @immutable
 class LensSpec {
+  /// Creates a lens that bends by [strength] over a band [depth] wide.
   const LensSpec({
     required this.strength,
     required this.dispersion,
@@ -41,6 +42,7 @@ class LensSpec {
   /// How far the bend near each side keeps to that side's own direction.
   final double splay;
 
+  /// Whether [depth] is a share of the lens's shorter side rather than px.
   final bool relative;
 
   /// Bends as light does through a rounded bezel: straight in from the rim,
@@ -56,7 +58,9 @@ class LensSpec {
   /// Softens what the rim bends, as iOS's tab bar lens does.
   final double blur;
 
-  /// Whether the glass paints the light on its rim itself.
+  /// Carried over from Glisse's lens options, where it marks a lens that
+  /// paints its own rim light. Nothing reads it yet: the shader always
+  /// lights the rim from the draw's [LensLight].
   final bool paintsLight;
 
   /// The strength on a dark page, if it differs.
@@ -99,6 +103,27 @@ class LensSpec {
     return s * (bezel ? depthOf(size) : math.min(size.width, size.height));
   }
 
+  @override
+  bool operator ==(Object other) =>
+      other is LensSpec &&
+      other.strength == strength &&
+      other.dispersion == dispersion &&
+      other.depth == depth &&
+      other.dome == dome &&
+      other.splay == splay &&
+      other.relative == relative &&
+      other.bezel == bezel &&
+      other.maxDepth == maxDepth &&
+      other.ink == ink &&
+      other.blur == blur &&
+      other.paintsLight == paintsLight &&
+      other.darkStrength == darkStrength;
+
+  @override
+  int get hashCode => Object.hash(
+      strength, dispersion, depth, dome, splay, relative, bezel, maxDepth, ink, blur, paintsLight, darkStrength);
+
+  /// A copy with the given [strength], [dispersion] or [blur] replaced.
   LensSpec copyWith({double? strength, double? dispersion, double? blur}) => LensSpec(
         strength: strength ?? this.strength,
         dispersion: dispersion ?? this.dispersion,
@@ -118,6 +143,7 @@ class LensSpec {
 /// Where the light catches a lens's rim.
 @immutable
 class LensLight {
+  /// Creates a light from where it shines and how its glow and edge look.
   const LensLight({
     required this.angle,
     required this.glow,
@@ -128,12 +154,25 @@ class LensLight {
     required this.edgePower,
   });
 
+  /// The direction the light comes from, in degrees.
   final double angle;
+
+  /// How bright the glow on the lit side of the rim is.
   final double glow;
+
+  /// How far round the rim the glow spreads.
   final double spread;
+
+  /// How sharply the glow falls off: higher keeps it nearer its peak.
   final double glowPower;
+
+  /// How bright the thin lit line at the very edge is.
   final double edge;
+
+  /// The width of that edge line, in px.
   final double edgeWidth;
+
+  /// How sharply the edge line falls off: higher keeps it nearer its peak.
   final double edgePower;
 
   /// Aave's light for dark surroundings.
@@ -159,6 +198,7 @@ enum LensTexture {
 
 /// The rim a lens paints over itself.
 enum LensRim {
+  /// No rim.
   none,
 
   /// Glass's rim: a lit line at the very edge over its 0.5px edge line.
@@ -187,8 +227,15 @@ enum LensRim {
 
 final Map<(double, double), ({double radius, double scale})> _arcs = {};
 
-({double radius, double scale}) _cachedArc(double sag, double half) =>
-    _arcs.putIfAbsent((sag, half), () => _arc(sag, half));
+// Keyed to a hundredth of a px, and bounded, so a lens whose size animates
+// doesn't grow the memo frame by frame.
+({double radius, double scale}) _cachedArc(double sag, double half) {
+  final key = ((sag * 100).roundToDouble() / 100, (half * 100).roundToDouble() / 100);
+  final hit = _arcs[key];
+  if (hit != null) return hit;
+  if (_arcs.length >= 256) _arcs.clear();
+  return _arcs[key] = _arc(key.$1, key.$2);
+}
 
 /// Loads and holds Glisse's shader. Widgets draw a fallback until it's ready.
 class GlassShaders {
@@ -196,6 +243,8 @@ class GlassShaders {
 
   static ui.FragmentProgram? _program;
   static Future<ui.FragmentProgram?>? _loading;
+
+  /// Whether the shader has loaded.
   static final ValueNotifier<bool> ready = ValueNotifier<bool>(false);
   static Object? _error;
 
@@ -205,20 +254,20 @@ class GlassShaders {
   /// Why loading failed, if it did.
   static Object? get error => _error;
 
-  /// Loads the shader. Safe to call any number of times.
+  /// Loads the shader. Safe to call any number of times; after a failure,
+  /// the next call tries again.
   static Future<ui.FragmentProgram?> load() {
-    // An app finds the package's asset under packages/glisse; the package's
-    // own tests find it at its plain path.
-    return _loading ??= ui.FragmentProgram.fromAsset('packages/glisse/shaders/glass.frag')
-        .catchError((Object _) => ui.FragmentProgram.fromAsset('shaders/glass.frag'))
-        .then(
+    if (_program != null) return Future<ui.FragmentProgram?>.value(_program);
+    return _loading ??= _fromAssets().then(
       (program) {
         _program = program;
+        _error = null;
         ready.value = true;
         return program;
       },
       onError: (Object error, StackTrace stack) {
         _error = error;
+        _loading = null;
         FlutterError.reportError(FlutterErrorDetails(
           exception: error,
           stack: stack,
@@ -228,6 +277,21 @@ class GlassShaders {
         return null;
       },
     );
+  }
+
+  // An app finds the package's asset under packages/glisse; the package's
+  // own tests find it at its plain path. If neither loads, the error is the
+  // package path's, which is the one an app has.
+  static Future<ui.FragmentProgram> _fromAssets() async {
+    try {
+      return await ui.FragmentProgram.fromAsset('packages/glisse/shaders/glass.frag');
+    } catch (error, stack) {
+      try {
+        return await ui.FragmentProgram.fromAsset('shaders/glass.frag');
+      } catch (_) {
+        Error.throwWithStackTrace(error, stack);
+      }
+    }
   }
 
   /// Loads the shader before the first frame, so glass refracts from the
@@ -269,6 +333,8 @@ class GlassShaders {
     }
   }
 
+  /// A new shader from the loaded program, or null while it is still loading
+  /// (this starts the load).
   static ui.FragmentShader? create() {
     if (_program == null) {
       unawaited(load());
@@ -280,6 +346,7 @@ class GlassShaders {
 
 /// Everything one draw of the lens shader needs.
 class LensDraw {
+  /// Describes one draw of [spec] over [rect], at [devicePixelRatio].
   LensDraw({
     required this.rect,
     required this.shape,
@@ -335,18 +402,32 @@ class LensDraw {
 
   /// The lens's own size, which its map is drawn for and stretched over [rect].
   final Size shape;
+
+  /// The corner radius of [shape], in local px.
   final double radius;
+
+  /// How the lens bends.
   final LensSpec spec;
+
+  /// Device pixels per logical pixel.
   final double devicePixelRatio;
 
   /// How far the rim reaches, in local px.
   final double reach;
+
+  /// Overrides [LensSpec.dispersion] of [spec] when set.
   final double? dispersion;
 
   /// The frost's deviation, in local px.
   final double blur;
+
+  /// How much the lens saturates what it shows; 1 for no change.
   final double saturation;
+
+  /// How much the lens brightens what it shows; 1 for no change.
   final double brightness;
+
+  /// What the lens samples.
   final LensTexture texture;
 
   /// Local px to texture uv, as (a, b, c, d, e, f): u = a x + b y + c, v = d x + e y + f.
@@ -358,20 +439,64 @@ class LensDraw {
 
   /// The light caught on the rim: above 0 it brightens, below it darkens.
   final double shine;
+
+  /// Where the light catches the rim.
   final LensLight light;
 
   /// For ink: the page under it, light or dark.
   final Brightness? inkPage;
+
+  /// The colour laid over what the lens shows.
   final Color tint;
+
+  /// The colour of the 0.5px line round the lens's edge.
   final Color edge;
+
+  /// The rim painted over the lens.
   final LensRim rim;
+
+  /// How bright the painted [rim] is.
   final double rimShine;
+
+  /// How opaque the painted [rim] is, from 0 to 1.
   final double rimOpacity;
 
   /// For [LensTexture.backdrop]: from the backdrop texture's px to local px,
   /// as (a, b, c, d, e, f). [uv] then maps local px to the texture's px.
   final List<double>? filterInverse;
+
+  /// The sampled texture's size, in its own px.
   final Size textureSize;
+
+  /// This draw over an image mapped by [uv], clear outside the image: how a
+  /// control's lens bends its own recorded content. What only a live
+  /// backdrop needs is left unset.
+  LensDraw onImage(List<double> uv) => LensDraw(
+        rect: rect,
+        shape: shape,
+        radius: radius,
+        spec: spec,
+        devicePixelRatio: devicePixelRatio,
+        reach: reach,
+        dispersion: dispersion,
+        blur: blur,
+        saturation: saturation,
+        brightness: brightness,
+        texture: LensTexture.image,
+        uv: uv,
+        clearOutside: true,
+        shine: shine,
+        light: light,
+        inkPage: inkPage,
+        tint: tint,
+        edge: edge,
+        rim: rim,
+        rimShine: rimShine,
+        rimOpacity: rimOpacity,
+        softensBend: softensBend,
+        magnification: magnification,
+        magnifyOffset: magnifyOffset,
+      );
 
   static double _premul(Color c, double channel) => channel * c.a;
 

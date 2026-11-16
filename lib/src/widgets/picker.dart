@@ -34,6 +34,7 @@ const List<String> glassMonthNames = [
 ///
 /// Give it either [children] or [items]; [items] are shown as text.
 class GlassPicker extends StatefulWidget {
+  /// Creates a wheel picker of [children] or [items], not both.
   const GlassPicker({
     super.key,
     this.children,
@@ -68,12 +69,20 @@ class GlassPicker extends StatefulWidget {
 
   /// Whether the rows go round, the first following the last.
   final bool looping;
+
+  /// The wheel's height, in logical pixels.
   final double height;
 
   /// The height of each row.
   final double itemExtent;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
+
+  /// Takes keyboard focus; made for it if null.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override
@@ -443,6 +452,7 @@ int _daysIn(int year, int month) => DateTime(year, month + 1, 0).day;
 /// The day keeps within the month, rolling back from the 31st to the 30th,
 /// say, when the month turns to one with fewer days.
 class GlassDatePicker extends StatefulWidget {
+  /// Creates a date picker; [minimumYear] must not be after [maximumYear].
   const GlassDatePicker({
     super.key,
     this.initialDate,
@@ -460,13 +470,23 @@ class GlassDatePicker extends StatefulWidget {
 
   /// Called with the date as it changes. Null disables the picker.
   final ValueChanged<DateTime>? onDateTimeChanged;
+
+  /// The earliest year on the year wheel.
   final int minimumYear;
+
+  /// The latest year on the year wheel.
   final int maximumYear;
+
+  /// The wheels' height, in logical pixels.
   final double height;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   /// The month wheel's focus node.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override
@@ -606,6 +626,7 @@ class _GlassDatePickerState extends State<GlassDatePicker> {
 /// wheel unless [use24hFormat]. In 12-hour form, turning the hour past 12
 /// turns AM to PM and back.
 class GlassTimePicker extends StatefulWidget {
+  /// Creates a time picker; [minuteInterval] must divide 60.
   const GlassTimePicker({
     super.key,
     this.initialTime,
@@ -630,11 +651,17 @@ class GlassTimePicker extends StatefulWidget {
 
   /// The minutes the minute wheel steps by; must divide 60.
   final int minuteInterval;
+
+  /// The wheels' height, in logical pixels.
   final double height;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   /// The hour wheel's focus node.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

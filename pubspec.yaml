@@ -7,6 +7,7 @@ version: 0.2.0
 homepage: https://github.com/devilAPI/glisse-flutter
 repository: https://github.com/devilAPI/glisse-flutter
 issue_tracker: https://github.com/devilAPI/glisse-flutter/issues
+documentation: https://devilapi.github.io/glisse-flutter/api/
 topics:
   - liquid-glass
   - glassmorphism

@@ -13,6 +13,7 @@ import 'pressable.dart';
 /// up under the pointer, and takes keyboard focus. It fills the width it's
 /// given, so give it a bounded one.
 class GlassCard extends StatefulWidget {
+  /// Creates a card of glass.
   const GlassCard({
     super.key,
     this.leading,
@@ -32,7 +33,11 @@ class GlassCard extends StatefulWidget {
 
   /// Shown before the title, such as an icon at 24px.
   final Widget? leading;
+
+  /// The header's main line.
   final Widget? title;
+
+  /// Shown under the [title], in smaller type.
   final Widget? subtitle;
 
   /// Shown at the end of the header, such as a value or a chevron.
@@ -43,7 +48,11 @@ class GlassCard extends StatefulWidget {
 
   /// Makes the card a button.
   final VoidCallback? onTap;
+
+  /// The corner radius.
   final double borderRadius;
+
+  /// The space between the card's edge and its content.
   final EdgeInsetsGeometry padding;
 
   /// The frost's colour. Defaults to the theme's glass.
@@ -51,8 +60,14 @@ class GlassCard extends StatefulWidget {
 
   /// Names the card for assistive technology, in place of its text.
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
+
+  /// How the glass reads what is behind it.
   final GlassMode mode;
 
   @override

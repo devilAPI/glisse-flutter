@@ -32,6 +32,7 @@ int _daysIn(int year, int month) => DateTime(year, month + 1, 0).day;
 /// with the accent. Days before [firstDate] or after [lastDate] can't be
 /// picked. With the keyboard, the arrows move between days and enter picks.
 class GlassCalendar extends StatefulWidget {
+  /// Creates a calendar; [firstDayOfWeek] is a [DateTime] weekday, from [DateTime.monday] to [DateTime.sunday].
   const GlassCalendar({
     super.key,
     required this.selectedDate,
@@ -78,10 +79,14 @@ class GlassCalendar extends StatefulWidget {
 
   /// The widest the calendar grows to.
   final double maxWidth;
+
+  /// Names the control for assistive technology.
   final String? semanticLabel;
 
   /// Focuses the grid of days.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

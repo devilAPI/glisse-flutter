@@ -15,6 +15,7 @@ const double _pad = 6;
 /// needed; pick one as from radio buttons. The picked one springs a little
 /// larger and gets a ring round it, with a gap.
 class GlassColorSwatches extends StatefulWidget {
+  /// Creates colour swatches; [labels], if given, must have one per colour.
   const GlassColorSwatches({
     super.key,
     required this.colors,
@@ -29,6 +30,7 @@ class GlassColorSwatches extends StatefulWidget {
   })  : assert(size > 0),
         assert(labels == null || labels.length == colors.length);
 
+  /// The colours to pick from.
   final List<Color> colors;
 
   /// The picked colour, or null for none.
@@ -48,7 +50,11 @@ class GlassColorSwatches extends StatefulWidget {
 
   /// The group's label.
   final String? semanticLabel;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
+
+  /// Whether it takes focus when first built.
   final bool autofocus;
 
   @override

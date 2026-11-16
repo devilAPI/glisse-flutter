@@ -11,6 +11,7 @@ import 'pressable.dart';
 /// with the accent and its label turns white. With [onDeleted] it shows a
 /// cross that removes it.
 class GlassChip extends StatefulWidget {
+  /// Creates a chip.
   const GlassChip({
     super.key,
     required this.label,
@@ -24,12 +25,17 @@ class GlassChip extends StatefulWidget {
     this.semanticLabel,
   });
 
+  /// The chip's text, or any widget.
   final Widget label;
 
   /// The chip's name for assistive technology. Defaults to [label]'s text
   /// when it is a [Text].
   final String? semanticLabel;
+
+  /// Shown before the label.
   final Widget? icon;
+
+  /// Whether the chip is picked.
   final bool selected;
 
   /// Called with the new selection when tapped.
@@ -37,8 +43,14 @@ class GlassChip extends StatefulWidget {
 
   /// Shows a cross that calls this.
   final VoidCallback? onDeleted;
+
+  /// The fill when selected. Defaults to the theme's accent.
   final Color? selectedColor;
+
+  /// Whether the chip responds to input.
   final bool enabled;
+
+  /// The control's focus node, to drive or watch its focus.
   final FocusNode? focusNode;
 
   @override

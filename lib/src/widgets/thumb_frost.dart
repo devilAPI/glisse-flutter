@@ -8,6 +8,7 @@ import '../rendering/liquid_glass.dart';
 /// and a brightening that fades as it lifts, and a saturation of 1.5. The
 /// thumb's lens draws the track over it.
 class ThumbFrost extends StatelessWidget {
+  /// Creates the frost for a thumb at [rect], lifted by [lift].
   const ThumbFrost({super.key, required this.rect, required this.lift});
 
   /// The thumb as placed, in its control's px.

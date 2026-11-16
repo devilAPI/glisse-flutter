@@ -130,52 +130,76 @@ vec4 tex(vec2 p) {
   return texture(uTexture, uv);
 }
 
+// The backdrop texture at a device pixel of its own, for a backdrop whose
+// place in the view isn't known.
+vec4 rawTex(vec2 px) {
+  vec2 uv = px / max(uSize, vec2(1.0));
+#ifdef IMPELLER_TARGET_OPENGLES
+  uv.y = 1.0 - uv.y;
+#endif
+  return texture(uTexture, uv);
+}
+
+// A sample at p: in local px through the lens's mapping, or, when raw, at a
+// device pixel of the backdrop texture.
+vec4 sampleAt(vec2 p, bool raw) {
+  return raw ? rawTex(p) : tex(p);
+}
+
 // Interleaved gradient noise: a per-pixel value in [0, 1) that turns the
 // rings' banding into an even grain.
 float noise(vec2 pixel) {
   return fract(52.9829189 * fract(dot(pixel, vec2(0.06711056, 0.00583715))));
 }
 
-// A frosted sample: a Gaussian of deviation s, as three rings of taps, the
-// rings turned by a different angle at each device pixel.
-vec4 frost(vec2 p, float sigma) {
+// A frosted sample: a Gaussian of deviation sigma, as three rings of taps, the
+// rings turned by a different angle at each device pixel. With raw, p and
+// sigma are in the backdrop texture's device px; otherwise in local px.
+vec4 frostOf(vec2 p, float sigma, bool raw) {
   if (sigma < 0.2) {
-    return tex(p);
+    return sampleAt(p, raw);
   }
   // These rings and weights blur with a deviation of 0.770 of their radius
   // scale (measured), so scale it up to give the deviation asked for, as
   // CSS's blur() does.
   float s = sigma / 0.770;
-  float angle = 6.2831853 * noise(floor(p / max(uLightC.w, 0.0001)));
+  float pixel = raw ? 1.0 : max(uLightC.w, 0.0001);
+  float angle = 6.2831853 * noise(floor(p / pixel));
   float c = cos(angle);
   float n = sin(angle);
   mat2 turn = mat2(c, n, -n, c);
-  vec4 sum = tex(p);
+  vec4 sum = sampleAt(p, raw);
   float total = 1.0;
   float r1 = 0.65 * s;
   float w1 = 0.8095;  // exp(-0.65^2 / 2)
-  sum += w1 * (tex(p + turn * vec2(r1, 0.0)) + tex(p + turn * vec2(-r1, 0.0)) +
-               tex(p + turn * vec2(0.5 * r1, 0.866 * r1)) + tex(p + turn * vec2(-0.5 * r1, 0.866 * r1)) +
-               tex(p + turn * vec2(0.5 * r1, -0.866 * r1)) + tex(p + turn * vec2(-0.5 * r1, -0.866 * r1)));
+  sum += w1 * (sampleAt(p + turn * vec2(r1, 0.0), raw) + sampleAt(p + turn * vec2(-r1, 0.0), raw) +
+               sampleAt(p + turn * vec2(0.5 * r1, 0.866 * r1), raw) +
+               sampleAt(p + turn * vec2(-0.5 * r1, 0.866 * r1), raw) +
+               sampleAt(p + turn * vec2(0.5 * r1, -0.866 * r1), raw) +
+               sampleAt(p + turn * vec2(-0.5 * r1, -0.866 * r1), raw));
   total += 6.0 * w1;
   float r2 = 1.35 * s;
   float w2 = 0.4020;  // exp(-1.35^2 / 2)
   float a2 = 0.7071 * r2;
-  sum += w2 * (tex(p + turn * vec2(r2, 0.0)) + tex(p + turn * vec2(-r2, 0.0)) +
-               tex(p + turn * vec2(0.0, r2)) + tex(p + turn * vec2(0.0, -r2)) +
-               tex(p + turn * vec2(a2, a2)) + tex(p + turn * vec2(-a2, a2)) +
-               tex(p + turn * vec2(a2, -a2)) + tex(p + turn * vec2(-a2, -a2)));
+  sum += w2 * (sampleAt(p + turn * vec2(r2, 0.0), raw) + sampleAt(p + turn * vec2(-r2, 0.0), raw) +
+               sampleAt(p + turn * vec2(0.0, r2), raw) + sampleAt(p + turn * vec2(0.0, -r2), raw) +
+               sampleAt(p + turn * vec2(a2, a2), raw) + sampleAt(p + turn * vec2(-a2, a2), raw) +
+               sampleAt(p + turn * vec2(a2, -a2), raw) + sampleAt(p + turn * vec2(-a2, -a2), raw));
   total += 8.0 * w2;
   float r3 = 2.1 * s;
   float w3 = 0.1103;  // exp(-2.1^2 / 2)
   float c3 = 0.9239 * r3;
   float s3 = 0.3827 * r3;
-  sum += w3 * (tex(p + turn * vec2(c3, s3)) + tex(p + turn * vec2(-c3, s3)) +
-               tex(p + turn * vec2(c3, -s3)) + tex(p + turn * vec2(-c3, -s3)) +
-               tex(p + turn * vec2(s3, c3)) + tex(p + turn * vec2(-s3, c3)) +
-               tex(p + turn * vec2(s3, -c3)) + tex(p + turn * vec2(-s3, -c3)));
+  sum += w3 * (sampleAt(p + turn * vec2(c3, s3), raw) + sampleAt(p + turn * vec2(-c3, s3), raw) +
+               sampleAt(p + turn * vec2(c3, -s3), raw) + sampleAt(p + turn * vec2(-c3, -s3), raw) +
+               sampleAt(p + turn * vec2(s3, c3), raw) + sampleAt(p + turn * vec2(-s3, c3), raw) +
+               sampleAt(p + turn * vec2(s3, -c3), raw) + sampleAt(p + turn * vec2(-s3, -c3), raw));
   total += 8.0 * w3;
   return sum / total;
+}
+
+vec4 frost(vec2 p, float sigma) {
+  return frostOf(p, sigma, false);
 }
 
 vec3 saturateRgb(vec3 c, float s) {
@@ -195,20 +219,8 @@ void main() {
   if (filtered && !backdropKnown()) {
     // A backdrop of unknown origin, as inside an opacity layer: frost what's
     // under each pixel and tint it; the layer's clip gives the shape.
-    vec2 texel = 1.0 / max(uSize, vec2(1.0));
-    // A 3x3 box at this spacing has a deviation of 0.816 of it.
-    float r = uFrost.x / 0.816 / max(uLightC.w, 0.0001);
-    vec2 uv = fc * texel;
-    vec4 sum = vec4(0.0);
-    for (int i = 0; i < 9; i++) {
-      vec2 o = vec2(float(i - (i / 3) * 3) - 1.0, float(i / 3) - 1.0) * r;
-      vec2 at = uv + o * texel;
-#ifdef IMPELLER_TARGET_OPENGLES
-      at.y = 1.0 - at.y;
-#endif
-      sum += texture(uTexture, at);
-    }
-    vec4 frosted = sum / 9.0;
+    // The same rings as any frost, at the frost's deviation in device px.
+    vec4 frosted = frostOf(fc, uFrost.x / max(uLightC.w, 0.0001), true);
     frosted.rgb = clamp(saturateRgb(frosted.rgb, uFrost.y) * uFrost.z, 0.0, frosted.a);
     fragColor = over(uTint, frosted);
     return;
@@ -277,7 +289,7 @@ void main() {
   }
   // Fully in once the pull reaches about a twentieth of its strength, and
   // smoothed over the last pixel at the edge.
-  float bends = clamp(min(min(amount * 20.0, -edge), 1.0), 0.0, 1.0);
+  float bends = clamp(min(min(amount * 20.0, -edge / max(mapPixel, 0.0001)), 1.0), 0.0, 1.0);
 
   vec4 base = vec4(0.0);
   // An opaque tint, as on a filled button, hides all the glass would show.

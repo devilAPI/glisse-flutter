@@ -8,8 +8,10 @@ import 'package:flutter/widgets.dart';
 /// Only touches its parent passes down reach it, so the parent must itself
 /// cover the padding (most layouts with room around the control do).
 class HitPadding extends SingleChildRenderObjectWidget {
+  /// Lets [child] take touches up to [padding] outside its box.
   const HitPadding({super.key, required this.padding, super.child});
 
+  /// How far outside the child's box touches still reach it, in logical px.
   final EdgeInsets padding;
 
   @override
@@ -21,9 +23,12 @@ class HitPadding extends SingleChildRenderObjectWidget {
   }
 }
 
+/// The render object of [HitPadding].
 class RenderHitPadding extends RenderProxyBox {
+  /// Creates a box that takes touches up to [padding] outside its child.
   RenderHitPadding(this.padding);
 
+  /// How far outside the box touches still reach the child, in logical px.
   EdgeInsets padding;
 
   @override
