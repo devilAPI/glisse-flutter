@@ -270,7 +270,11 @@ class LensDraw {
     this.filterInverse,
     this.textureSize = Size.zero,
     this.softensBend = false,
+    this.magnification = 1,
   });
+
+  /// How much the lens magnifies what's under its middle; 1 for none.
+  final double magnification;
 
   /// Blurs only what the rim bends, as far as it bends it, rather than all
   /// the glass shows: iOS's tab bar lens.
@@ -412,7 +416,7 @@ class LensDraw {
     f(rim.index.toDouble());
     f(rimShine);
     f(rimOpacity);
-    f(0);
+    f(magnification);
     // uFilter, uFilterY
     final inverse = filterInverse ?? const [1.0, 0.0, 0.0, 0.0, 1.0, 0.0];
     f(inverse[0]);

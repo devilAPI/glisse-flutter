@@ -35,7 +35,7 @@ uniform vec4 uLightB;   // spread, glow power, edge, edge width.
 uniform vec4 uLightC;   // edge power, ink (0 none, 1 light page, 2 dark page), soften (1: blur only what the rim bends), local px per device px.
 uniform vec4 uTint;     // A colour laid over, premultiplied.
 uniform vec4 uEdge;     // The edge line's colour, premultiplied.
-uniform vec4 uRim;      // rim mode (0 none, 1 glass, 2 selection, 3 bright selection), shine, opacity, unused.
+uniform vec4 uRim;      // rim mode (0 none, 1 glass, 2 selection, 3 bright selection), shine, opacity, magnification.
 uniform vec4 uFilter;   // Mode 2: local x = a fx + b fy + c from the fragment's coordinates; w: enabled.
 uniform vec4 uFilterY;  // Mode 2: local y = d fx + e fy + f.
 
@@ -110,35 +110,46 @@ vec4 tex(vec2 p) {
   return texture(uTexture, uv);
 }
 
-// A frosted sample: a Gaussian of deviation s, as three rings of taps.
+// Interleaved gradient noise: a per-pixel value in [0, 1) that turns the
+// rings' banding into an even grain.
+float noise(vec2 pixel) {
+  return fract(52.9829189 * fract(dot(pixel, vec2(0.06711056, 0.00583715))));
+}
+
+// A frosted sample: a Gaussian of deviation s, as three rings of taps, the
+// rings turned by a different angle at each device pixel.
 vec4 frost(vec2 p, float s) {
   if (s < 0.2) {
     return tex(p);
   }
+  float angle = 6.2831853 * noise(floor(p / max(uLightC.w, 0.0001)));
+  float c = cos(angle);
+  float n = sin(angle);
+  mat2 turn = mat2(c, n, -n, c);
   vec4 sum = tex(p);
   float total = 1.0;
   float r1 = 0.65 * s;
   float w1 = 0.8095;  // exp(-0.65^2 / 2)
-  sum += w1 * (tex(p + vec2(r1, 0.0)) + tex(p + vec2(-r1, 0.0)) +
-               tex(p + vec2(0.5 * r1, 0.866 * r1)) + tex(p + vec2(-0.5 * r1, 0.866 * r1)) +
-               tex(p + vec2(0.5 * r1, -0.866 * r1)) + tex(p + vec2(-0.5 * r1, -0.866 * r1)));
+  sum += w1 * (tex(p + turn * vec2(r1, 0.0)) + tex(p + turn * vec2(-r1, 0.0)) +
+               tex(p + turn * vec2(0.5 * r1, 0.866 * r1)) + tex(p + turn * vec2(-0.5 * r1, 0.866 * r1)) +
+               tex(p + turn * vec2(0.5 * r1, -0.866 * r1)) + tex(p + turn * vec2(-0.5 * r1, -0.866 * r1)));
   total += 6.0 * w1;
   float r2 = 1.35 * s;
   float w2 = 0.4020;  // exp(-1.35^2 / 2)
   float a2 = 0.7071 * r2;
-  sum += w2 * (tex(p + vec2(r2, 0.0)) + tex(p + vec2(-r2, 0.0)) +
-               tex(p + vec2(0.0, r2)) + tex(p + vec2(0.0, -r2)) +
-               tex(p + vec2(a2, a2)) + tex(p + vec2(-a2, a2)) +
-               tex(p + vec2(a2, -a2)) + tex(p + vec2(-a2, -a2)));
+  sum += w2 * (tex(p + turn * vec2(r2, 0.0)) + tex(p + turn * vec2(-r2, 0.0)) +
+               tex(p + turn * vec2(0.0, r2)) + tex(p + turn * vec2(0.0, -r2)) +
+               tex(p + turn * vec2(a2, a2)) + tex(p + turn * vec2(-a2, a2)) +
+               tex(p + turn * vec2(a2, -a2)) + tex(p + turn * vec2(-a2, -a2)));
   total += 8.0 * w2;
   float r3 = 2.1 * s;
   float w3 = 0.1103;  // exp(-2.1^2 / 2)
   float c3 = 0.9239 * r3;
   float s3 = 0.3827 * r3;
-  sum += w3 * (tex(p + vec2(c3, s3)) + tex(p + vec2(-c3, s3)) +
-               tex(p + vec2(c3, -s3)) + tex(p + vec2(-c3, -s3)) +
-               tex(p + vec2(s3, c3)) + tex(p + vec2(-s3, c3)) +
-               tex(p + vec2(s3, -c3)) + tex(p + vec2(-s3, -c3)));
+  sum += w3 * (tex(p + turn * vec2(c3, s3)) + tex(p + turn * vec2(-c3, s3)) +
+               tex(p + turn * vec2(c3, -s3)) + tex(p + turn * vec2(-c3, -s3)) +
+               tex(p + turn * vec2(s3, c3)) + tex(p + turn * vec2(-s3, c3)) +
+               tex(p + turn * vec2(s3, -c3)) + tex(p + turn * vec2(-s3, -c3)));
   total += 8.0 * w3;
   return sum / total;
 }
@@ -227,7 +238,14 @@ void main() {
     // Softened glass, as iOS's tab bar lens, blurs only what its rim bends,
     // as far as it bends it; other glass frosts all it shows.
     bool soften = uLightC.z > 0.5;
-    vec4 plain = frost(p, soften ? 0.0 : uFrost.x);
+    // A magnifying lens shows what's nearer its middle, before its rim bends.
+    vec2 q = p;
+    float zoom = uRim.w;
+    if (zoom > 0.0 && zoom != 1.0) {
+      vec2 centre = uRect.xy + uRect.zw * 0.5;
+      q = centre + (p - centre) / zoom;
+    }
+    vec4 plain = frost(q, soften ? 0.0 : uFrost.x);
     float sigma = soften ? uFrost.x * amount : uFrost.x;
     base = plain;
     if (bends > 0.0 && uBend.x > 0.0) {
@@ -235,9 +253,9 @@ void main() {
       // The map stretches over the lens as placed; the pull is in local px.
       vec2 pull = dir * amount * 0.5 * uBend.x;
       float d = uBend.y;
-      vec4 red = frost(p - pull * (1.0 + 0.2 * d), sigma);
-      vec4 green = frost(p - pull * (1.0 + 0.1 * d), sigma);
-      vec4 blue = frost(p - pull, sigma);
+      vec4 red = frost(q - pull * (1.0 + 0.2 * d), sigma);
+      vec4 green = frost(q - pull * (1.0 + 0.1 * d), sigma);
+      vec4 blue = frost(q - pull, sigma);
       vec4 bent;
       if (uLightC.y > 0.5) {
         // Ink: the alpha of whichever colour covers most, and each colour's

@@ -44,6 +44,7 @@ class GlassStyle {
     this.rim = LensRim.glass,
     this.amount = 1,
     this.mode = GlassMode.auto,
+    this.magnification = 1,
   });
 
   final Color tint;
@@ -64,6 +65,43 @@ class GlassStyle {
   final double amount;
   final GlassMode mode;
 
+  /// How much the glass magnifies what's under its middle; 1 for none.
+  final double magnification;
+
+  GlassStyle copyWith({
+    Color? tint,
+    Color? edge,
+    Color? drop,
+    double? rimShine,
+    double? blur,
+    double? saturation,
+    double? brightness,
+    double? bend,
+    double? dispersion,
+    LensSpec? spec,
+    LensRim? rim,
+    double? amount,
+    GlassMode? mode,
+    double? magnification,
+  }) {
+    return GlassStyle(
+      tint: tint ?? this.tint,
+      edge: edge ?? this.edge,
+      drop: drop ?? this.drop,
+      rimShine: rimShine ?? this.rimShine,
+      blur: blur ?? this.blur,
+      saturation: saturation ?? this.saturation,
+      brightness: brightness ?? this.brightness,
+      bend: bend ?? this.bend,
+      dispersion: dispersion ?? this.dispersion,
+      spec: spec ?? this.spec,
+      rim: rim ?? this.rim,
+      amount: amount ?? this.amount,
+      mode: mode ?? this.mode,
+      magnification: magnification ?? this.magnification,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       other is GlassStyle &&
@@ -79,11 +117,12 @@ class GlassStyle {
       other.spec == spec &&
       other.rim == rim &&
       other.amount == amount &&
-      other.mode == mode;
+      other.mode == mode &&
+      other.magnification == magnification;
 
   @override
-  int get hashCode =>
-      Object.hash(tint, edge, drop, rimShine, blur, saturation, brightness, bend, dispersion, spec, rim, amount, mode);
+  int get hashCode => Object.hash(tint, edge, drop, rimShine, blur, saturation, brightness, bend, dispersion, spec, rim,
+      amount, mode, magnification);
 }
 
 /// The render object behind every piece of Glisse glass: a rounded
@@ -131,6 +170,15 @@ class RenderLiquidGlass extends RenderProxyBox {
     if (attached) _unlisten();
     _backdrop = value;
     if (attached) _listen();
+    markNeedsPaint();
+  }
+
+  GlassStyle? _outer;
+
+  /// The glass this glass sits in, if any.
+  set outer(GlassStyle? value) {
+    if (value == _outer) return;
+    _outer = value;
     markNeedsPaint();
   }
 
@@ -203,6 +251,11 @@ class RenderLiquidGlass extends RenderProxyBox {
   }) {
     final s = _style;
     final spec = s.spec;
+    // Over a copy, glass in other glass sees through that glass's frost too.
+    final outer = texture == LensTexture.image ? _outer : null;
+    final blur = outer == null ? s.blur : math.sqrt(s.blur * s.blur + outer.blur * outer.blur);
+    final tint = outer == null ? s.tint : Color.alphaBlend(s.tint, outer.tint);
+    final saturation = outer == null ? s.saturation : s.saturation * outer.saturation;
     return LensDraw(
       rect: rect,
       shape: size,
@@ -211,16 +264,17 @@ class RenderLiquidGlass extends RenderProxyBox {
       devicePixelRatio: _devicePixelRatio,
       reach: spec.reachOf(size, strengthOverride: s.bend, dark: false) * s.amount.clamp(0.0, 1.0),
       dispersion: s.dispersion,
-      blur: texture == LensTexture.none ? 0 : s.blur,
-      saturation: s.saturation,
+      blur: texture == LensTexture.none ? 0 : blur,
+      saturation: saturation,
       brightness: s.brightness,
       texture: texture,
       uv: uv,
-      tint: s.tint,
+      tint: tint,
       edge: s.edge,
       rim: s.rim,
       rimShine: s.rimShine,
       filterInverse: inverse,
+      magnification: s.magnification,
     );
   }
 
@@ -336,54 +390,72 @@ class RenderLiquidGlass extends RenderProxyBox {
 }
 
 /// The widget for [RenderLiquidGlass].
-class LiquidGlassBox extends SingleChildRenderObjectWidget {
+///
+/// Glass inside other glass that reads a [GlassBackdrop]'s copy sees the
+/// copy, not the glass around it, so it takes on the outer glass's frost and
+/// tint too, and looks as it would through it.
+class LiquidGlassBox extends StatelessWidget {
   const LiquidGlassBox({
     super.key,
     required this.radius,
     required this.style,
-    super.child,
+    this.child,
   });
 
   /// The corners' radius; [double.infinity] for a capsule.
   final double radius;
   final GlassStyle style;
+  final Widget? child;
 
-  // Glass that leaves its mode to the page takes the theme's.
-  GlassStyle _style(BuildContext context) {
-    if (style.mode != GlassMode.auto) return style;
-    final mode = GlassTheme.of(context).mode;
-    if (mode == GlassMode.auto) return style;
-    return GlassStyle(
-      tint: style.tint,
-      edge: style.edge,
-      drop: style.drop,
-      rimShine: style.rimShine,
-      blur: style.blur,
-      saturation: style.saturation,
-      brightness: style.brightness,
-      bend: style.bend,
-      dispersion: style.dispersion,
-      spec: style.spec,
-      rim: style.rim,
-      amount: style.amount,
-      mode: mode,
+  @override
+  Widget build(BuildContext context) {
+    final resolved = _resolveStyle(context, style);
+    return _LiquidGlassRender(
+      radius: radius,
+      style: resolved,
+      child: _GlassAncestor(style: resolved, child: child ?? const SizedBox.shrink()),
     );
   }
+}
+
+// Glass that leaves its mode to the page takes the theme's.
+GlassStyle _resolveStyle(BuildContext context, GlassStyle style) {
+  if (style.mode != GlassMode.auto) return style;
+  final mode = GlassTheme.of(context).mode;
+  if (mode == GlassMode.auto) return style;
+  return style.copyWith(mode: mode);
+}
+
+class _GlassAncestor extends InheritedWidget {
+  const _GlassAncestor({required this.style, required super.child});
+
+  final GlassStyle style;
+
+  @override
+  bool updateShouldNotify(_GlassAncestor oldWidget) => style != oldWidget.style;
+}
+
+class _LiquidGlassRender extends SingleChildRenderObjectWidget {
+  const _LiquidGlassRender({required this.radius, required this.style, super.child});
+
+  final double radius;
+  final GlassStyle style;
 
   @override
   RenderLiquidGlass createRenderObject(BuildContext context) => RenderLiquidGlass(
         radius: radius,
-        style: _style(context),
+        style: style,
         devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
         backdrop: GlassBackdrop.maybeOf(context),
-      );
+      )..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
 
   @override
   void updateRenderObject(BuildContext context, RenderLiquidGlass renderObject) {
     renderObject
       ..radius = radius
-      ..style = _style(context)
+      ..style = style
       ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1
-      ..backdrop = GlassBackdrop.maybeOf(context);
+      ..backdrop = GlassBackdrop.maybeOf(context)
+      ..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
   }
 }

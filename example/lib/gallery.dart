@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:glisse/glisse.dart';
 
+import 'sections/controls_section.dart';
+import 'sections/magnifier_section.dart';
+import 'sections/navigation_section.dart';
+import 'sections/overlays_section.dart';
 import 'wallpaper.dart';
 
 /// Every Glisse widget, over a wallpaper the glass bends.
@@ -295,6 +299,10 @@ class _GalleryPageState extends State<GalleryPage> {
             const GlassInput(placeholder: 'Password', icon: Icon(Icons.lock_outline), obscureText: true),
           ],
         ),
+        const _Section(title: 'Controls', children: [ControlsSection()]),
+        const _Section(title: 'Overlays', children: [OverlaysSection()]),
+        const _Section(title: 'Navigation', children: [NavigationSection()]),
+        const _Section(title: 'Magnifier', children: [MagnifierSection()]),
         _Section(
           title: 'Playground',
           children: [

@@ -46,6 +46,11 @@ class GlassBackdrop extends StatefulWidget {
   static GlassBackdropController? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_GlassBackdropScope>()?.controller;
 
+  /// Gives the glass in [child] a backdrop found elsewhere, as for an overlay
+  /// laid out outside the [GlassBackdrop] it floats over.
+  static Widget inherit({required GlassBackdropController? controller, required Widget child}) =>
+      _GlassBackdropScope(controller: controller, child: child);
+
   @override
   State<GlassBackdrop> createState() => _GlassBackdropState();
 }
