@@ -1,0 +1,33 @@
+name: glisse
+description: >-
+  Apple's Liquid Glass for Flutter, on every platform: refracting glass,
+  buttons, switches, sliders, segmented controls, tab bars, menus and more.
+  A port of the Glisse web library.
+version: 0.1.0
+homepage: https://github.com/devilAPI/glisse-flutter
+repository: https://github.com/devilAPI/glisse-flutter
+issue_tracker: https://github.com/devilAPI/glisse-flutter/issues
+topics:
+  - liquid-glass
+  - glassmorphism
+  - shader
+  - ui
+  - widget
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  vector_math: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  shaders:
+    - shaders/glass.frag
