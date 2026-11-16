@@ -1,0 +1,235 @@
+// Bugs found in review, kept fixed.
+import 'dart:ui' as ui;
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:glisse/glisse.dart';
+
+import 'helpers.dart';
+
+final GlobalKey shot = GlobalKey();
+
+Widget scrollingApp(Key key, ScrollController c) => MaterialApp(
+      home: RepaintBoundary(
+        key: shot,
+        child: Material(
+          child: GlassBackdrop(
+            key: key,
+            background: const Stripes(),
+            child: ListView(controller: c, children: [
+              const SizedBox(height: 100),
+              const Glass(height: 80, bend: 1, child: SizedBox(width: 200, height: 80)),
+              const SizedBox(height: 2000),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+Future<List<int>> grab(WidgetTester tester) async {
+  final boundary = shot.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  final bytes = await tester.runAsync(() async {
+    final image = await boundary.toImage();
+    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    image.dispose();
+    return data!.buffer.asUint8List().toList();
+  });
+  return bytes!;
+}
+
+void main() {
+  testWidgets('glass inside a backdrop\'s background settles instead of copying itself', (tester) async {
+    await setUpGlass(tester);
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: GlassBackdrop(
+          background: Stack(children: [
+            Positioned.fill(child: Stripes()),
+            Center(child: Glass(width: 100, height: 60)),
+          ]),
+          child: SizedBox.expand(),
+        ),
+      ),
+    ));
+    var frames = 0;
+    for (var i = 0; i < 200; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      if (!tester.binding.hasScheduledFrame) break;
+      frames++;
+    }
+    expect(frames, lessThan(20));
+  });
+
+  testWidgets('a popover survives its parent rebuilding while open', (tester) async {
+    await setUpGlass(tester);
+    var n = 0;
+    late StateSetter set;
+    await tester.pumpWidget(scene(StatefulBuilder(builder: (context, s) {
+      set = s;
+      return GlassPopover(
+        popoverBuilder: (_) => Text('Card $n'),
+        child: const Text('Anchor'),
+      );
+    })));
+    await tester.tap(find.text('Anchor'));
+    await settle(tester);
+    expect(find.text('Card 0'), findsOneWidget);
+    set(() => n = 1);
+    await tester.pump();
+    final error = tester.takeException();
+    expect(error, isNull);
+  });
+
+  testWidgets('a tooltip goes after a cancelled long press', (tester) async {
+    await setUpGlass(tester);
+    await tester.pumpWidget(scene(const GlassTooltip(message: 'Tip', child: Text('Hold me'))));
+    final g = await tester.startGesture(tester.getCenter(find.text('Hold me')));
+    await tester.pump(const Duration(milliseconds: 600));
+    await settle(tester);
+    expect(find.text('Tip'), findsOneWidget);
+    await g.cancel();
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Tip'), findsNothing);
+  });
+
+  testWidgets('glass that scrolls refracts as if laid out there', (tester) async {
+    await setUpGlass(tester, size: const Size(400, 600), ratio: 1);
+    final c1 = ScrollController();
+    await tester.pumpWidget(scrollingApp(const ValueKey(1), c1));
+    await settle(tester);
+    c1.jumpTo(60);
+    await settle(tester);
+    final scrolled = await grab(tester);
+
+    final c2 = ScrollController(initialScrollOffset: 60);
+    await tester.pumpWidget(scrollingApp(const ValueKey(2), c2));
+    await settle(tester);
+    final fresh = await grab(tester);
+    var diff = 0;
+    for (var i = 0; i < scrolled.length; i++) {
+      if ((scrolled[i] - fresh[i]).abs() > 8) diff++;
+    }
+    expect(diff, 0);
+  });
+
+  testWidgets('HitPadding round an empty child takes no hits and does not throw', (tester) async {
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: HitPadding(padding: EdgeInsets.all(10), child: SizedBox.shrink())),
+    ));
+    await tester.tapAt(tester.getCenter(find.byType(HitPadding)) + const Offset(3, 3));
+    final error = tester.takeException();
+    expect(error, isNull);
+  });
+
+  testWidgets('RTL segments: semantics match the drawn labels', (tester) async {
+    await setUpGlass(tester);
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: Center(
+            child: GlassSegmentedControl<int>(
+              segments: const [
+                GlassSegment(value: 0, label: 'First'),
+                GlassSegment(value: 1, label: 'Second'),
+                GlassSegment(value: 2, label: 'Third'),
+              ],
+              value: 0,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    ));
+    final bar = tester.getRect(find.byType(GlassSegmentedControl<int>));
+    final first = tester.getRect(find.bySemanticsLabel('First'));
+    // The painter and pointer code put index 0 at the left.
+    expect(first.left, lessThan(bar.left + 84));
+    handle.dispose();
+  });
+
+  testWidgets('the magnifier keeps every move, even two in one frame', (tester) async {
+    await setUpGlass(tester);
+    final moves = <Offset>[];
+    await tester.pumpWidget(scene(SizedBox(
+      width: 400,
+      height: 300,
+      child: GlassMagnifier(size: 60, position: null, onMoved: moves.add),
+    )));
+    final start = tester.getCenter(find.bySemanticsLabel('Magnifier'));
+    final g = await tester.startGesture(start, kind: PointerDeviceKind.touch);
+    await g.moveBy(const Offset(30, 0));
+    await tester.pump();
+    final at0 = moves.last;
+    // Two events, no frame between.
+    await g.moveBy(const Offset(10, 0));
+    await g.moveBy(const Offset(10, 0));
+    await tester.pump();
+    await g.up();
+    expect(moves.last.dx - at0.dx, 20);
+  });
+
+  testWidgets('a popover mounted with an open controller shows its card', (tester) async {
+    await setUpGlass(tester);
+    final c = GlassPopoverController()..show();
+    await tester.pumpWidget(scene(GlassPopover(
+      controller: c,
+      popoverBuilder: (_) => const Text('Card'),
+      child: const Text('Anchor'),
+    )));
+    await settle(tester);
+    expect(find.text('Card'), findsOneWidget);
+  });
+
+  testWidgets('a tab bar emptied mid-press does not throw', (tester) async {
+    await setUpGlass(tester);
+    var items = const [GlassSegment(value: 0, label: 'A'), GlassSegment(value: 1, label: 'B')];
+    late StateSetter set;
+    await tester.pumpWidget(scene(StatefulBuilder(builder: (context, s) {
+      set = s;
+      return GlassTabBar<int>(items: items, value: 0, onChanged: (_) {});
+    })));
+    final g = await tester.startGesture(tester.getCenter(find.byType(GlassTabBar<int>)));
+    await tester.pump();
+    set(() => items = const []);
+    await tester.pump();
+    await g.moveBy(const Offset(20, 0));
+    await g.up();
+    final error = tester.takeException();
+    expect(error, isNull);
+  });
+
+  testWidgets('RTL dock: hovering an icon labels that icon', (tester) async {
+    await setUpGlass(tester);
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: Center(
+            child: GlassDock(items: [
+              GlassDockItem(icon: const ColoredBox(color: Colors.red), label: 'Zero', onPressed: () {}),
+              GlassDockItem(icon: const ColoredBox(color: Colors.green), label: 'One', onPressed: () {}),
+              GlassDockItem(icon: const ColoredBox(color: Colors.blue), label: 'Two', onPressed: () {}),
+            ]),
+          ),
+        ),
+      ),
+    ));
+    final dock = tester.getRect(find.byType(GlassDock));
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset(dock.left + 8 + 24, dock.bottom - 20));
+    await mouse.moveTo(Offset(dock.left + 8 + 24, dock.bottom - 20));
+    await settle(tester);
+    final shown = ['Zero', 'One', 'Two'].where((l) => find.text(l).evaluate().isNotEmpty).toList();
+    final pressed = <String>[];
+    await mouse.removePointer();
+    // The dock is laid out left to right, as it magnifies.
+    expect(shown, ['Zero'], reason: pressed.join());
+  });
+}

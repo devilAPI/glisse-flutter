@@ -90,6 +90,15 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
     super.initState();
     _controller.addListener(_changed);
     _open.addListener(_settled);
+    // A controller that's already open shows its card once there's an overlay.
+    if (_controller.isOpen) _later(_changed);
+  }
+
+  // Overlay changes can't be made while the tree builds.
+  void _later(VoidCallback action) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) action();
+    });
   }
 
   @override
@@ -98,9 +107,10 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
     if (oldWidget.controller != widget.controller) {
       (oldWidget.controller ?? _own)?.removeListener(_changed);
       _controller.addListener(_changed);
-      _changed();
+      _later(_changed);
     }
-    _entry?.markNeedsBuild();
+    // The card shows this widget's builder: rebuild it, after this build.
+    if (_entry != null) _later(() => _entry?.markNeedsBuild());
   }
 
   @override
@@ -278,6 +288,14 @@ class _GlassTooltipState extends State<GlassTooltip> with SingleTickerProviderSt
   }
 
   @override
+  void didUpdateWidget(GlassTooltip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message != widget.message && _entry != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _entry?.markNeedsBuild());
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _shown.reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
@@ -364,6 +382,11 @@ class _GlassTooltipState extends State<GlassTooltip> with SingleTickerProviderSt
             behavior: HitTestBehavior.translucent,
             onLongPress: _show,
             onLongPressEnd: (_) {
+              _timer?.cancel();
+              _timer = Timer(widget.showDuration, _hide);
+            },
+            // A press the system takes back still lets the tip go.
+            onLongPressCancel: () {
               _timer?.cancel();
               _timer = Timer(widget.showDuration, _hide);
             },

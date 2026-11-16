@@ -222,8 +222,13 @@ class _GlassDockState extends State<GlassDock> with TickerProviderStateMixin {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: _pad),
-                  child:
-                      Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: icons),
+                  child: Row(
+                    // Laid out left to right, as the magnification is worked out.
+                    textDirection: TextDirection.ltr,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: icons,
+                  ),
                 ),
               ],
             );

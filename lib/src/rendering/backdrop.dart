@@ -78,7 +78,9 @@ class _GlassBackdropState extends State<GlassBackdrop> {
               controller: _controller,
               pixelRatio: ratio,
               enabled: widget.enabled,
-              child: widget.background,
+              // Glass in the background reads whatever is behind this
+              // backdrop, never its own copy, which it is part of.
+              child: _GlassBackdropScope(controller: GlassBackdrop.maybeOf(context), child: widget.background),
             ),
           ),
           widget.child,

@@ -109,6 +109,8 @@ class GlassMagnifier extends StatefulWidget {
 
 class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProviderStateMixin {
   Offset? _own;
+  // Where a drag has the lens now: moves can come faster than frames.
+  Offset? _dragging;
   late final GlassSpring _lift = GlassSpring(vsync: this, stiffness: 600, damping: 30);
 
   @override
@@ -142,14 +144,24 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
               child: Semantics(
                 label: 'Magnifier',
                 child: GestureDetector(
-                  onPanStart: (_) => _lift.set(1),
+                  onPanStart: (_) {
+                    _dragging = at;
+                    _lift.set(1);
+                  },
                   onPanUpdate: (details) {
-                    final next = clampTo(at + details.delta);
+                    final next = clampTo((_dragging ?? at) + details.delta);
+                    _dragging = next;
                     if (widget.position == null) setState(() => _own = next);
                     widget.onMoved?.call(next);
                   },
-                  onPanEnd: (_) => _lift.set(0),
-                  onPanCancel: () => _lift.set(0),
+                  onPanEnd: (_) {
+                    _dragging = null;
+                    _lift.set(0);
+                  },
+                  onPanCancel: () {
+                    _dragging = null;
+                    _lift.set(0);
+                  },
                   child: AnimatedBuilder(
                     animation: _lift,
                     builder: (context, child) => Transform.scale(scale: 1 + 0.06 * _lift.value, child: child),

@@ -160,8 +160,19 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
   @override
   void didUpdateWidget(SegmentsView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_sameItems(oldWidget.items, widget.items)) _painters.clear();
-    if (oldWidget.value != widget.value || !_sameItems(oldWidget.items, widget.items)) _settle();
+    final sameItems = _sameItems(oldWidget.items, widget.items);
+    if (!sameItems) {
+      for (final painter in _painters.values) {
+        painter.dispose();
+      }
+      _painters.clear();
+      // A press on items that are gone can't choose among them.
+      if (_gesture != null) {
+        _gesture = null;
+        _lift.set(0);
+      }
+    }
+    if (oldWidget.value != widget.value || !sameItems) _settle();
   }
 
   bool _sameItems(List<GlassSegment<T>> a, List<GlassSegment<T>> b) {
@@ -204,7 +215,7 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
 
   double _position(double dx) {
     final gesture = _gesture!;
-    return (gesture.anchor + dx).clamp(0.0, _slot * (widget.items.length - 1)).toDouble();
+    return (gesture.anchor + dx).clamp(0.0, _slot * math.max(0, widget.items.length - 1)).toDouble();
   }
 
   void _setGlow(Offset local) {
@@ -238,7 +249,12 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
   void _up(PointerUpEvent event) {
     final gesture = _gesture;
     if (gesture == null || event.pointer != gesture.pointer) return;
-    final index = (_position(gesture.moved ? gesture.dx : 0) / _slot).round();
+    if (widget.items.isEmpty) {
+      _gesture = null;
+      _settle();
+      return;
+    }
+    final index = (_position(gesture.moved ? gesture.dx : 0) / _slot).round().clamp(0, widget.items.length - 1);
     _gesture = null;
     // A drag selects wherever it leaves the lens; a tap only counts if it
     // ends on the bar, as with a button.
@@ -402,7 +418,16 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
               ),
             ),
           ),
-          Positioned(left: m.inset, top: m.inset, child: Row(mainAxisSize: MainAxisSize.min, children: tabs)),
+          Positioned(
+            left: m.inset,
+            top: m.inset,
+            child: Row(
+              // Laid out left to right, as the selection is painted and dragged.
+              textDirection: TextDirection.ltr,
+              mainAxisSize: MainAxisSize.min,
+              children: tabs,
+            ),
+          ),
         ],
       ),
     );

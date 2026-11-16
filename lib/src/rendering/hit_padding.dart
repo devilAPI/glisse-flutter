@@ -28,12 +28,13 @@ class RenderHitPadding extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (size.isEmpty) return false;
     final area = padding.inflateRect(Offset.zero & size);
     if (!area.contains(position)) return false;
     // The child takes it at the nearest point of its own box.
     final inside = Offset(
-      position.dx.clamp(0.0, size.width - 0.001).toDouble(),
-      position.dy.clamp(0.0, size.height - 0.001).toDouble(),
+      position.dx.clamp(0.0, (size.width - 0.001).clamp(0.0, double.infinity)).toDouble(),
+      position.dy.clamp(0.0, (size.height - 0.001).clamp(0.0, double.infinity)).toDouble(),
     );
     if (child != null && child!.hitTest(result, position: inside)) {
       result.add(BoxHitTestEntry(this, position));

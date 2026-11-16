@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/theme.dart';
@@ -208,6 +209,51 @@ class RenderLiquidGlass extends RenderProxyBox {
 
   void _onShaderReady() => markNeedsPaint();
 
+  // Where the glass was, against what it reads, when it last painted. Glass
+  // can move without painting again, as in a scrolling list or a route
+  // transition, where only a layer above it moves; after each frame it
+  // checks, and paints again if it has moved.
+  Matrix4? _paintedTransform;
+  bool _watching = false;
+
+  Matrix4? _currentTransform() {
+    switch (_lastMode) {
+      case GlassMode.captured:
+        final box = _backdrop?.renderBox;
+        if (box == null || !box.attached) return null;
+        return getTransformTo(box);
+      case GlassMode.backdropFilter:
+        return getTransformTo(null);
+      case GlassMode.frost:
+      case GlassMode.auto:
+      case null:
+        return null;
+    }
+  }
+
+  void _watch() {
+    if (_watching) return;
+    _watching = true;
+    SchedulerBinding.instance.addPostFrameCallback(_check);
+  }
+
+  void _check(Duration _) {
+    _watching = false;
+    final painted = _paintedTransform;
+    if (!attached || painted == null) return;
+    final now = _currentTransform();
+    if (now == null) return;
+    var moved = false;
+    for (var i = 0; i < 16; i++) {
+      if ((now.storage[i] - painted.storage[i]).abs() > 1e-3) {
+        moved = true;
+        break;
+      }
+    }
+    if (moved) markNeedsPaint();
+    _watch();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -218,6 +264,7 @@ class RenderLiquidGlass extends RenderProxyBox {
 
   @override
   void detach() {
+    _paintedTransform = null;
     GlassShaders.ready.removeListener(_onShaderReady);
     _unlisten();
     super.detach();
@@ -325,6 +372,7 @@ class RenderLiquidGlass extends RenderProxyBox {
 
     final mode = _resolve();
     _lastMode = mode;
+    _paintedTransform = null;
     switch (mode) {
       case GlassMode.captured:
         _clipLayer.layer = null;
@@ -349,6 +397,8 @@ class RenderLiquidGlass extends RenderProxyBox {
     final shader = _shader ??= GlassShaders.create();
     if (shader == null) return;
     final transform = getTransformTo(box);
+    _paintedTransform = transform;
+    _watch();
     final uv = uvFor(imageRect: Offset.zero & box.size, transform: transform, localOffset: offset);
     _draw(rect: offset & size, texture: LensTexture.image, uv: uv).apply(shader, image: image);
     canvas.drawRect(offset & size, Paint()..shader = shader);
@@ -362,6 +412,8 @@ class RenderLiquidGlass extends RenderProxyBox {
     }
     // Local px to the backdrop texture's px: the view's, scaled to device px.
     final toGlobal = getTransformTo(null);
+    _paintedTransform = toGlobal;
+    _watch();
     final forward = Matrix4.diagonal3Values(_devicePixelRatio, _devicePixelRatio, 1)..multiply(toGlobal);
     final s = forward.storage;
     final a = s[0], b = s[4], c = s[12], d = s[1], e = s[5], f = s[13];
