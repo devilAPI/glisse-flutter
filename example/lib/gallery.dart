@@ -5,23 +5,34 @@ import 'wallpaper.dart';
 
 /// Every Glisse widget, over a wallpaper the glass bends.
 class GalleryPage extends StatefulWidget {
-  const GalleryPage({super.key, required this.dark, required this.onToggleTheme});
+  const GalleryPage({super.key, required this.dark, required this.onToggleTheme, this.animateWallpaper = true});
 
   final bool dark;
   final VoidCallback onToggleTheme;
+  final bool animateWallpaper;
 
   @override
   State<GalleryPage> createState() => _GalleryPageState();
 }
 
 class _GalleryPageState extends State<GalleryPage> {
+  final ScrollController _scroll = ScrollController(
+    initialScrollOffset: double.tryParse(const String.fromEnvironment('SCROLL')) ?? 0,
+  );
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   // Playground tuning, as on glisse.kelvinzhang.ca.
   double _bend = 2;
   double _dispersion = 0.6;
   double _blur = 3;
   double _rim = 0.3;
   GlassMode _mode = GlassMode.auto;
-  bool _animate = true;
+  late bool _animate = widget.animateWallpaper;
 
   bool _wifi = true;
   bool _bluetooth = false;
@@ -56,6 +67,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: SafeArea(
                   bottom: false,
                   child: ListView(
+                    controller: _scroll,
                     padding: const EdgeInsets.fromLTRB(16, 72, 16, 140),
                     children: [
                       Center(

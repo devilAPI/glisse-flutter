@@ -7,7 +7,11 @@ import 'package:glisse/glisse.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GlassShaders.precache();
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(0.6)), child: child!), home: const Probe()));
+  runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) =>
+          MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(0.6)), child: child!),
+      home: const Probe()));
 }
 
 class Probe extends StatelessWidget {
@@ -18,7 +22,9 @@ class Probe extends StatelessWidget {
     Widget tile(String label, Widget glass) => Padding(
           padding: const EdgeInsets.all(8),
           child: Row(children: [
-            SizedBox(width: 60, child: Text(label, style: const TextStyle(color: Colors.black, backgroundColor: Colors.white))),
+            SizedBox(
+                width: 60,
+                child: Text(label, style: const TextStyle(color: Colors.black, backgroundColor: Colors.white))),
             Container(decoration: BoxDecoration(border: Border.all(color: Colors.green, width: 1)), child: glass),
           ]),
         );
@@ -27,10 +33,13 @@ class Probe extends StatelessWidget {
       child: SafeArea(
         child: Wrap(children: [
           tile('box', const SizedBox(width: 120, height: 60, child: ColoredBox(color: Color(0x80FFFFFF)))),
-          tile('blur', ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 4, sigmaY: 4), child: const SizedBox(width: 120, height: 60)),
-          )),
+          tile(
+              'blur',
+              ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 4, sigmaY: 4), child: const SizedBox(width: 120, height: 60)),
+              )),
           tile('shader', const SizedBox(width: 120, height: 60, child: CustomPaint(painter: _ShaderTile()))),
           tile('frost', const Glass(width: 120, height: 60, borderRadius: 30, mode: GlassMode.frost)),
           tile('captured', const Glass(width: 120, height: 60, borderRadius: 30, mode: GlassMode.captured)),

@@ -86,9 +86,11 @@ void paintThumbChrome(
   final rrect = roundedRect(rect, double.infinity);
   paintDropShadow(canvas, rrect, color: const Color.fromRGBO(0, 0, 0, 0.2), offset: const Offset(0, 6), blur: 24);
   paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(255, 255, 255, 0.5), spread: 1.5);
-  paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(255, 255, 255, 0.45), offset: const Offset(0, 2), blur: 1);
+  paintInsetShadow(canvas, rrect,
+      color: const Color.fromRGBO(255, 255, 255, 0.45), offset: const Offset(0, 2), blur: 1);
   paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(0, 0, 0, 0.09), offset: const Offset(2, 7), blur: 24);
-  paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(255, 255, 255, 0.16), offset: const Offset(-2, -7), blur: 24);
+  paintInsetShadow(canvas, rrect,
+      color: const Color.fromRGBO(255, 255, 255, 0.16), offset: const Offset(-2, -7), blur: 24);
   final face = 1 - 0.85 * (1 - settled);
   canvas.drawRRect(rrect, Paint()..color = Color.fromRGBO(255, 255, 255, face.clamp(0.0, 1.0)));
   canvas.restore();

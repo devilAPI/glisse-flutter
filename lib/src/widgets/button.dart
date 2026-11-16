@@ -100,9 +100,7 @@ class _GlassButtonState extends State<GlassButton> {
     final radius = height / 2;
     final ink = _ink(theme);
     final padding = widget.padding ??
-        (iconOnly
-            ? EdgeInsets.zero
-            : EdgeInsets.only(left: widget.icon != null ? 12 : 16, right: 16));
+        (iconOnly ? EdgeInsets.zero : EdgeInsets.only(left: widget.icon != null ? 12 : 16, right: 16));
 
     Widget content = Row(
       mainAxisSize: MainAxisSize.min,

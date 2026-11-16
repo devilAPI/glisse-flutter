@@ -13,7 +13,8 @@ Widget menuScene({
   return scene(
     dark: dark,
     Padding(
-      padding: EdgeInsets.only(bottom: 160, left: align == GlassMenuAlign.end ? 140 : 0, right: align == GlassMenuAlign.end ? 0 : 140),
+      padding: EdgeInsets.only(
+          bottom: 160, left: align == GlassMenuAlign.end ? 140 : 0, right: align == GlassMenuAlign.end ? 0 : 140),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

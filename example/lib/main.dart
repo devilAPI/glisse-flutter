@@ -17,8 +17,16 @@ class GlisseGallery extends StatefulWidget {
   State<GlisseGallery> createState() => _GlisseGalleryState();
 }
 
+// --dart-define=THEME=light|dark starts in that theme, and SCROLL=<px>
+// scrolled down, as for screenshots.
+const _theme = String.fromEnvironment('THEME');
+
 class _GlisseGalleryState extends State<GlisseGallery> {
-  ThemeMode _mode = ThemeMode.system;
+  ThemeMode _mode = switch (_theme) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 
   @override
   Widget build(BuildContext context) {

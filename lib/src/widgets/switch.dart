@@ -49,7 +49,8 @@ class GlassSwitch extends StatefulWidget {
 }
 
 class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin {
-  late final GlassSpring _position = GlassSpring(vsync: this, value: widget.value ? 1 : 0, stiffness: 1000, damping: 80);
+  late final GlassSpring _position =
+      GlassSpring(vsync: this, value: widget.value ? 1 : 0, stiffness: 1000, damping: 80);
   late final GlassSpring _color = GlassSpring(vsync: this, value: widget.value ? 1 : 0, stiffness: 1000, damping: 80);
   late final GlassSpring _lift = GlassSpring(vsync: this, stiffness: 2000, damping: 80);
   late final Listenable _repaint = Listenable.merge([_position, _color, _lift, GlassShaders.ready]);
@@ -184,7 +185,8 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
       ),
     );
     // A touch target 44px tall, as Glisse's ::before gives it.
-    result = HitPadding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: (44 - _height) / 2), child: result);
+    result =
+        HitPadding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: (44 - _height) / 2), child: result);
     result = FocusableActionDetector(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
@@ -228,7 +230,6 @@ class _SwitchPainter extends CustomPainter {
   final Color activeColor;
   final double devicePixelRatio;
   final bool focused;
-
 
   void _paintTrack(Canvas canvas, RRect rrect, double fill) {
     canvas.drawRRect(rrect, Paint()..color = theme.track);

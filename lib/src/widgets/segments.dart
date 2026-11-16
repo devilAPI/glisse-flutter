@@ -65,12 +65,12 @@ class _Metrics {
   final double fontSize;
   final double iconSize;
 
-  static const _Metrics tabBar = _Metrics(
-      tabWidth: 84, tabHeight: 32, inset: 4, thumbInset: 0, growX: 27, growY: 20, fontSize: 14, iconSize: 0);
-  static const _Metrics tabBarIcons = _Metrics(
-      tabWidth: 72, tabHeight: 52, inset: 4, thumbInset: 0, growX: 24, growY: 16, fontSize: 10, iconSize: 26);
-  static const _Metrics segmented = _Metrics(
-      tabWidth: 84, tabHeight: 32, inset: 0, thumbInset: 2, growX: 24, growY: 16, fontSize: 13, iconSize: 0);
+  static const _Metrics tabBar =
+      _Metrics(tabWidth: 84, tabHeight: 32, inset: 4, thumbInset: 0, growX: 27, growY: 20, fontSize: 14, iconSize: 0);
+  static const _Metrics tabBarIcons =
+      _Metrics(tabWidth: 72, tabHeight: 52, inset: 4, thumbInset: 0, growX: 24, growY: 16, fontSize: 10, iconSize: 26);
+  static const _Metrics segmented =
+      _Metrics(tabWidth: 84, tabHeight: 32, inset: 0, thumbInset: 2, growX: 24, growY: 16, fontSize: 13, iconSize: 0);
 }
 
 class _MoveIntent extends Intent {
@@ -529,7 +529,11 @@ class _SegmentsPainter<T> extends CustomPainter {
       ).createShader(Rect.fromCircle(center: center, radius: 260));
       canvas.save();
       canvas.clipRRect(barRRect);
-      canvas.drawRect(barRect, Paint()..shader = glow..color = Color.fromRGBO(0, 0, 0, lifted));
+      canvas.drawRect(
+          barRect,
+          Paint()
+            ..shader = glow
+            ..color = Color.fromRGBO(0, 0, 0, lifted));
       canvas.restore();
     }
 
@@ -567,8 +571,8 @@ class _SegmentsPainter<T> extends CustomPainter {
     }
 
     if (lensing) {
-      final room = Rect.fromLTRB(-m.growX / 2 - 4, -m.growY / 2 - 4, size.width + m.growX / 2 + 4,
-          size.height + m.growY / 2 + 4);
+      final room = Rect.fromLTRB(
+          -m.growX / 2 - 4, -m.growY / 2 - 4, size.width + m.growX / 2 + 4, size.height + m.growY / 2 + 4);
       canvas.saveLayer(room, Paint());
       paintLabels(canvas, realColor, active);
       cutOut(canvas, lensRRect);

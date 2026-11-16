@@ -897,5 +897,8 @@ class _GlyphFlow extends FlowDelegate {
 
   @override
   bool shouldRepaint(_GlyphFlow oldDelegate) =>
-      oldDelegate.t != t || oldDelegate.from != from || oldDelegate.trailing != trailing || oldDelegate.origin != origin;
+      oldDelegate.t != t ||
+      oldDelegate.from != from ||
+      oldDelegate.trailing != trailing ||
+      oldDelegate.origin != origin;
 }

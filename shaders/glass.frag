@@ -102,9 +102,10 @@ vec4 tex(vec2 p) {
     return vec4(0.0);
   }
 #ifdef IMPELLER_TARGET_OPENGLES
-  if (uFrost.w > 1.5) {
-    uv.y = 1.0 - uv.y;
-  }
+  // On OpenGL, Impeller's render targets are upside down: the backdrop it
+  // binds, and every image glass samples, as all of them are drawn into
+  // (a copied backdrop, or a widget's recorded content).
+  uv.y = 1.0 - uv.y;
 #endif
   return texture(uTexture, uv);
 }

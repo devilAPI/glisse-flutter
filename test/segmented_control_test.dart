@@ -142,7 +142,8 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
       await settle(tester);
-      await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/segmented_${dark ? 'dark' : 'light'}.png'));
+      await expectLater(
+          find.byType(MaterialApp), matchesGoldenFile('goldens/segmented_${dark ? 'dark' : 'light'}.png'));
       await gesture.up();
       await settle(tester);
     });

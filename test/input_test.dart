@@ -8,7 +8,8 @@ void main() {
   testWidgets('typing reports changes', (tester) async {
     await setUpGlass(tester);
     String? last;
-    await tester.pumpWidget(scene(SizedBox(width: 300, child: GlassInput(placeholder: 'Name', onChanged: (v) => last = v))));
+    await tester
+        .pumpWidget(scene(SizedBox(width: 300, child: GlassInput(placeholder: 'Name', onChanged: (v) => last = v))));
     await tester.enterText(find.byType(EditableText), 'Ada');
     await settle(tester);
     expect(last, 'Ada');
