@@ -122,9 +122,12 @@ class _GlassButtonGroupItemState extends State<GlassButtonGroupItem> {
         ),
       ),
     );
-    final highlight = _pressed
-        ? theme.highlight
-        : (_hovered && _enabled ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6) : const Color(0x00000000));
+    final highlight =
+        _pressed
+            ? theme.highlight
+            : (_hovered && _enabled
+                ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6)
+                : const Color(0x00000000));
     Widget item = AnimatedContainer(
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
       constraints: BoxConstraints(minWidth: height + 4, minHeight: height),

@@ -35,11 +35,11 @@ class GlassSegmentedControl<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SegmentsView<T>(
-        kind: SegmentsKind.segmented,
-        items: segments,
-        value: value,
-        onChanged: onChanged,
-        semanticLabel: semanticLabel,
-        mode: mode,
-      );
+    kind: SegmentsKind.segmented,
+    items: segments,
+    value: value,
+    onChanged: onChanged,
+    semanticLabel: semanticLabel,
+    mode: mode,
+  );
 }

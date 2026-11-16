@@ -81,10 +81,9 @@ void main() {
       var calls = 0;
       final focus = FocusNode();
       addTearDown(focus.dispose);
-      await tester.pumpWidget(scene(SizedBox(
-        width: 300,
-        child: GlassSlideToConfirm(focusNode: focus, onConfirmed: () => calls++),
-      )));
+      await tester.pumpWidget(
+        scene(SizedBox(width: 300, child: GlassSlideToConfirm(focusNode: focus, onConfirmed: () => calls++))),
+      );
       final node = tester.getSemantics(find.byType(GlassSlideToConfirm));
       expect(node.label, 'Slide to confirm');
       expect(node.flagsCollection.isButton, isTrue);
@@ -97,10 +96,9 @@ void main() {
       await settle(tester);
       expect(calls, 1);
 
-      await tester.pumpWidget(scene(SizedBox(
-        width: 300,
-        child: GlassSlideToConfirm(key: const Key('second'), onConfirmed: () => calls++),
-      )));
+      await tester.pumpWidget(
+        scene(SizedBox(width: 300, child: GlassSlideToConfirm(key: const Key('second'), onConfirmed: () => calls++))),
+      );
       tester.semantics.tap(find.semantics.byLabel('Slide to confirm'));
       await settle(tester);
       expect(calls, 2);
@@ -163,10 +161,14 @@ void main() {
       await setUpGlass(tester);
       await pumpSlide(tester, onConfirmed: () {});
       expect(find.byType(ShaderMask), findsOneWidget);
-      await tester.pumpWidget(scene(MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
-        child: SizedBox(width: 300, child: GlassSlideToConfirm(onConfirmed: () {})),
-      )));
+      await tester.pumpWidget(
+        scene(
+          MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: SizedBox(width: 300, child: GlassSlideToConfirm(onConfirmed: () {})),
+          ),
+        ),
+      );
       expect(find.byType(ShaderMask), findsNothing);
       // And with reduced motion, a confirm lands at once.
       await tester.dragFrom(knobStart(tester), const Offset(240, 0));
@@ -180,11 +182,18 @@ void main() {
     testWidgets('shows initials, a status dot and labels itself', (tester) async {
       await setUpGlass(tester);
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(scene(const Row(mainAxisSize: MainAxisSize.min, children: [
-        GlassAvatar(key: Key('a'), initials: 'ada lovelace', status: GlassAvatarStatus.online),
-        GlassAvatar(key: Key('b'), initials: 'bob'),
-        GlassAvatar(key: Key('c'), semanticLabel: 'Guest'),
-      ])));
+      await tester.pumpWidget(
+        scene(
+          const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlassAvatar(key: Key('a'), initials: 'ada lovelace', status: GlassAvatarStatus.online),
+              GlassAvatar(key: Key('b'), initials: 'bob'),
+              GlassAvatar(key: Key('c'), semanticLabel: 'Guest'),
+            ],
+          ),
+        ),
+      );
       expect(find.text('AL'), findsOneWidget);
       expect(find.text('BO'), findsOneWidget);
       final a = tester.getSemantics(find.byKey(const Key('a')));
@@ -210,11 +219,18 @@ void main() {
 
     testWidgets('away and busy dots, and an image', (tester) async {
       await setUpGlass(tester);
-      await tester.pumpWidget(scene(Row(mainAxisSize: MainAxisSize.min, children: [
-        const GlassAvatar(key: Key('away'), initials: 'A', status: GlassAvatarStatus.away, size: 56),
-        const GlassAvatar(key: Key('busy'), initials: 'B', status: GlassAvatarStatus.busy),
-        GlassAvatar(key: const Key('img'), initials: 'IM', image: MemoryImage(Uint8List(0))),
-      ])));
+      await tester.pumpWidget(
+        scene(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const GlassAvatar(key: Key('away'), initials: 'A', status: GlassAvatarStatus.away, size: 56),
+              const GlassAvatar(key: Key('busy'), initials: 'B', status: GlassAvatarStatus.busy),
+              GlassAvatar(key: const Key('img'), initials: 'IM', image: MemoryImage(Uint8List(0))),
+            ],
+          ),
+        ),
+      );
       Color? dot(String key) {
         final box = tester.widgetList<DecoratedBox>(
           find.descendant(of: find.byKey(Key(key)), matching: find.byType(DecoratedBox)),
@@ -235,7 +251,7 @@ void main() {
       await setUpGlass(tester);
       final handle = tester.ensureSemantics();
       final people = [
-        for (final n in ['AB', 'CD', 'EF', 'GH', 'IJ', 'KL']) GlassAvatar(initials: n)
+        for (final n in ['AB', 'CD', 'EF', 'GH', 'IJ', 'KL']) GlassAvatar(initials: n),
       ];
       await tester.pumpWidget(scene(GlassAvatarGroup(max: 3, children: people)));
       expect(find.text('AB'), findsOneWidget);
@@ -279,19 +295,22 @@ void main() {
       await setUpGlass(tester);
       final handle = tester.ensureSemantics();
       Color? value = colors[0];
-      await tester.pumpWidget(scene(StatefulBuilder(
-        builder: (context, setState) => swatches(value, (c) => setState(() => value = c)),
-      )));
+      await tester.pumpWidget(
+        scene(StatefulBuilder(builder: (context, setState) => swatches(value, (c) => setState(() => value = c)))),
+      );
       await tester.tap(find.bySemanticsLabel('Green'));
       await settle(tester);
       expect(value, colors[1]);
       expect(find.semantics.byLabel('Green').evaluate().single.flagsCollection.isChecked, isTrue);
       expect(find.semantics.byLabel('Red').evaluate().single.flagsCollection.isChecked, isFalse);
       expect(find.semantics.byLabel('Colour'), findsOne);
-      final scales = tester
-          .widgetList<Transform>(find.descendant(of: find.byType(GlassColorSwatches), matching: find.byType(Transform)))
-          .map((t) => t.transform.getMaxScaleOnAxis())
-          .toList();
+      final scales =
+          tester
+              .widgetList<Transform>(
+                find.descendant(of: find.byType(GlassColorSwatches), matching: find.byType(Transform)),
+              )
+              .map((t) => t.transform.getMaxScaleOnAxis())
+              .toList();
       expect(scales[1], closeTo(1.08, 0.001));
       expect(scales[0], closeTo(1, 0.001));
       handle.dispose();
@@ -371,17 +390,22 @@ void main() {
       bool enabled = true,
     }) async {
       var current = value;
-      await tester.pumpWidget(scene(StatefulBuilder(
-        builder: (context, setState) => GlassKnob(
-          value: current,
-          min: min,
-          max: max,
-          divisions: divisions,
-          focusNode: focus,
-          semanticLabel: 'Volume',
-          onChanged: enabled ? (v) => setState(() => current = v) : null,
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder:
+                (context, setState) => GlassKnob(
+                  value: current,
+                  min: min,
+                  max: max,
+                  divisions: divisions,
+                  focusNode: focus,
+                  semanticLabel: 'Volume',
+                  onChanged: enabled ? (v) => setState(() => current = v) : null,
+                ),
+          ),
         ),
-      )));
+      );
       return () => current;
     }
 
@@ -488,13 +512,17 @@ void main() {
       await tester.pump();
       expect(value(), closeTo(0.55, 1e-9));
 
-      await tester.pumpWidget(scene(GlassKnob(
-        value: 3,
-        max: 10,
-        semanticLabel: 'Gain',
-        semanticFormatter: (v) => '${v.round()} dB',
-        onChanged: (_) {},
-      )));
+      await tester.pumpWidget(
+        scene(
+          GlassKnob(
+            value: 3,
+            max: 10,
+            semanticLabel: 'Gain',
+            semanticFormatter: (v) => '${v.round()} dB',
+            onChanged: (_) {},
+          ),
+        ),
+      );
       expect(tester.getSemantics(find.byType(GlassKnob)).value, '3 dB');
       await settle(tester);
       handle.dispose();
@@ -524,16 +552,24 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       var value = 0.0;
-      await tester.pumpWidget(scene(SizedBox(
-        height: 200,
-        child: StatefulBuilder(
-          builder: (context, setState) => ListView(controller: controller, children: [
-            const SizedBox(height: 40),
-            Center(child: GlassKnob(value: value, onChanged: (v) => setState(() => value = v))),
-            const SizedBox(height: 600),
-          ]),
+      await tester.pumpWidget(
+        scene(
+          SizedBox(
+            height: 200,
+            child: StatefulBuilder(
+              builder:
+                  (context, setState) => ListView(
+                    controller: controller,
+                    children: [
+                      const SizedBox(height: 40),
+                      Center(child: GlassKnob(value: value, onChanged: (v) => setState(() => value = v))),
+                      const SizedBox(height: 600),
+                    ],
+                  ),
+            ),
+          ),
         ),
-      )));
+      );
       final center = tester.getCenter(find.byType(GlassKnob));
       await tester.dragFrom(center, const Offset(0, -60));
       await tester.sendEventToBinding(PointerScrollEvent(position: center, scrollDelta: const Offset(0, -20)));
@@ -546,16 +582,24 @@ void main() {
   testWidgets('every extra control is labelled', (tester) async {
     await setUpGlass(tester, size: const Size(800, 900), ratio: 1);
     final handle = tester.ensureSemantics();
-    await tester.pumpWidget(scene(SingleChildScrollView(
-      child: Wrap(spacing: 12, runSpacing: 12, children: [
-        SizedBox(width: 300, child: GlassSlideToConfirm(onConfirmed: () {})),
-        const GlassAvatar(initials: 'AB', status: GlassAvatarStatus.online),
-        const GlassAvatarGroup(max: 1, children: [GlassAvatar(initials: 'A'), GlassAvatar(initials: 'B')]),
-        GlassColorSwatches(colors: const [Color(0xFFFF0000), Color(0xFF00FF00)], value: null, onChanged: (_) {}),
-        GlassKnob(value: 0.5, semanticLabel: 'Pan', onChanged: (_) {}),
-        GlassCalendar(selectedDate: null, currentDate: DateTime(2027, 3, 10), onDateSelected: (_) {}),
-      ]),
-    )));
+    await tester.pumpWidget(
+      scene(
+        SingleChildScrollView(
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              SizedBox(width: 300, child: GlassSlideToConfirm(onConfirmed: () {})),
+              const GlassAvatar(initials: 'AB', status: GlassAvatarStatus.online),
+              const GlassAvatarGroup(max: 1, children: [GlassAvatar(initials: 'A'), GlassAvatar(initials: 'B')]),
+              GlassColorSwatches(colors: const [Color(0xFFFF0000), Color(0xFF00FF00)], value: null, onChanged: (_) {}),
+              GlassKnob(value: 0.5, semanticLabel: 'Pan', onChanged: (_) {}),
+              GlassCalendar(selectedDate: null, currentDate: DateTime(2027, 3, 10), onDateSelected: (_) {}),
+            ],
+          ),
+        ),
+      ),
+    );
     await settle(tester);
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     handle.dispose();
@@ -569,10 +613,16 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 460));
       DateTime? selected = DateTime(2027, 3, 3);
       late StateSetter update;
-      await tester.pumpWidget(scene(StatefulBuilder(builder: (context, setState) {
-        update = setState;
-        return GlassCalendar(selectedDate: selected, currentDate: today, onDateSelected: (_) {});
-      })));
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return GlassCalendar(selectedDate: selected, currentDate: today, onDateSelected: (_) {});
+            },
+          ),
+        ),
+      );
       expect(find.text('March 2027'), findsOneWidget);
       update(() => selected = DateTime(2028, 7, 4, 13, 30));
       await settle(tester);
@@ -596,19 +646,21 @@ void main() {
       final picked = <DateTime>[];
       var current = selected;
       Widget child = StatefulBuilder(
-        builder: (context, setState) => GlassCalendar(
-          selectedDate: current,
-          initialMonth: month,
-          currentDate: today,
-          firstDate: first,
-          lastDate: last,
-          firstDayOfWeek: firstDayOfWeek,
-          focusNode: focus,
-          onDateSelected: (d) => setState(() {
-            current = d;
-            picked.add(d);
-          }),
-        ),
+        builder:
+            (context, setState) => GlassCalendar(
+              selectedDate: current,
+              initialMonth: month,
+              currentDate: today,
+              firstDate: first,
+              lastDate: last,
+              firstDayOfWeek: firstDayOfWeek,
+              focusNode: focus,
+              onDateSelected:
+                  (d) => setState(() {
+                    current = d;
+                    picked.add(d);
+                  }),
+            ),
       );
       if (rtl) child = _rtl(child);
       await tester.pumpWidget(scene(child));
@@ -775,77 +827,98 @@ void main() {
     final name = dark ? 'dark' : 'light';
     testWidgets('extras look right $name', (tester) async {
       await setUpGlass(tester, size: const Size(420, 330));
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            SizedBox(width: 340, child: GlassSlideToConfirm(onConfirmed: () {}, shimmer: false)),
-            const SizedBox(height: 12),
-            const SizedBox(
-                width: 340, child: GlassSlideToConfirm(onConfirmed: null, label: 'Disabled', shimmer: false)),
-            const SizedBox(height: 18),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              const GlassAvatar(initials: 'Ada Lovelace', status: GlassAvatarStatus.online, size: 48),
-              const GlassAvatar(status: GlassAvatarStatus.busy, size: 48),
-              GlassAvatarGroup(max: 3, size: 36, children: [
-                for (final n in ['AB', 'CD', 'EF', 'GH', 'IJ']) GlassAvatar(initials: n, size: 36),
-              ]),
-              GlassKnob(value: 0.62, onChanged: (_) {}),
-              const GlassKnob(value: 0.3, onChanged: null, size: 48),
-            ]),
-            const SizedBox(height: 18),
-            GlassColorSwatches(
-              colors: const [
-                Color(0xFFFF3B30), Color(0xFFFF9500), Color(0xFFFFCC00), Color(0xFF34C759), //
-                Color(0xFF007AFF), Color(0xFFAF52DE), Color(0xFFFFFFFF), Color(0xFF1C1C1E),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 340, child: GlassSlideToConfirm(onConfirmed: () {}, shimmer: false)),
+                const SizedBox(height: 12),
+                const SizedBox(
+                  width: 340,
+                  child: GlassSlideToConfirm(onConfirmed: null, label: 'Disabled', shimmer: false),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const GlassAvatar(initials: 'Ada Lovelace', status: GlassAvatarStatus.online, size: 48),
+                    const GlassAvatar(status: GlassAvatarStatus.busy, size: 48),
+                    GlassAvatarGroup(
+                      max: 3,
+                      size: 36,
+                      children: [
+                        for (final n in ['AB', 'CD', 'EF', 'GH', 'IJ']) GlassAvatar(initials: n, size: 36),
+                      ],
+                    ),
+                    GlassKnob(value: 0.62, onChanged: (_) {}),
+                    const GlassKnob(value: 0.3, onChanged: null, size: 48),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                GlassColorSwatches(
+                  colors: const [
+                    Color(0xFFFF3B30), Color(0xFFFF9500), Color(0xFFFFCC00), Color(0xFF34C759), //
+                    Color(0xFF007AFF), Color(0xFFAF52DE), Color(0xFFFFFFFF), Color(0xFF1C1C1E),
+                  ],
+                  value: const Color(0xFF007AFF),
+                  onChanged: (_) {},
+                ),
               ],
-              value: const Color(0xFF007AFF),
-              onChanged: (_) {},
             ),
-          ]),
+          ),
         ),
-      ));
+      );
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/extras_$name.png'));
     });
 
     testWidgets('calendar looks right $name', (tester) async {
       await setUpGlass(tester, size: const Size(380, 440));
-      await tester.pumpWidget(scene(
-        dark: dark,
-        GlassCalendar(
-          currentDate: DateTime(2027, 3, 10),
-          selectedDate: DateTime(2027, 3, 18),
-          firstDate: DateTime(2027, 3, 4),
-          onDateSelected: (_) {},
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          GlassCalendar(
+            currentDate: DateTime(2027, 3, 10),
+            selectedDate: DateTime(2027, 3, 18),
+            firstDate: DateTime(2027, 3, 4),
+            onDateSelected: (_) {},
+          ),
         ),
-      ));
+      );
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/calendar_$name.png'));
     });
 
     testWidgets('slide to confirm mid-slide and confirmed $name', (tester) async {
       await setUpGlass(tester, size: const Size(380, 200));
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          SizedBox(
-            width: 340,
-            child: GlassSlideToConfirm(key: const Key('mid'), onConfirmed: () {}, shimmer: false),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 340,
+                child: GlassSlideToConfirm(key: const Key('mid'), onConfirmed: () {}, shimmer: false),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: 340,
+                child: GlassSlideToConfirm(
+                  key: const Key('done'),
+                  onConfirmed: () {},
+                  confirmedLabel: 'Confirmed',
+                  shimmer: false,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 340,
-            child: GlassSlideToConfirm(
-              key: const Key('done'),
-              onConfirmed: () {},
-              confirmedLabel: 'Confirmed',
-              shimmer: false,
-            ),
-          ),
-        ]),
-      ));
+        ),
+      );
       Offset knobOf(String key) =>
           tester.getCenter(find.descendant(of: find.byKey(Key(key)), matching: find.byType(GlassPressable)));
       await tester.dragFrom(knobOf('done'), const Offset(300, 0));

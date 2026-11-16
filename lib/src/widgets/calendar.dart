@@ -239,194 +239,211 @@ class _GlassCalendarState extends State<GlassCalendar> {
     final title = '${_months[_month.month - 1]} ${_month.year}';
 
     Widget chevron(bool back) => Transform.flip(
-          // The glyph points right; back points to the start.
-          flipX: back != rtl,
-          child: GlassGlyph.chevron(color: theme.foreground, size: 16),
-        );
+      // The glyph points right; back points to the start.
+      flipX: back != rtl,
+      child: GlassGlyph.chevron(color: theme.foreground, size: 16),
+    );
 
     final header = Padding(
       padding: const EdgeInsetsDirectional.only(start: 6, bottom: 8),
-      child: Row(children: [
-        Expanded(
-          child: Semantics(
-            header: true,
-            liveRegion: true,
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textStyle.copyWith(
-                color: theme.foreground,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.3,
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              header: true,
+              liveRegion: true,
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textStyle.copyWith(
+                  color: theme.foreground,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.3,
+                ),
               ),
             ),
           ),
-        ),
-        GlassButton(
-          icon: chevron(true),
-          height: 32,
-          semanticLabel: 'Previous month',
-          onPressed: _canGo(-1) ? () => _go(-1) : null,
-        ),
-        const SizedBox(width: 6),
-        GlassButton(
-          icon: chevron(false),
-          height: 32,
-          semanticLabel: 'Next month',
-          onPressed: _canGo(1) ? () => _go(1) : null,
-        ),
-      ]),
+          GlassButton(
+            icon: chevron(true),
+            height: 32,
+            semanticLabel: 'Previous month',
+            onPressed: _canGo(-1) ? () => _go(-1) : null,
+          ),
+          const SizedBox(width: 6),
+          GlassButton(
+            icon: chevron(false),
+            height: 32,
+            semanticLabel: 'Next month',
+            onPressed: _canGo(1) ? () => _go(1) : null,
+          ),
+        ],
+      ),
     );
 
     final weekdays = ExcludeSemantics(
-      child: Row(children: [
-        for (var i = 0; i < 7; i++)
-          Expanded(
-            child: Center(
-              child: Text(
-                _weekdays[(widget.firstDayOfWeek - 1 + i) % 7][0],
-                style: theme.textStyle.copyWith(color: theme.muted, fontSize: 12, fontWeight: FontWeight.w600),
+      child: Row(
+        children: [
+          for (var i = 0; i < 7; i++)
+            Expanded(
+              child: Center(
+                child: Text(
+                  _weekdays[(widget.firstDayOfWeek - 1 + i) % 7][0],
+                  style: theme.textStyle.copyWith(color: theme.muted, fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
-          ),
-      ]),
+        ],
+      ),
     );
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.hasBoundedWidth ? math.min(constraints.maxWidth, widget.maxWidth) : 320.0;
-      const padding = 12.0;
-      final cell = (width - 2 * padding) / 7;
-      final rowHeight = math.min(cell, 44.0);
-      final circle = math.min(36.0, rowHeight - 4);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? math.min(constraints.maxWidth, widget.maxWidth) : 320.0;
+        const padding = 12.0;
+        final cell = (width - 2 * padding) / 7;
+        final rowHeight = math.min(cell, 44.0);
+        final circle = math.min(36.0, rowHeight - 4);
 
-      final leading = (DateTime(_month.year, _month.month).weekday - widget.firstDayOfWeek + 7) % 7;
-      final focused = _ring ? _cursor : null;
-      final grid = KeyedSubtree(
-        key: ValueKey<int>(_month.year * 12 + _month.month),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var row = 0; row < 6; row++)
-              SizedBox(
-                height: rowHeight,
-                child: Row(children: [
-                  for (var column = 0; column < 7; column++)
-                    Expanded(
-                      child: Builder(builder: (context) {
-                        final day = DateTime(_month.year, _month.month, 1 - leading + row * 7 + column);
-                        final allowed = _allowed(day);
-                        final isToday = _sameDay(day, today);
-                        return _DayCell(
-                          key: ValueKey<DateTime>(day),
-                          day: day.day,
-                          inMonth: day.month == _month.month,
-                          today: isToday,
-                          selected: _sameDay(day, widget.selectedDate),
-                          focused: _sameDay(day, focused),
-                          enabled: allowed && _selectable,
-                          diameter: circle,
-                          accent: accent,
-                          label: '${isToday ? 'Today, ' : ''}${_describe(day)}',
-                          onTap: () => _select(day),
-                        );
-                      }),
-                    ),
-                ]),
+        final leading = (DateTime(_month.year, _month.month).weekday - widget.firstDayOfWeek + 7) % 7;
+        final focused = _ring ? _cursor : null;
+        final grid = KeyedSubtree(
+          key: ValueKey<int>(_month.year * 12 + _month.month),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var row = 0; row < 6; row++)
+                SizedBox(
+                  height: rowHeight,
+                  child: Row(
+                    children: [
+                      for (var column = 0; column < 7; column++)
+                        Expanded(
+                          child: Builder(
+                            builder: (context) {
+                              final day = DateTime(_month.year, _month.month, 1 - leading + row * 7 + column);
+                              final allowed = _allowed(day);
+                              final isToday = _sameDay(day, today);
+                              return _DayCell(
+                                key: ValueKey<DateTime>(day),
+                                day: day.day,
+                                inMonth: day.month == _month.month,
+                                today: isToday,
+                                selected: _sameDay(day, widget.selectedDate),
+                                focused: _sameDay(day, focused),
+                                enabled: allowed && _selectable,
+                                diameter: circle,
+                                accent: accent,
+                                label: '${isToday ? 'Today, ' : ''}${_describe(day)}',
+                                onTap: () => _select(day),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        );
+
+        Widget days = AnimatedSwitcher(
+          duration: _reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          layoutBuilder:
+              (current, previous) =>
+                  Stack(alignment: Alignment.topCenter, children: [...previous, if (current != null) current]),
+          transitionBuilder: (child, animation) {
+            final incoming = child.key == ValueKey<int>(_month.year * 12 + _month.month);
+            final from = Offset(0.3 * _slide * (incoming ? 1 : -1), 0);
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(begin: from, end: Offset.zero).animate(animation),
+                textDirection: Directionality.of(context),
+                child: child,
               ),
-          ],
-        ),
-      );
-
-      Widget days = AnimatedSwitcher(
-        duration: _reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        layoutBuilder: (current, previous) => Stack(
-          alignment: Alignment.topCenter,
-          children: [...previous, if (current != null) current],
-        ),
-        transitionBuilder: (child, animation) {
-          final incoming = child.key == ValueKey<int>(_month.year * 12 + _month.month);
-          final from = Offset(0.3 * _slide * (incoming ? 1 : -1), 0);
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(begin: from, end: Offset.zero).animate(animation),
-              textDirection: Directionality.of(context),
-              child: child,
+            );
+          },
+          child: grid,
+        );
+        days = ClipRect(child: days);
+        days = GestureDetector(
+          excludeFromSemantics: true,
+          onHorizontalDragStart: (_) => _swipe = 0,
+          onHorizontalDragUpdate: (details) => _swipe += details.delta.dx,
+          onHorizontalDragEnd: _swipeEnd,
+          onHorizontalDragCancel: () => _swipe = 0,
+          child: days,
+        );
+        days = FocusableActionDetector(
+          focusNode: widget.focusNode,
+          autofocus: widget.autofocus,
+          onShowFocusHighlight: (value) => setState(() => _ring = value),
+          shortcuts: <ShortcutActivator, Intent>{
+            const SingleActivator(LogicalKeyboardKey.arrowLeft): _MoveIntent(rtl ? 1 : -1),
+            const SingleActivator(LogicalKeyboardKey.arrowRight): _MoveIntent(rtl ? -1 : 1),
+            const SingleActivator(LogicalKeyboardKey.arrowUp): const _MoveIntent(-7),
+            const SingleActivator(LogicalKeyboardKey.arrowDown): const _MoveIntent(7),
+            const SingleActivator(LogicalKeyboardKey.pageUp): const _MonthIntent(-1),
+            const SingleActivator(LogicalKeyboardKey.pageDown): const _MonthIntent(1),
+            const SingleActivator(LogicalKeyboardKey.home): const _WeekEdgeIntent(false),
+            const SingleActivator(LogicalKeyboardKey.end): const _WeekEdgeIntent(true),
+            const SingleActivator(LogicalKeyboardKey.enter): const ActivateIntent(),
+            const SingleActivator(LogicalKeyboardKey.space): const ActivateIntent(),
+          },
+          actions: <Type, Action<Intent>>{
+            _MoveIntent: CallbackAction<_MoveIntent>(
+              onInvoke: (intent) {
+                _moveDays(intent.days);
+                return null;
+              },
             ),
-          );
-        },
-        child: grid,
-      );
-      days = ClipRect(child: days);
-      days = GestureDetector(
-        excludeFromSemantics: true,
-        onHorizontalDragStart: (_) => _swipe = 0,
-        onHorizontalDragUpdate: (details) => _swipe += details.delta.dx,
-        onHorizontalDragEnd: _swipeEnd,
-        onHorizontalDragCancel: () => _swipe = 0,
-        child: days,
-      );
-      days = FocusableActionDetector(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        onShowFocusHighlight: (value) => setState(() => _ring = value),
-        shortcuts: <ShortcutActivator, Intent>{
-          const SingleActivator(LogicalKeyboardKey.arrowLeft): _MoveIntent(rtl ? 1 : -1),
-          const SingleActivator(LogicalKeyboardKey.arrowRight): _MoveIntent(rtl ? -1 : 1),
-          const SingleActivator(LogicalKeyboardKey.arrowUp): const _MoveIntent(-7),
-          const SingleActivator(LogicalKeyboardKey.arrowDown): const _MoveIntent(7),
-          const SingleActivator(LogicalKeyboardKey.pageUp): const _MonthIntent(-1),
-          const SingleActivator(LogicalKeyboardKey.pageDown): const _MonthIntent(1),
-          const SingleActivator(LogicalKeyboardKey.home): const _WeekEdgeIntent(false),
-          const SingleActivator(LogicalKeyboardKey.end): const _WeekEdgeIntent(true),
-          const SingleActivator(LogicalKeyboardKey.enter): const ActivateIntent(),
-          const SingleActivator(LogicalKeyboardKey.space): const ActivateIntent(),
-        },
-        actions: <Type, Action<Intent>>{
-          _MoveIntent: CallbackAction<_MoveIntent>(onInvoke: (intent) {
-            _moveDays(intent.days);
-            return null;
-          }),
-          _MonthIntent: CallbackAction<_MonthIntent>(onInvoke: (intent) {
-            _moveMonths(intent.months);
-            return null;
-          }),
-          _WeekEdgeIntent: CallbackAction<_WeekEdgeIntent>(onInvoke: (intent) {
-            _moveInWeek(intent.end);
-            return null;
-          }),
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            _select(_cursor);
-            return null;
-          }),
-        },
-        child: days,
-      );
+            _MonthIntent: CallbackAction<_MonthIntent>(
+              onInvoke: (intent) {
+                _moveMonths(intent.months);
+                return null;
+              },
+            ),
+            _WeekEdgeIntent: CallbackAction<_WeekEdgeIntent>(
+              onInvoke: (intent) {
+                _moveInWeek(intent.end);
+                return null;
+              },
+            ),
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                _select(_cursor);
+                return null;
+              },
+            ),
+          },
+          child: days,
+        );
 
-      return Semantics(
-        container: true,
-        label: widget.semanticLabel,
-        explicitChildNodes: true,
-        child: SizedBox(
-          width: width,
-          child: LiquidGlassBox(
-            radius: 24,
-            style: themedGlass(theme),
-            child: Padding(
-              padding: const EdgeInsets.all(padding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [header, weekdays, const SizedBox(height: 4), days],
+        return Semantics(
+          container: true,
+          label: widget.semanticLabel,
+          explicitChildNodes: true,
+          child: SizedBox(
+            width: width,
+            child: LiquidGlassBox(
+              radius: 24,
+              style: themedGlass(theme),
+              child: Padding(
+                padding: const EdgeInsets.all(padding),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [header, weekdays, const SizedBox(height: 4), days],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }
 
@@ -503,9 +520,10 @@ class _DayCellState extends State<_DayCell> with SingleTickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
-    final ink = widget.today
-        ? widget.accent
-        : widget.inMonth
+    final ink =
+        widget.today
+            ? widget.accent
+            : widget.inMonth
             ? theme.foreground
             : theme.muted.withValues(alpha: theme.muted.a * 0.7);
     final base = theme.textStyle.copyWith(
@@ -579,19 +597,21 @@ class _DayPainter extends CustomPainter {
     final ring = Paint()..style = PaintingStyle.stroke;
     if (outline != null && outline!.a > 0.001) {
       canvas.drawCircle(
-          center,
-          radius - 0.75,
-          ring
-            ..strokeWidth = 1.5
-            ..color = outline!);
+        center,
+        radius - 0.75,
+        ring
+          ..strokeWidth = 1.5
+          ..color = outline!,
+      );
     }
     if (focus != null) {
       canvas.drawCircle(
-          center,
-          radius + 2,
-          ring
-            ..strokeWidth = 2
-            ..color = focus!);
+        center,
+        radius + 2,
+        ring
+          ..strokeWidth = 2
+          ..color = focus!,
+      );
     }
   }
 

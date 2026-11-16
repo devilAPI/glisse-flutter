@@ -109,59 +109,61 @@ class _GlassSidebarState extends State<GlassSidebar> with SingleTickerProviderSt
     for (var i = 0; i < widget.items.length; i++) {
       final item = widget.items[i];
       final selected = i == widget.selected;
-      rows.add(Padding(
-        padding: EdgeInsets.only(bottom: i < widget.items.length - 1 ? _gap : 0),
-        child: Semantics(
-          button: true,
-          selected: selected,
-          label: item.label,
-          excludeSemantics: true,
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            onEnter: (_) => setState(() => _hovered = i),
-            onExit: (_) => setState(() => _hovered = -1),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => widget.onSelected(i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                height: row,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(row / 3),
-                  color: _hovered == i && !selected
-                      ? theme.highlight.withValues(alpha: theme.highlight.a * 0.7)
-                      : const Color(0x00000000),
-                ),
-                child: Row(children: [
-                  IconTheme.merge(
-                    data: IconThemeData(color: selected ? theme.fill : theme.muted, size: 19),
-                    child: SizedBox.square(dimension: 22, child: Center(child: item.icon)),
+      rows.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: i < widget.items.length - 1 ? _gap : 0),
+          child: Semantics(
+            button: true,
+            selected: selected,
+            label: item.label,
+            excludeSemantics: true,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) => setState(() => _hovered = i),
+              onExit: (_) => setState(() => _hovered = -1),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => widget.onSelected(i),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  height: row,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(row / 3),
+                    color:
+                        _hovered == i && !selected
+                            ? theme.highlight.withValues(alpha: theme.highlight.a * 0.7)
+                            : const Color(0x00000000),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      item.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: base.copyWith(
-                        color: theme.foreground,
-                        fontSize: 14,
-                        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  child: Row(
+                    children: [
+                      IconTheme.merge(
+                        data: IconThemeData(color: selected ? theme.fill : theme.muted, size: 19),
+                        child: SizedBox.square(dimension: 22, child: Center(child: item.icon)),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: base.copyWith(
+                            color: theme.foreground,
+                            fontSize: 14,
+                            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      if (item.trailing != null)
+                        DefaultTextStyle(style: base.copyWith(color: theme.muted, fontSize: 13), child: item.trailing!),
+                    ],
                   ),
-                  if (item.trailing != null)
-                    DefaultTextStyle(
-                      style: base.copyWith(color: theme.muted, fontSize: 13),
-                      child: item.trailing!,
-                    ),
-                ]),
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
     }
 
     final list = Stack(
@@ -169,19 +171,20 @@ class _GlassSidebarState extends State<GlassSidebar> with SingleTickerProviderSt
         if (widget.selected >= 0)
           AnimatedBuilder(
             animation: _plate,
-            builder: (context, _) => Positioned(
-              left: 0,
-              right: 0,
-              top: _plate.value * (row + _gap),
-              height: row,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(row / 3),
-                  color: theme.selection,
-                  border: _focused ? Border.all(color: theme.ring, width: 2) : null,
+            builder:
+                (context, _) => Positioned(
+                  left: 0,
+                  right: 0,
+                  top: _plate.value * (row + _gap),
+                  height: row,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(row / 3),
+                      color: theme.selection,
+                      border: _focused ? Border.all(color: theme.ring, width: 2) : null,
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
       ],

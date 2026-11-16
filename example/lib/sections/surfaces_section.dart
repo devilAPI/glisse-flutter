@@ -58,10 +58,11 @@ class _SurfacesSectionState extends State<SurfacesSection> {
         GlassMenuItem(
           label: Text(_favourite ? 'Unfavourite' : 'Favourite'),
           icon: Icon(_favourite ? Icons.favorite : Icons.favorite_border),
-          onSelected: () => setState(() {
-            _favourite = !_favourite;
-            _status = _favourite ? 'Added to favourites' : 'Removed from favourites';
-          }),
+          onSelected:
+              () => setState(() {
+                _favourite = !_favourite;
+                _status = _favourite ? 'Added to favourites' : 'Removed from favourites';
+              }),
         ),
         const GlassMenuSeparator(),
         GlassMenuItem(
@@ -131,11 +132,7 @@ class _SurfacesSectionState extends State<SurfacesSection> {
           child: const Text('Connected, secured, 5 GHz. Tap the card.'),
         ),
         const SizedBox(height: 12),
-        const GlassCard(
-          title: Text('Battery'),
-          subtitle: Text('Last charged to 100%'),
-          trailing: Text('82%'),
-        ),
+        const GlassCard(title: Text('Battery'), subtitle: Text('Last charged to 100%'), trailing: Text('82%')),
         const SizedBox(height: 12),
         GlassDisclosure(
           leading: const Icon(Icons.tune),

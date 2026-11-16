@@ -49,12 +49,7 @@ void cutOut(Canvas canvas, RRect rrect) {
 /// [rect] is the thumb at its own, unscaled size; [scale] scales it about
 /// its centre. Paints the shadows and face; the lens itself is drawn before
 /// by the caller through [paintContentLens].
-void paintThumbChrome(
-  Canvas canvas, {
-  required Rect rect,
-  required double scale,
-  required double lift,
-}) {
+void paintThumbChrome(Canvas canvas, {required Rect rect, required double scale, required double lift}) {
   final settled = 1 - lift.clamp(0.0, 1.0);
   canvas.save();
   canvas.translate(rect.center.dx, rect.center.dy);
@@ -63,19 +58,26 @@ void paintThumbChrome(
   final rrect = roundedRect(rect, double.infinity);
   paintDropShadow(canvas, rrect, color: const Color.fromRGBO(0, 0, 0, 0.2), offset: const Offset(0, 6), blur: 24);
   paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(255, 255, 255, 0.5), spread: 1.5);
-  paintInsetShadow(canvas, rrect,
-      color: const Color.fromRGBO(255, 255, 255, 0.45), offset: const Offset(0, 2), blur: 1);
+  paintInsetShadow(
+    canvas,
+    rrect,
+    color: const Color.fromRGBO(255, 255, 255, 0.45),
+    offset: const Offset(0, 2),
+    blur: 1,
+  );
   paintInsetShadow(canvas, rrect, color: const Color.fromRGBO(0, 0, 0, 0.09), offset: const Offset(2, 7), blur: 24);
-  paintInsetShadow(canvas, rrect,
-      color: const Color.fromRGBO(255, 255, 255, 0.16), offset: const Offset(-2, -7), blur: 24);
+  paintInsetShadow(
+    canvas,
+    rrect,
+    color: const Color.fromRGBO(255, 255, 255, 0.16),
+    offset: const Offset(-2, -7),
+    blur: 24,
+  );
   final face = 1 - 0.85 * (1 - settled);
   canvas.drawRRect(rrect, Paint()..color = Color.fromRGBO(255, 255, 255, face.clamp(0.0, 1.0)));
   canvas.restore();
 }
 
 /// A rect scaled by [scale] about its centre.
-Rect scaleAbout(Rect rect, double scale) => Rect.fromCenter(
-      center: rect.center,
-      width: rect.width * scale,
-      height: rect.height * scale,
-    );
+Rect scaleAbout(Rect rect, double scale) =>
+    Rect.fromCenter(center: rect.center, width: rect.width * scale, height: rect.height * scale);

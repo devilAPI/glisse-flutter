@@ -225,10 +225,12 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
             shortcuts: const {SingleActivator(LogicalKeyboardKey.escape): DismissIntent()},
             child: Actions(
               actions: {
-                DismissIntent: CallbackAction<DismissIntent>(onInvoke: (_) {
-                  _controller.hide();
-                  return null;
-                }),
+                DismissIntent: CallbackAction<DismissIntent>(
+                  onInvoke: (_) {
+                    _controller.hide();
+                    return null;
+                  },
+                ),
               },
               child: Focus(
                 autofocus: true,
@@ -241,11 +243,7 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
                       ignoring: !_controller.isOpen,
                       child: Opacity(
                         opacity: (t / 0.3).clamp(0.0, 1.0),
-                        child: Transform.scale(
-                          alignment: follower,
-                          scale: 0.6 + 0.4 * t,
-                          child: child,
-                        ),
+                        child: Transform.scale(alignment: follower, scale: 0.6 + 0.4 * t, child: child),
                       ),
                     );
                   },
@@ -264,10 +262,7 @@ class _GlassPopoverState extends State<GlassPopover> with SingleTickerProviderSt
     if (widget.tapToToggle) {
       anchor = GestureDetector(behavior: HitTestBehavior.opaque, onTap: _controller.toggle, child: anchor);
     }
-    return CompositedTransformTarget(
-      link: _link,
-      child: TapRegion(groupId: _group, child: anchor),
-    );
+    return CompositedTransformTarget(link: _link, child: TapRegion(groupId: _group, child: anchor));
   }
 }
 
@@ -374,11 +369,15 @@ class _GlassTooltipState extends State<GlassTooltip> with SingleTickerProviderSt
         child: IgnorePointer(
           child: AnimatedBuilder(
             animation: _shown,
-            builder: (context, child) => Opacity(
-              opacity: _shown.value.clamp(0.0, 1.0),
-              child:
-                  Transform.scale(alignment: Alignment.bottomCenter, scale: 0.85 + 0.15 * _shown.value, child: child),
-            ),
+            builder:
+                (context, child) => Opacity(
+                  opacity: _shown.value.clamp(0.0, 1.0),
+                  child: Transform.scale(
+                    alignment: Alignment.bottomCenter,
+                    scale: 0.85 + 0.15 * _shown.value,
+                    child: child,
+                  ),
+                ),
             child: Glass(
               borderRadius: double.infinity,
               tint: floatingTint(theme),

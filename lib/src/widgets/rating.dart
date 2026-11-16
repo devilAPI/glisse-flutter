@@ -30,9 +30,9 @@ class GlassRating extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(count > 0),
-        assert(size > 0),
-        assert(spacing >= 0);
+  }) : assert(count > 0),
+       assert(size > 0),
+       assert(spacing >= 0);
 
   /// How many stars are filled, from 0 to [count].
   final double value;
@@ -85,9 +85,9 @@ class _GlassRatingState extends State<GlassRating> with TickerProviderStateMixin
   double get _width => widget.count * widget.size + (widget.count - 1) * widget.spacing;
 
   List<GlassSpring> _springs(int count) => [
-        for (var i = 0; i < count; i++)
-          GlassSpring(vsync: this, value: 1, stiffness: 520, damping: 13)..reduceMotion = _reduceMotion,
-      ];
+    for (var i = 0; i < count; i++)
+      GlassSpring(vsync: this, value: 1, stiffness: 520, damping: 13)..reduceMotion = _reduceMotion,
+  ];
 
   @override
   void didChangeDependencies() {
@@ -149,9 +149,10 @@ class _GlassRatingState extends State<GlassRating> with TickerProviderStateMixin
   /// The next point on the step grid above or below [value]: from 3.7, up is
   /// 4 and down is 3.
   double _stepped(double value, int direction) {
-    final next = direction > 0
-        ? ((value + 1e-9) / _step).floor() * _step + _step
-        : ((value - 1e-9) / _step).ceil() * _step - _step;
+    final next =
+        direction > 0
+            ? ((value + 1e-9) / _step).floor() * _step + _step
+            : ((value - 1e-9) / _step).ceil() * _step - _step;
     return next.clamp(0.0, widget.count.toDouble());
   }
 
@@ -239,14 +240,16 @@ class _GlassRatingState extends State<GlassRating> with TickerProviderStateMixin
         const SingleActivator(LogicalKeyboardKey.end): const _RateIntent(double.infinity),
       },
       actions: <Type, Action<Intent>>{
-        _RateIntent: CallbackAction<_RateIntent>(onInvoke: (intent) {
-          if (intent.steps.isInfinite) {
-            _set(intent.steps > 0 ? widget.count.toDouble() : 0);
-          } else {
-            _nudge(intent.steps);
-          }
-          return null;
-        }),
+        _RateIntent: CallbackAction<_RateIntent>(
+          onInvoke: (intent) {
+            if (intent.steps.isInfinite) {
+              _set(intent.steps > 0 ? widget.count.toDouble() : 0);
+            } else {
+              _nudge(intent.steps);
+            }
+            return null;
+          },
+        ),
       },
       child: stars,
     );
@@ -315,15 +318,17 @@ class _StarsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size canvasSize) {
     final stroke = size * 0.08;
-    Paint paintOf(Color color) => Paint()
-      ..color = color
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-    Paint edgeOf(Color color) => Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeJoin = StrokeJoin.round;
+    Paint paintOf(Color color) =>
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill
+          ..isAntiAlias = true;
+    Paint edgeOf(Color color) =>
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke
+          ..strokeJoin = StrokeJoin.round;
     for (var i = 0; i < count; i++) {
       final left = rtl ? canvasSize.width - (i * (size + spacing) + size) : i * (size + spacing);
       final center = Offset(left + size / 2, size / 2);
@@ -336,12 +341,14 @@ class _StarsPainter extends CustomPainter {
       canvas.translate(-center.dx, -center.dy);
       // A part star splits where the fill ends, from the side the row starts on.
       final split = rtl ? left + size * (1 - shown) : left + size * shown;
-      final filled = rtl
-          ? Rect.fromLTRB(split, -size, left + size + stroke, size * 2)
-          : Rect.fromLTRB(left - stroke, -size, split, size * 2);
-      final bare = rtl
-          ? Rect.fromLTRB(left - stroke, -size, split, size * 2)
-          : Rect.fromLTRB(split, -size, left + size + stroke, size * 2);
+      final filled =
+          rtl
+              ? Rect.fromLTRB(split, -size, left + size + stroke, size * 2)
+              : Rect.fromLTRB(left - stroke, -size, split, size * 2);
+      final bare =
+          rtl
+              ? Rect.fromLTRB(left - stroke, -size, split, size * 2)
+              : Rect.fromLTRB(split, -size, left + size + stroke, size * 2);
       for (final (part, color, clip) in [(shown < 1, empty, bare), (shown > 0, fill, filled)]) {
         if (!part) continue;
         canvas.save();

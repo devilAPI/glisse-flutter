@@ -412,9 +412,13 @@ class _ContextOverlayState extends State<_ContextOverlay> {
     );
 
     final previewBuilder = menu.widget.previewBuilder;
-    Widget preview = previewBuilder != null
-        ? Builder(builder: previewBuilder)
-        : FittedBox(fit: BoxFit.scaleDown, child: SizedBox.fromSize(size: menu._anchor.size, child: menu.widget.child));
+    Widget preview =
+        previewBuilder != null
+            ? Builder(builder: previewBuilder)
+            : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: SizedBox.fromSize(size: menu._anchor.size, child: menu.widget.child),
+            );
     preview = menu._themes?.wrap(preview) ?? preview;
     // A copy, for show: the page's own child keeps its taps and semantics.
     preview = IgnorePointer(child: ExcludeSemantics(child: preview));
@@ -496,10 +500,12 @@ class _ContextOverlayState extends State<_ContextOverlay> {
       final item = _items[i];
       switch (item) {
         case GlassMenuSeparator():
-          rows.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 11),
-            child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
-          ));
+          rows.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 11),
+              child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
+            ),
+          );
         case GlassMenuItem():
           rows.add(_row(theme, i, item));
       }
@@ -530,10 +536,7 @@ class _ContextOverlayState extends State<_ContextOverlay> {
             borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
             child: BackdropFilter(
               filter: frostFilter(sigma: 22, saturation: 1.9),
-              child: CustomPaint(
-                painter: _CardFill(fill: theme.surface, edge: theme.surfaceEdge),
-                child: content,
-              ),
+              child: CustomPaint(painter: _CardFill(fill: theme.surface, edge: theme.surfaceEdge), child: content),
             ),
           ),
         ),
@@ -579,22 +582,25 @@ class _ContextOverlayState extends State<_ContextOverlay> {
         focusNode: _focusNode(index),
         enabled: item.enabled,
         mouseCursor: item.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-        onShowFocusHighlight: (shown) => setState(() {
-          if (shown) {
-            _focusVisible = index;
-          } else if (_focusVisible == index) {
-            _focusVisible = null;
-          }
-        }),
+        onShowFocusHighlight:
+            (shown) => setState(() {
+              if (shown) {
+                _focusVisible = index;
+              } else if (_focusVisible == index) {
+                _focusVisible = null;
+              }
+            }),
         shortcuts: const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
           SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            _select(index);
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _select(index);
+              return null;
+            },
+          ),
         },
         child: Opacity(opacity: item.enabled ? 1 : 0.38, child: row),
       ),
@@ -652,9 +658,10 @@ class _ContextLayout extends MultiChildLayoutDelegate {
       y = start.dy;
       above = false;
     } else if (roomAbove >= _gap + menu.height || (roomAbove > roomBelow && total <= height)) {
-      y = start.dy
-          .clamp(top + _gap + menu.height, math.max(top + _gap + menu.height, bottom - preview.height))
-          .toDouble();
+      y =
+          start.dy
+              .clamp(top + _gap + menu.height, math.max(top + _gap + menu.height, bottom - preview.height))
+              .toDouble();
       above = true;
     } else {
       y = start.dy.clamp(top, math.max(top, bottom - total)).toDouble();
@@ -668,9 +675,10 @@ class _ContextLayout extends MultiChildLayoutDelegate {
     // The lifted preview stands a little taller; the menu keeps clear of it.
     final lift = preview.height * 0.025 * t;
     final fromLeft = anchor.center.dx <= size.width / 2;
-    final menuX = (fromLeft ? at.dx : at.dx + preview.width - menu.width)
-        .clamp(left, math.max(left, right - menu.width))
-        .toDouble();
+    final menuX =
+        (fromLeft ? at.dx : at.dx + preview.width - menu.width)
+            .clamp(left, math.max(left, right - menu.width))
+            .toDouble();
     var menuY = above ? at.dy - lift - _gap - menu.height : at.dy + preview.height + lift + _gap;
     menuY = menuY.clamp(top, math.max(top, bottom - menu.height)).toDouble();
     positionChild(_Slot.menu, Offset(menuX, menuY));
@@ -765,8 +773,13 @@ class _CardShadow extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    paintDropShadow(canvas, roundedRect(Offset.zero & size, _cardRadius),
-        color: color, offset: const Offset(0, 12), blur: 40);
+    paintDropShadow(
+      canvas,
+      roundedRect(Offset.zero & size, _cardRadius),
+      color: color,
+      offset: const Offset(0, 12),
+      blur: 40,
+    );
   }
 
   @override

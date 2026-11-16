@@ -72,18 +72,19 @@ GlassBannerController showGlassBanner({
   }
 
   entry = OverlayEntry(
-    builder: (context) => carried.wrap(
-      _GlassBanner(
-        controller: controller,
-        title: title,
-        message: message,
-        leading: leading,
-        trailing: trailing,
-        duration: duration,
-        onTap: onTap,
-        onGone: gone,
-      ),
-    ),
+    builder:
+        (context) => carried.wrap(
+          _GlassBanner(
+            controller: controller,
+            title: title,
+            message: message,
+            leading: leading,
+            trailing: trailing,
+            duration: duration,
+            onTap: onTap,
+            onGone: gone,
+          ),
+        ),
   );
   overlay.insert(entry);
   return controller;
@@ -230,7 +231,10 @@ class _GlassBannerState extends State<_GlassBanner> with TickerProviderStateMixi
             padding: const EdgeInsets.only(top: 2),
             child: DefaultTextStyle(
               style: base.copyWith(
-                  fontSize: 14, height: 1.3, color: theme.foreground.withValues(alpha: theme.foreground.a * 0.8)),
+                fontSize: 14,
+                height: 1.3,
+                color: theme.foreground.withValues(alpha: theme.foreground.a * 0.8),
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               child: widget.message!,

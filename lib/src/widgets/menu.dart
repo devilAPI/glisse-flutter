@@ -19,13 +19,7 @@ sealed class GlassMenuEntry {
 /// A row of a [GlassMenu].
 class GlassMenuItem extends GlassMenuEntry {
   /// Creates a menu row; [onSelected] runs when it's chosen.
-  const GlassMenuItem({
-    required this.label,
-    this.icon,
-    this.onSelected,
-    this.destructive = false,
-    this.enabled = true,
-  });
+  const GlassMenuItem({required this.label, this.icon, this.onSelected, this.destructive = false, this.enabled = true});
 
   /// The row's text.
   final Widget label;
@@ -518,10 +512,7 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
       clipper: _ContentClip(t: t, from: from, trailing: trailing, origin: origin, scale: scale),
       child: content,
     );
-    content = Transform(
-      transform: settled ? Matrix4.identity() : _scaleAbout(origin, scale),
-      child: content,
-    );
+    content = Transform(transform: settled ? Matrix4.identity() : _scaleAbout(origin, scale), child: content);
     content = Opacity(opacity: contentOpacity, child: content);
 
     Widget card = SizedBox(
@@ -607,10 +598,12 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
       final item = _items[i];
       switch (item) {
         case GlassMenuSeparator():
-          children.add(Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 11),
-            child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
-          ));
+          children.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 11),
+              child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
+            ),
+          );
         case GlassMenuItem():
           children.add(_row(theme, i, item));
       }
@@ -645,11 +638,7 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
               ),
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
+          Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
         ],
       ),
     );
@@ -709,10 +698,12 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
           SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            _select(index);
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _select(index);
+              return null;
+            },
+          ),
         },
         child: Opacity(opacity: item.enabled ? 1 : 0.38, child: row),
       ),
@@ -720,9 +711,10 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
   }
 }
 
-Matrix4 _scaleAbout(Offset origin, double scale) => Matrix4.translationValues(origin.dx, origin.dy, 0)
-  ..multiply(Matrix4.diagonal3Values(scale, scale, 1))
-  ..multiply(Matrix4.translationValues(-origin.dx, -origin.dy, 0));
+Matrix4 _scaleAbout(Offset origin, double scale) =>
+    Matrix4.translationValues(origin.dx, origin.dy, 0)
+      ..multiply(Matrix4.diagonal3Values(scale, scale, 1))
+      ..multiply(Matrix4.translationValues(-origin.dx, -origin.dy, 0));
 
 /// The glass's rect as it grows from the trigger's size to the card's,
 /// anchored at the trigger's corner.

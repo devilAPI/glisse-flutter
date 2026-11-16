@@ -152,8 +152,23 @@ class GlassStyle {
       other.magnifyOffset == magnifyOffset;
 
   @override
-  int get hashCode => Object.hash(tint, edge, drop, rimShine, blur, saturation, brightness, bend, dispersion, spec, rim,
-      amount, mode, magnification, magnifyOffset);
+  int get hashCode => Object.hash(
+    tint,
+    edge,
+    drop,
+    rimShine,
+    blur,
+    saturation,
+    brightness,
+    bend,
+    dispersion,
+    spec,
+    rim,
+    amount,
+    mode,
+    magnification,
+    magnifyOffset,
+  );
 }
 
 /// The render object behind every piece of Glisse glass: a rounded
@@ -168,12 +183,12 @@ class RenderLiquidGlass extends RenderProxyBox {
     GlassBackdropController? backdrop,
     bool dark = false,
     RenderBox? child,
-  })  : _radius = radius,
-        _style = style,
-        _devicePixelRatio = devicePixelRatio,
-        _backdrop = backdrop,
-        _dark = dark,
-        super(child);
+  }) : _radius = radius,
+       _style = style,
+       _devicePixelRatio = devicePixelRatio,
+       _backdrop = backdrop,
+       _dark = dark,
+       super(child);
 
   double _radius;
 
@@ -501,38 +516,27 @@ class RenderLiquidGlass extends RenderProxyBox {
     final filter = ui.ImageFilter.shader(shader);
     // Clipped to the glass's shape, so glass whose backdrop it can't place
     // (see the shader) still keeps its shape.
-    _clipLayer.layer = context.pushClipRRect(
-      true,
+    _clipLayer.layer = context.pushClipRRect(true, offset, Offset.zero & size, _rrect(Offset.zero & size), (
+      context,
       offset,
-      Offset.zero & size,
-      _rrect(Offset.zero & size),
-      (context, offset) {
-        final layer = _filterLayer.layer ??= BackdropFilterLayer();
-        layer.filter = filter;
-        context.pushLayer(layer, super.paint, offset);
-      },
-      oldLayer: _clipLayer.layer,
-    );
+    ) {
+      final layer = _filterLayer.layer ??= BackdropFilterLayer();
+      layer.filter = filter;
+      context.pushLayer(layer, super.paint, offset);
+    }, oldLayer: _clipLayer.layer);
   }
 
   void _paintFrosted(PaintingContext context, Offset offset) {
     final local = _rrect(Offset.zero & size);
     final filter = frostFilter(sigma: _style.blur, saturation: _style.saturation, brightness: _style.brightness);
-    _clipLayer.layer = context.pushClipRRect(
-      true,
-      offset,
-      Offset.zero & size,
-      local,
-      (context, offset) {
-        final layer = _filterLayer.layer ??= BackdropFilterLayer();
-        layer.filter = filter;
-        context.pushLayer(layer, (context, offset) {
-          _paintOverlay(context.canvas, offset);
-          super.paint(context, offset);
-        }, offset);
-      },
-      oldLayer: _clipLayer.layer,
-    );
+    _clipLayer.layer = context.pushClipRRect(true, offset, Offset.zero & size, local, (context, offset) {
+      final layer = _filterLayer.layer ??= BackdropFilterLayer();
+      layer.filter = filter;
+      context.pushLayer(layer, (context, offset) {
+        _paintOverlay(context.canvas, offset);
+        super.paint(context, offset);
+      }, offset);
+    }, oldLayer: _clipLayer.layer);
   }
 
   // The tint and the lit rim alone, over a frosted backdrop.
@@ -564,12 +568,7 @@ class RenderLiquidGlass extends RenderProxyBox {
 /// tint too, and looks as it would through it.
 class LiquidGlassBox extends StatelessWidget {
   /// Draws glass of [radius] in [style] behind [child].
-  const LiquidGlassBox({
-    super.key,
-    required this.radius,
-    required this.style,
-    this.child,
-  });
+  const LiquidGlassBox({super.key, required this.radius, required this.style, this.child});
 
   /// The corners' radius; [double.infinity] for a capsule.
   final double radius;
@@ -616,12 +615,12 @@ class _LiquidGlassRender extends SingleChildRenderObjectWidget {
 
   @override
   RenderLiquidGlass createRenderObject(BuildContext context) => RenderLiquidGlass(
-        radius: radius,
-        style: style,
-        devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
-        backdrop: GlassBackdrop.maybeOf(context),
-        dark: GlassTheme.of(context).isDark,
-      )..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
+    radius: radius,
+    style: style,
+    devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
+    backdrop: GlassBackdrop.maybeOf(context),
+    dark: GlassTheme.of(context).isDark,
+  )..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
 
   @override
   void updateRenderObject(BuildContext context, RenderLiquidGlass renderObject) {

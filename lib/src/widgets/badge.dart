@@ -85,19 +85,20 @@ class _GlassBadgeState extends State<GlassBadge> with SingleTickerProviderStateM
         boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 3, offset: Offset(0, 1))],
       ),
       alignment: Alignment.center,
-      child: label == null
-          ? null
-          : Text(
-              label,
-              maxLines: 1,
-              style: theme.textStyle.copyWith(
-                color: const Color(0xFFFFFFFF),
-                fontSize: 11,
-                height: 1.1,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0,
+      child:
+          label == null
+              ? null
+              : Text(
+                label,
+                maxLines: 1,
+                style: theme.textStyle.copyWith(
+                  color: const Color(0xFFFFFFFF),
+                  fontSize: 11,
+                  height: 1.1,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                ),
               ),
-            ),
     );
     return Semantics(
       value: widget.show ? (label ?? 'New') : null,

@@ -154,11 +154,12 @@ class _GlassCardState extends State<GlassCard> {
       // Lights up at once when pressed, and fades on release.
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.ease,
-      builder: (context, color, child) => LiquidGlassBox(
-        radius: radius,
-        style: themedGlass(theme, tint: color ?? tint).copyWith(mode: widget.mode),
-        child: child,
-      ),
+      builder:
+          (context, color, child) => LiquidGlassBox(
+            radius: radius,
+            style: themedGlass(theme, tint: color ?? tint).copyWith(mode: widget.mode),
+            child: child,
+          ),
       child: _tappable ? GlassPressableGlow(radius: radius, child: content) : content,
     );
 

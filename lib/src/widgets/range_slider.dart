@@ -64,8 +64,8 @@ class GlassRangeSlider extends StatefulWidget {
     this.focusNode,
     this.endFocusNode,
     this.autofocus = false,
-  })  : assert(divisions == null || divisions > 0),
-        assert(min <= max);
+  }) : assert(divisions == null || divisions > 0),
+       assert(min <= max);
 
   /// The range shown; its start must not be after its end.
   final GlassRange values;
@@ -399,14 +399,18 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
             const SingleActivator(LogicalKeyboardKey.end): const _JumpIntent(1),
           },
           actions: <Type, Action<Intent>>{
-            _NudgeIntent: CallbackAction<_NudgeIntent>(onInvoke: (intent) {
-              _nudge(knob, intent.steps);
-              return null;
-            }),
-            _JumpIntent: CallbackAction<_JumpIntent>(onInvoke: (intent) {
-              _jump(knob, intent.progress);
-              return null;
-            }),
+            _NudgeIntent: CallbackAction<_NudgeIntent>(
+              onInvoke: (intent) {
+                _nudge(knob, intent.steps);
+                return null;
+              },
+            ),
+            _JumpIntent: CallbackAction<_JumpIntent>(
+              onInvoke: (intent) {
+                _jump(knob, intent.progress);
+                return null;
+              },
+            ),
           },
           child: const SizedBox.expand(),
         ),
@@ -418,32 +422,34 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     _rtl = Directionality.maybeOf(context) == TextDirection.rtl;
-    Widget result = LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
-      _width = width;
-      final start = _xOf(_startProgress);
-      final end = _xOf(_endProgress);
-      return Stack(
-        clipBehavior: Clip.none,
-        children: [
-          CustomPaint(
-            size: Size(width, _height),
-            painter: _RangePainter(
-              theme: theme,
-              start: start,
-              end: end,
-              top: _top,
-              focused: _focused,
-              press: _press,
-              activeColor: widget.activeColor ?? theme.fill,
-              repaint: _motion,
+    Widget result = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
+        _width = width;
+        final start = _xOf(_startProgress);
+        final end = _xOf(_endProgress);
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            CustomPaint(
+              size: Size(width, _height),
+              painter: _RangePainter(
+                theme: theme,
+                start: start,
+                end: end,
+                top: _top,
+                focused: _focused,
+                press: _press,
+                activeColor: widget.activeColor ?? theme.fill,
+                repaint: _motion,
+              ),
             ),
-          ),
-          // Draw order follows the knobs, so the top one is read last.
-          for (final knob in _top == 0 ? const [1, 0] : const [0, 1]) _knob(knob),
-        ],
-      );
-    });
+            // Draw order follows the knobs, so the top one is read last.
+            for (final knob in _top == 0 ? const [1, 0] : const [0, 1]) _knob(knob),
+          ],
+        );
+      },
+    );
     result = SizedBox(height: _height, child: result);
     result = Listener(
       onPointerDown: _down,
@@ -459,10 +465,7 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
         onHorizontalDragUpdate: _enabled ? _dragUpdate : null,
         onHorizontalDragEnd: _enabled ? _dragEnd : null,
         onHorizontalDragCancel: _enabled ? _dragEnd : null,
-        child: MouseRegion(
-          cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-          child: result,
-        ),
+        child: MouseRegion(cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic, child: result),
       ),
     );
     return Semantics(
@@ -518,7 +521,9 @@ class _RangePainter extends CustomPainter {
     // The fill runs between the knobs' middles, rounded at both ends.
     final fill = Rect.fromLTRB(left - _trackHeight / 2, _trackTop, right + _trackHeight / 2, _trackTop + _trackHeight);
     canvas.drawRRect(
-        RRect.fromRectAndRadius(fill, const Radius.circular(_trackHeight / 2)), Paint()..color = activeColor);
+      RRect.fromRectAndRadius(fill, const Radius.circular(_trackHeight / 2)),
+      Paint()..color = activeColor,
+    );
 
     for (final knob in top == 0 ? const [1, 0] : const [0, 1]) {
       final x = knob == 0 ? start : end;

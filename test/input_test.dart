@@ -8,8 +8,9 @@ void main() {
   testWidgets('typing reports changes', (tester) async {
     await setUpGlass(tester);
     String? last;
-    await tester
-        .pumpWidget(scene(SizedBox(width: 300, child: GlassInput(placeholder: 'Name', onChanged: (v) => last = v))));
+    await tester.pumpWidget(
+      scene(SizedBox(width: 300, child: GlassInput(placeholder: 'Name', onChanged: (v) => last = v))),
+    );
     await tester.enterText(find.byType(EditableText), 'Ada');
     await settle(tester);
     expect(last, 'Ada');
@@ -40,19 +41,24 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 180));
       final controller = TextEditingController(text: 'Liquid glass');
       addTearDown(controller.dispose);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        SizedBox(
-          width: 320,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const GlassInput(placeholder: 'Email', icon: Icon(Icons.mail_outline)),
-            const SizedBox(height: 12),
-            GlassSearchField(controller: controller),
-            const SizedBox(height: 12),
-            const GlassSearchField(),
-          ]),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const GlassInput(placeholder: 'Email', icon: Icon(Icons.mail_outline)),
+                const SizedBox(height: 12),
+                GlassSearchField(controller: controller),
+                const SizedBox(height: 12),
+                const GlassSearchField(),
+              ],
+            ),
+          ),
         ),
-      ));
+      );
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/input_${dark ? 'dark' : 'light'}.png'));
     });

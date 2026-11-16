@@ -14,19 +14,13 @@ class MagnifierSection extends StatelessWidget {
       children: [
         Text('Drag the lens over the page.', style: TextStyle(color: theme.muted, fontSize: 13)),
         const SizedBox(height: 8),
-        const SizedBox(
-          height: 220,
-          child: GlassMagnifier(size: 140, magnification: 1.8),
-        ),
+        const SizedBox(height: 220, child: GlassMagnifier(size: 140, magnification: 1.8)),
         const SizedBox(height: 12),
         GlassLoupeRegion(
           child: Container(
             height: 90,
             alignment: Alignment.center,
-            child: Text(
-              'Press and hold here for a loupe.',
-              style: TextStyle(color: theme.foreground, fontSize: 16),
-            ),
+            child: Text('Press and hold here for a loupe.', style: TextStyle(color: theme.foreground, fontSize: 16)),
           ),
         ),
       ],

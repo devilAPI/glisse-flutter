@@ -18,22 +18,12 @@ Future<T?> showGlassDialog<T>({
 }) {
   final carried = GlassOverlayContext.of(context);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
-    _GlassDialogRoute<T>(
-      carried: carried,
-      builder: builder,
-      dismissible: barrierDismissible,
-      label: barrierLabel,
-    ),
+    _GlassDialogRoute<T>(carried: carried, builder: builder, dismissible: barrierDismissible, label: barrierLabel),
   );
 }
 
 class _GlassDialogRoute<T> extends PopupRoute<T> {
-  _GlassDialogRoute({
-    required this.carried,
-    required this.builder,
-    required this.dismissible,
-    required this.label,
-  });
+  _GlassDialogRoute({required this.carried, required this.builder, required this.dismissible, required this.label});
 
   final GlassOverlayContext carried;
   final WidgetBuilder builder;
@@ -60,11 +50,7 @@ class _GlassDialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return carried.wrap(
-      SafeArea(
-        child: Center(
-          child: Padding(padding: const EdgeInsets.all(24), child: Builder(builder: builder)),
-        ),
-      ),
+      SafeArea(child: Center(child: Padding(padding: const EdgeInsets.all(24), child: Builder(builder: builder)))),
     );
   }
 
@@ -126,13 +112,7 @@ class GlassDialogAction {
 /// and capsule buttons side by side when there are two, stacked otherwise.
 class GlassAlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
-  const GlassAlertDialog({
-    super.key,
-    this.title,
-    this.content,
-    this.actions = const [],
-    this.width = 290,
-  });
+  const GlassAlertDialog({super.key, this.title, this.content, this.actions = const [], this.width = 290});
 
   /// The heading, above [content].
   final Widget? title;
@@ -176,17 +156,22 @@ class GlassAlertDialog extends StatelessWidget {
       if (content != null)
         DefaultTextStyle.merge(
           style: TextStyle(
-              fontSize: 14, color: theme.foreground.withValues(alpha: theme.foreground.a * 0.8), height: 1.35),
+            fontSize: 14,
+            color: theme.foreground.withValues(alpha: theme.foreground.a * 0.8),
+            height: 1.35,
+          ),
           textAlign: TextAlign.center,
           child: content!,
         ),
       if (actions.isNotEmpty) const SizedBox(height: 18),
       if (actions.length == 2)
-        Row(children: [
-          Expanded(child: _button(context, actions[0])),
-          const SizedBox(width: 10),
-          Expanded(child: _button(context, actions[1])),
-        ])
+        Row(
+          children: [
+            Expanded(child: _button(context, actions[0])),
+            const SizedBox(width: 10),
+            Expanded(child: _button(context, actions[1])),
+          ],
+        )
       else
         for (var i = 0; i < actions.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),

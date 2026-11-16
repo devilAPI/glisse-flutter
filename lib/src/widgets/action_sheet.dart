@@ -290,22 +290,25 @@ class _GlassActionSheetState extends State<GlassActionSheet> {
         // The first row takes focus, so the keyboard starts in the sheet.
         autofocus: index == 0,
         mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: (shown) => setState(() {
-          if (shown) {
-            _focusVisible = index;
-          } else if (_focusVisible == index) {
-            _focusVisible = null;
-          }
-        }),
+        onShowFocusHighlight:
+            (shown) => setState(() {
+              if (shown) {
+                _focusVisible = index;
+              } else if (_focusVisible == index) {
+                _focusVisible = null;
+              }
+            }),
         shortcuts: const <ShortcutActivator, Intent>{
           SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
           SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            _choose(index);
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _choose(index);
+              return null;
+            },
+          ),
         },
         child: row,
       ),
@@ -359,8 +362,11 @@ class _GlassActionSheetState extends State<GlassActionSheet> {
       if (header.isNotEmpty)
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-          child:
-              Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: header),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: header,
+          ),
         ),
       if (header.isNotEmpty && rows.isNotEmpty) rule,
       if (rows.isNotEmpty)
@@ -380,16 +386,16 @@ class _GlassActionSheetState extends State<GlassActionSheet> {
     ];
 
     Widget pane(Widget child) => GlassSurfaceShadow(
-          radius: _radius,
-          offset: const Offset(0, 8),
-          blur: 32,
-          child: Glass(
-            borderRadius: _radius,
-            tint: floatingTint(theme),
-            blur: 5,
-            child: ClipRRect(borderRadius: BorderRadius.circular(_radius), child: child),
-          ),
-        );
+      radius: _radius,
+      offset: const Offset(0, 8),
+      blur: 32,
+      child: Glass(
+        borderRadius: _radius,
+        tint: floatingTint(theme),
+        blur: 5,
+        child: ClipRRect(borderRadius: BorderRadius.circular(_radius), child: child),
+      ),
+    );
 
     final cancel = widget.cancel;
     final sheet = Column(
@@ -398,11 +404,13 @@ class _GlassActionSheetState extends State<GlassActionSheet> {
       children: [
         if (groupChildren.isNotEmpty)
           Flexible(
-            child: pane(Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: groupChildren,
-            )),
+            child: pane(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: groupChildren,
+              ),
+            ),
           ),
         if (groupChildren.isNotEmpty && cancel != null) const SizedBox(height: 8),
         if (cancel != null) pane(_row(theme, widget.actions.length, cancel, cancel: true)),

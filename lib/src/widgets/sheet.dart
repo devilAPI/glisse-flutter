@@ -182,8 +182,12 @@ class _GlassSheetState extends State<_GlassSheet> with SingleTickerProviderState
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding:
-            EdgeInsets.fromLTRB(8, media.padding.top + 24, 8, 8 + media.viewPadding.bottom + media.viewInsets.bottom),
+        padding: EdgeInsets.fromLTRB(
+          8,
+          media.padding.top + 24,
+          8,
+          8 + media.viewPadding.bottom + media.viewInsets.bottom,
+        ),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 640, maxHeight: media.size.height * 0.9),
           child: Semantics(

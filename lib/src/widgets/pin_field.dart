@@ -99,9 +99,9 @@ class _GlassPinFieldState extends State<GlassPinField> with TickerProviderStateM
   FocusNode get _focus => widget.focusNode ?? (_ownFocus ??= FocusNode(debugLabel: 'GlassPinField'));
 
   List<GlassSpring> _springs(int count) => [
-        for (var i = 0; i < count; i++)
-          GlassSpring(vsync: this, value: 1, stiffness: 600, damping: 18)..reduceMotion = _reduceMotion,
-      ];
+    for (var i = 0; i < count; i++)
+      GlassSpring(vsync: this, value: 1, stiffness: 600, damping: 18)..reduceMotion = _reduceMotion,
+  ];
 
   @override
   void initState() {
@@ -209,9 +209,10 @@ class _GlassPinFieldState extends State<GlassPinField> with TickerProviderStateM
     final active = focused && index == math.min(count, widget.length - 1);
     final char = index < count ? chars[index] : null;
     final error = widget.error;
-    final outline = error
-        ? theme.destructive.withValues(alpha: active ? 1 : 0.7)
-        : (active ? theme.ring : theme.ring.withValues(alpha: 0));
+    final outline =
+        error
+            ? theme.destructive.withValues(alpha: active ? 1 : 0.7)
+            : (active ? theme.ring : theme.ring.withValues(alpha: 0));
     final tint = error ? Color.alphaBlend(theme.destructive.withValues(alpha: 0.16), theme.glass) : null;
     Widget content;
     if (char == null) {
@@ -219,22 +220,25 @@ class _GlassPinFieldState extends State<GlassPinField> with TickerProviderStateM
       content =
           active ? Container(width: 2, height: widget.boxHeight * 0.42, color: theme.fill) : const SizedBox.shrink();
     } else {
-      final face = widget.obscure
-          ? Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: theme.foreground, shape: BoxShape.circle),
-            )
-          : Text(
-              char,
-              style: DefaultTextStyle.of(context).style.merge(theme.textStyle).copyWith(
-                    color: error ? theme.destructive : theme.foreground,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    height: 1,
-                    decoration: TextDecoration.none,
-                  ),
-            );
+      final face =
+          widget.obscure
+              ? Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(color: theme.foreground, shape: BoxShape.circle),
+              )
+              : Text(
+                char,
+                style: DefaultTextStyle.of(context).style
+                    .merge(theme.textStyle)
+                    .copyWith(
+                      color: error ? theme.destructive : theme.foreground,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                      decoration: TextDecoration.none,
+                    ),
+              );
       content = AnimatedBuilder(
         animation: _pops[index],
         builder: (context, child) => Transform.scale(scale: _pops[index].value, child: child),
@@ -347,9 +351,10 @@ class _PinFormatter extends TextInputFormatter {
     var text = _clean(newValue.text);
     if (text.characters.length > length) {
       final added = text.startsWith(old) ? text.substring(old.length) : '';
-      text = added.characters.length >= length
-          ? added.characters.take(length).toString()
-          : text.characters.take(length).toString();
+      text =
+          added.characters.length >= length
+              ? added.characters.take(length).toString()
+              : text.characters.take(length).toString();
     }
     return TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length));
   }

@@ -5,16 +5,15 @@ import 'package:glisse/glisse.dart';
 
 import 'helpers.dart';
 
-Widget menuScene({
-  List<String>? log,
-  bool dark = false,
-  GlassMenuAlign align = GlassMenuAlign.end,
-}) {
+Widget menuScene({List<String>? log, bool dark = false, GlassMenuAlign align = GlassMenuAlign.end}) {
   return scene(
     dark: dark,
     Padding(
       padding: EdgeInsets.only(
-          bottom: 160, left: align == GlassMenuAlign.end ? 140 : 0, right: align == GlassMenuAlign.end ? 0 : 140),
+        bottom: 160,
+        left: align == GlassMenuAlign.end ? 140 : 0,
+        right: align == GlassMenuAlign.end ? 0 : 140,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -6,10 +6,16 @@ import 'package:glisse/glisse.dart';
 void main() {
   Future<Brightness> brightnessUnder(WidgetTester tester, Widget Function(Widget child) wrap) async {
     late Brightness seen;
-    await tester.pumpWidget(wrap(Builder(builder: (context) {
-      seen = GlassTheme.of(context).brightness;
-      return const SizedBox();
-    })));
+    await tester.pumpWidget(
+      wrap(
+        Builder(
+          builder: (context) {
+            seen = GlassTheme.of(context).brightness;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
     return seen;
   }
 
@@ -48,10 +54,7 @@ void main() {
   testWidgets('falls back to the platform', (tester) async {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-    final b = await brightnessUnder(
-      tester,
-      (child) => MediaQuery.fromView(view: tester.view, child: child),
-    );
+    final b = await brightnessUnder(tester, (child) => MediaQuery.fromView(view: tester.view, child: child));
     expect(b, Brightness.dark);
   });
 

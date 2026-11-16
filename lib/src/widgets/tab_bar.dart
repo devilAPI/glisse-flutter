@@ -36,11 +36,11 @@ class GlassTabBar<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SegmentsView<T>(
-        kind: SegmentsKind.tabBar,
-        items: items,
-        value: value,
-        onChanged: onChanged,
-        semanticLabel: semanticLabel,
-        mode: mode,
-      );
+    kind: SegmentsKind.tabBar,
+    items: items,
+    value: value,
+    onChanged: onChanged,
+    semanticLabel: semanticLabel,
+    mode: mode,
+  );
 }

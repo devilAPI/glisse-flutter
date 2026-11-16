@@ -41,13 +41,7 @@ class PressState {
 /// size when let go.
 class GlassPressable extends StatefulWidget {
   /// Creates a pressable around [child].
-  const GlassPressable({
-    super.key,
-    required this.child,
-    this.enabled = true,
-    this.onPressChanged,
-    this.builder,
-  });
+  const GlassPressable({super.key, required this.child, this.enabled = true, this.onPressChanged, this.builder});
 
   /// What presses.
   final Widget child;
@@ -66,9 +60,10 @@ class GlassPressable extends StatefulWidget {
 }
 
 class _GlassPressableState extends State<GlassPressable> with TickerProviderStateMixin {
-  late final List<GlassSpring> _springs = [1.0, 1.0, 0.0, 0.0]
-      .map((v) => GlassSpring(vsync: this, value: v, stiffness: _pointer.release.$1, damping: _pointer.release.$2))
-      .toList();
+  late final List<GlassSpring> _springs =
+      [1.0, 1.0, 0.0, 0.0]
+          .map((v) => GlassSpring(vsync: this, value: v, stiffness: _pointer.release.$1, damping: _pointer.release.$2))
+          .toList();
   late final Listenable _motion = Listenable.merge(_springs);
 
   int? _pointerId;
@@ -117,10 +112,12 @@ class _GlassPressableState extends State<GlassPressable> with TickerProviderStat
   void _track(Offset local) {
     final box = context.size;
     if (box == null || box.isEmpty) return;
-    _setState(PressState(
-      pressed: true,
-      position: Offset((local.dx / box.width).clamp(-1.0, 2.0), (local.dy / box.height).clamp(-1.0, 2.0)),
-    ));
+    _setState(
+      PressState(
+        pressed: true,
+        position: Offset((local.dx / box.width).clamp(-1.0, 2.0), (local.dy / box.height).clamp(-1.0, 2.0)),
+      ),
+    );
     final width = box.width;
     final height = box.height;
     final base = 1 + _feel.grow / math.max(width, height);

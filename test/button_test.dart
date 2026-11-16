@@ -31,18 +31,29 @@ void main() {
   for (final dark in [false, true]) {
     testWidgets('looks right ${dark ? 'dark' : 'light'}', (tester) async {
       await setUpGlass(tester, size: const Size(420, 160), ratio: 2);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Wrap(spacing: 10, runSpacing: 12, alignment: WrapAlignment.center, children: [
-          GlassButton(onPressed: () {}, child: const Text('Glass')),
-          GlassButton(onPressed: () {}, variant: GlassButtonVariant.filled, child: const Text('Continue')),
-          GlassButton(
-              onPressed: () {}, destructive: true, icon: const Icon(Icons.delete_outline), child: const Text('Delete')),
-          GlassButton(onPressed: () {}, icon: const Icon(Icons.share), semanticLabel: 'Share'),
-          const GlassButton(onPressed: null, child: Text('Disabled')),
-          GlassButton(key: const Key('held'), onPressed: () {}, tint: Colors.purple, child: const Text('Held')),
-        ]),
-      ));
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Wrap(
+            spacing: 10,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              GlassButton(onPressed: () {}, child: const Text('Glass')),
+              GlassButton(onPressed: () {}, variant: GlassButtonVariant.filled, child: const Text('Continue')),
+              GlassButton(
+                onPressed: () {},
+                destructive: true,
+                icon: const Icon(Icons.delete_outline),
+                child: const Text('Delete'),
+              ),
+              GlassButton(onPressed: () {}, icon: const Icon(Icons.share), semanticLabel: 'Share'),
+              const GlassButton(onPressed: null, child: Text('Disabled')),
+              GlassButton(key: const Key('held'), onPressed: () {}, tint: Colors.purple, child: const Text('Held')),
+            ],
+          ),
+        ),
+      );
       await settle(tester);
       final gesture = await tester.startGesture(tester.getCenter(find.byKey(const Key('held'))));
       await gesture.moveBy(const Offset(12, 4));

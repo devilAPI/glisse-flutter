@@ -21,15 +21,16 @@ const _iconTabs = [
 Widget _bar({List<GlassSegment<int>> items = _tabs, int? initial = 0, void Function(int)? onChanged, Key? key}) {
   var value = initial;
   return StatefulBuilder(
-    builder: (context, setState) => GlassTabBar<int>(
-      key: key,
-      items: items,
-      value: value,
-      onChanged: (v) {
-        setState(() => value = v);
-        onChanged?.call(v);
-      },
-    ),
+    builder:
+        (context, setState) => GlassTabBar<int>(
+          key: key,
+          items: items,
+          value: value,
+          onChanged: (v) {
+            setState(() => value = v);
+            onChanged?.call(v);
+          },
+        ),
   );
 }
 
@@ -118,16 +119,21 @@ void main() {
   for (final dark in [false, true]) {
     testWidgets('looks right ${dark ? 'dark' : 'light'}', (tester) async {
       await setUpGlass(tester, size: const Size(400, 260), ratio: 3);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          _bar(initial: 1),
-          const SizedBox(height: 24),
-          _bar(items: _iconTabs, initial: 0),
-          const SizedBox(height: 30),
-          _bar(key: const Key('held'), initial: 0),
-        ]),
-      ));
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _bar(initial: 1),
+              const SizedBox(height: 24),
+              _bar(items: _iconTabs, initial: 0),
+              const SizedBox(height: 30),
+              _bar(key: const Key('held'), initial: 0),
+            ],
+          ),
+        ),
+      );
       await settle(tester);
       final box = tester.getRect(find.byKey(const Key('held')));
       final gesture = await tester.startGesture(Offset(box.left + 4 + 42, box.center.dy));

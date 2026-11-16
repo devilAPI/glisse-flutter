@@ -19,14 +19,20 @@ void main() {
         await tester.fling(list, const Offset(0, -500), 1500);
         await tester
             .pumpAndSettle(
-                const Duration(milliseconds: 16), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5))
+              const Duration(milliseconds: 16),
+              EnginePhase.sendSemanticsUpdate,
+              const Duration(seconds: 5),
+            )
             .catchError((_) => 0);
       }
       for (var i = 0; i < 6; i++) {
         await tester.fling(list, const Offset(0, 500), 1500);
         await tester
             .pumpAndSettle(
-                const Duration(milliseconds: 16), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5))
+              const Duration(milliseconds: 16),
+              EnginePhase.sendSemanticsUpdate,
+              const Duration(seconds: 5),
+            )
             .catchError((_) => 0);
       }
     }, reportKey: 'scrolling');

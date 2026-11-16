@@ -23,40 +23,43 @@ const _photoActions = [
 ];
 
 List<GlassMenuEntry> _menuItems(List<String> log) => [
-      GlassMenuItem(label: const Text('Copy'), icon: const Icon(Icons.copy), onSelected: () => log.add('copy')),
-      GlassMenuItem(label: const Text('Share'), icon: const Icon(Icons.ios_share), onSelected: () => log.add('share')),
-      GlassMenuItem(label: const Text('Hidden'), enabled: false, onSelected: () => log.add('hidden')),
-      const GlassMenuSeparator(),
-      GlassMenuItem(
-        label: const Text('Delete'),
-        icon: const Icon(Icons.delete_outline),
-        destructive: true,
-        onSelected: () => log.add('delete'),
-      ),
-    ];
+  GlassMenuItem(label: const Text('Copy'), icon: const Icon(Icons.copy), onSelected: () => log.add('copy')),
+  GlassMenuItem(label: const Text('Share'), icon: const Icon(Icons.ios_share), onSelected: () => log.add('share')),
+  GlassMenuItem(label: const Text('Hidden'), enabled: false, onSelected: () => log.add('hidden')),
+  const GlassMenuSeparator(),
+  GlassMenuItem(
+    label: const Text('Delete'),
+    icon: const Icon(Icons.delete_outline),
+    destructive: true,
+    onSelected: () => log.add('delete'),
+  ),
+];
 
 Widget _tile(String label) => Container(
-      width: 120,
-      height: 60,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-      child: Text(label),
-    );
+  width: 120,
+  height: 60,
+  alignment: Alignment.center,
+  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+  child: Text(label),
+);
 
 void main() {
   group('action sheet', () {
     Future<Future<String?>> open(WidgetTester tester, {bool dark = false}) async {
       late Future<String?> result;
-      await tester.pumpWidget(opener(
-        dark: dark,
-        (context) => result = showGlassActionSheet<String>(
-          context: context,
-          title: const Text('Photo'),
-          message: const Text('What would you like to do with it?'),
-          actions: _photoActions,
-          cancel: const GlassActionSheetAction(result: 'cancel', child: Text('Cancel')),
+      await tester.pumpWidget(
+        opener(
+          dark: dark,
+          (context) =>
+              result = showGlassActionSheet<String>(
+                context: context,
+                title: const Text('Photo'),
+                message: const Text('What would you like to do with it?'),
+                actions: _photoActions,
+                cancel: const GlassActionSheetAction(result: 'cancel', child: Text('Cancel')),
+              ),
         ),
-      ));
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       return result;
@@ -66,10 +69,17 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 600));
       var pressed = 0;
       late Future<String?> result;
-      await tester.pumpWidget(opener((context) => result = showGlassActionSheet<String>(
-            context: context,
-            actions: [GlassActionSheetAction(result: 'share', onPressed: () => pressed++, child: const Text('Share'))],
-          )));
+      await tester.pumpWidget(
+        opener(
+          (context) =>
+              result = showGlassActionSheet<String>(
+                context: context,
+                actions: [
+                  GlassActionSheetAction(result: 'share', onPressed: () => pressed++, child: const Text('Share')),
+                ],
+              ),
+        ),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       expect(find.text('Share'), findsOneWidget);
@@ -160,12 +170,16 @@ void main() {
 
     testWidgets('many actions scroll on a small screen', (tester) async {
       await setUpGlass(tester, size: const Size(320, 300));
-      await tester.pumpWidget(opener((context) => showGlassActionSheet<int>(
+      await tester.pumpWidget(
+        opener(
+          (context) => showGlassActionSheet<int>(
             context: context,
             title: const Text('Pick one'),
             actions: [for (var i = 0; i < 12; i++) GlassActionSheetAction(result: i, child: Text('Action $i'))],
             cancel: const GlassActionSheetAction(child: Text('Cancel')),
-          )));
+          ),
+        ),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       expect(tester.takeException(), isNull);
@@ -341,11 +355,15 @@ void main() {
 
     testWidgets('a custom preview shows instead of the child', (tester) async {
       await setUpGlass(tester, size: const Size(400, 600));
-      await tester.pumpWidget(scene(GlassContextMenu(
-        items: _menuItems([]),
-        previewBuilder: (context) => const SizedBox(width: 200, height: 120, child: Text('Big photo')),
-        child: _tile('Photo'),
-      )));
+      await tester.pumpWidget(
+        scene(
+          GlassContextMenu(
+            items: _menuItems([]),
+            previewBuilder: (context) => const SizedBox(width: 200, height: 120, child: Text('Big photo')),
+            child: _tile('Photo'),
+          ),
+        ),
+      );
       await tester.longPress(find.text('Photo'));
       await settle(tester);
       expect(find.text('Big photo'), findsOneWidget);
@@ -370,14 +388,16 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 600));
       tester.view.padding = const FakeViewPadding(top: 94);
       GlassBannerController? banner;
-      await tester.pumpWidget(opener((context) {
-        banner = showGlassBanner(
-          context: context,
-          title: const Text('Messages'),
-          message: const Text('See you at eight?'),
-          duration: const Duration(seconds: 3),
-        );
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          banner = showGlassBanner(
+            context: context,
+            title: const Text('Messages'),
+            message: const Text('See you at eight?'),
+            duration: const Duration(seconds: 3),
+          );
+        }),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       expect(find.text('Messages'), findsOneWidget);
@@ -392,9 +412,11 @@ void main() {
 
     testWidgets('swiping up dismisses it, a small drag down does not', (tester) async {
       await setUpGlass(tester, size: const Size(400, 600));
-      await tester.pumpWidget(opener((context) {
-        showGlassBanner(context: context, title: const Text('Mail'), duration: const Duration(seconds: 30));
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          showGlassBanner(context: context, title: const Text('Mail'), duration: const Duration(seconds: 30));
+        }),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       final rest = tester.getCenter(find.text('Mail'));
@@ -411,14 +433,16 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 600));
       var taps = 0;
       GlassBannerController? banner;
-      await tester.pumpWidget(opener((context) {
-        banner = showGlassBanner(
-          context: context,
-          title: const Text('Reminder'),
-          onTap: () => taps++,
-          duration: const Duration(seconds: 30),
-        );
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          banner = showGlassBanner(
+            context: context,
+            title: const Text('Reminder'),
+            onTap: () => taps++,
+            duration: const Duration(seconds: 30),
+          );
+        }),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       await tester.tap(find.text('Reminder'));
@@ -440,10 +464,12 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 600));
       var count = 0;
       final banners = <GlassBannerController>[];
-      await tester.pumpWidget(opener((context) {
-        count++;
-        banners.add(showGlassBanner(context: context, title: Text('Banner $count')));
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          count++;
+          banners.add(showGlassBanner(context: context, title: Text('Banner $count')));
+        }),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       await tester.tap(find.text('Open'));
@@ -459,10 +485,12 @@ void main() {
 
     testWidgets('two in one frame: only the second shows', (tester) async {
       await setUpGlass(tester, size: const Size(400, 600));
-      await tester.pumpWidget(opener((context) {
-        showGlassBanner(context: context, title: const Text('First'));
-        showGlassBanner(context: context, title: const Text('Second'));
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          showGlassBanner(context: context, title: const Text('First'));
+          showGlassBanner(context: context, title: const Text('Second'));
+        }),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       expect(find.text('First'), findsNothing);
@@ -474,9 +502,11 @@ void main() {
     testWidgets('taken down with the app, it counts as gone', (tester) async {
       await setUpGlass(tester, size: const Size(400, 600));
       GlassBannerController? banner;
-      await tester.pumpWidget(opener((context) {
-        banner = showGlassBanner(context: context, title: const Text('Bye'));
-      }));
+      await tester.pumpWidget(
+        opener((context) {
+          banner = showGlassBanner(context: context, title: const Text('Bye'));
+        }),
+      );
       await tester.tap(find.text('Open'));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpWidget(const SizedBox());
@@ -492,16 +522,20 @@ void main() {
       var taps = 0;
       final focus = FocusNode();
       addTearDown(focus.dispose);
-      await tester.pumpWidget(scene(SizedBox(
-        width: 300,
-        child: GlassCard(
-          title: const Text('Wi-Fi'),
-          subtitle: const Text('Home network'),
-          focusNode: focus,
-          onTap: () => taps++,
-          child: const Text('Connected'),
+      await tester.pumpWidget(
+        scene(
+          SizedBox(
+            width: 300,
+            child: GlassCard(
+              title: const Text('Wi-Fi'),
+              subtitle: const Text('Home network'),
+              focusNode: focus,
+              onTap: () => taps++,
+              child: const Text('Connected'),
+            ),
+          ),
         ),
-      )));
+      );
       await tester.tap(find.text('Connected'));
       await settle(tester);
       expect(taps, 1);
@@ -520,10 +554,9 @@ void main() {
     testWidgets('a card without onTap is not a button', (tester) async {
       await setUpGlass(tester);
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(scene(const SizedBox(
-        width: 300,
-        child: GlassCard(title: Text('Battery'), child: Text('82%')),
-      )));
+      await tester.pumpWidget(
+        scene(const SizedBox(width: 300, child: GlassCard(title: Text('Battery'), child: Text('82%')))),
+      );
       expect(tester.getSemantics(find.byType(GlassCard)), isNot(containsSemantics(isButton: true)));
       expect(find.text('Battery'), findsOneWidget);
       handle.dispose();
@@ -534,14 +567,18 @@ void main() {
     testWidgets('keeps its own state when not controlled', (tester) async {
       await setUpGlass(tester, size: const Size(400, 400));
       final changes = <bool>[];
-      await tester.pumpWidget(scene(SizedBox(
-        width: 320,
-        child: GlassDisclosure(
-          title: const Text('Advanced'),
-          onExpansionChanged: changes.add,
-          child: const Text('Hidden settings'),
+      await tester.pumpWidget(
+        scene(
+          SizedBox(
+            width: 320,
+            child: GlassDisclosure(
+              title: const Text('Advanced'),
+              onExpansionChanged: changes.add,
+              child: const Text('Hidden settings'),
+            ),
+          ),
         ),
-      )));
+      );
       expect(find.text('Hidden settings'), findsNothing);
       final closed = tester.getSize(find.byType(GlassDisclosure)).height;
       await tester.tap(find.text('Advanced'));
@@ -560,18 +597,24 @@ void main() {
       var expanded = false;
       final asked = <bool>[];
       late StateSetter setOuter;
-      await tester.pumpWidget(scene(StatefulBuilder(builder: (context, setState) {
-        setOuter = setState;
-        return SizedBox(
-          width: 320,
-          child: GlassDisclosure(
-            title: const Text('Details'),
-            expanded: expanded,
-            onExpansionChanged: asked.add,
-            child: const Text('Body'),
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder: (context, setState) {
+              setOuter = setState;
+              return SizedBox(
+                width: 320,
+                child: GlassDisclosure(
+                  title: const Text('Details'),
+                  expanded: expanded,
+                  onExpansionChanged: asked.add,
+                  child: const Text('Body'),
+                ),
+              );
+            },
           ),
-        );
-      })));
+        ),
+      );
       await tester.tap(find.text('Details'));
       await settle(tester);
       expect(asked, [true]);
@@ -587,10 +630,14 @@ void main() {
     testWidgets('starts open, and its header reports the expanded state', (tester) async {
       await setUpGlass(tester, size: const Size(400, 400));
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(scene(const SizedBox(
-        width: 320,
-        child: GlassDisclosure(title: Text('Notes'), initiallyExpanded: true, child: Text('Body')),
-      )));
+      await tester.pumpWidget(
+        scene(
+          const SizedBox(
+            width: 320,
+            child: GlassDisclosure(title: Text('Notes'), initiallyExpanded: true, child: Text('Body')),
+          ),
+        ),
+      );
       expect(find.text('Body'), findsOneWidget);
       expect(
         tester.getSemantics(find.text('Notes')),
@@ -598,10 +645,7 @@ void main() {
       );
       await tester.tap(find.text('Notes'));
       await settle(tester);
-      expect(
-        tester.getSemantics(find.text('Notes')),
-        containsSemantics(hasExpandedState: true, isExpanded: false),
-      );
+      expect(tester.getSemantics(find.text('Notes')), containsSemantics(hasExpandedState: true, isExpanded: false));
       handle.dispose();
     });
 
@@ -609,10 +653,14 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       final focus = FocusNode();
       addTearDown(focus.dispose);
-      await tester.pumpWidget(scene(SizedBox(
-        width: 320,
-        child: GlassDisclosure(title: const Text('Keys'), focusNode: focus, child: const Text('Body')),
-      )));
+      await tester.pumpWidget(
+        scene(
+          SizedBox(
+            width: 320,
+            child: GlassDisclosure(title: const Text('Keys'), focusNode: focus, child: const Text('Body')),
+          ),
+        ),
+      );
       focus.requestFocus();
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -625,13 +673,19 @@ void main() {
 
     testWidgets('sits in a list section as a row, matching its tiles', (tester) async {
       await setUpGlass(tester, size: const Size(400, 400));
-      await tester.pumpWidget(scene(const SizedBox(
-        width: 320,
-        child: GlassListSection(children: [
-          GlassListTile(title: Text('Name')),
-          GlassDisclosure(inset: false, title: Text('More'), child: Text('Body')),
-        ]),
-      )));
+      await tester.pumpWidget(
+        scene(
+          const SizedBox(
+            width: 320,
+            child: GlassListSection(
+              children: [
+                GlassListTile(title: Text('Name')),
+                GlassDisclosure(inset: false, title: Text('More'), child: Text('Body')),
+              ],
+            ),
+          ),
+        ),
+      );
       expect(find.byType(Glass), findsOneWidget);
       expect(
         tester.getSize(find.byType(GlassDisclosure)).height,
@@ -642,10 +696,14 @@ void main() {
 
     testWidgets('right to left, the chevron sits at the left', (tester) async {
       await setUpGlass(tester, size: const Size(400, 400));
-      await tester.pumpWidget(scene(const Directionality(
-        textDirection: TextDirection.rtl,
-        child: SizedBox(width: 320, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
-      )));
+      await tester.pumpWidget(
+        scene(
+          const Directionality(
+            textDirection: TextDirection.rtl,
+            child: SizedBox(width: 320, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
+          ),
+        ),
+      );
       final glyph = tester.getCenter(find.byType(GlassGlyph));
       expect(glyph.dx, lessThan(tester.getCenter(find.text('More')).dx));
     });
@@ -657,20 +715,28 @@ void main() {
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     final log = <String>[];
     Future<String?>? sheet;
-    await tester.pumpWidget(scene(Builder(
-      builder: (context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        GlassButton(
-          onPressed: () => sheet = showGlassActionSheet<String>(context: context, actions: _photoActions),
-          child: const Text('Sheet'),
+    await tester.pumpWidget(
+      scene(
+        Builder(
+          builder:
+              (context) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GlassButton(
+                    onPressed: () => sheet = showGlassActionSheet<String>(context: context, actions: _photoActions),
+                    child: const Text('Sheet'),
+                  ),
+                  GlassButton(
+                    onPressed: () => showGlassBanner(context: context, title: const Text('Banner')),
+                    child: const Text('Banner'),
+                  ),
+                  GlassContextMenu(items: _menuItems(log), child: const Text('Hold me')),
+                  const SizedBox(width: 300, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
+                ],
+              ),
         ),
-        GlassButton(
-          onPressed: () => showGlassBanner(context: context, title: const Text('Banner')),
-          child: const Text('Banner'),
-        ),
-        GlassContextMenu(items: _menuItems(log), child: const Text('Hold me')),
-        const SizedBox(width: 300, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
-      ]),
-    )));
+      ),
+    );
     await tester.tap(find.text('Sheet'));
     await settle(tester);
     await tester.tap(find.text('Share'));
@@ -706,21 +772,30 @@ void main() {
   testWidgets('tap targets are labelled', (tester) async {
     await setUpGlass(tester, size: const Size(400, 700));
     final handle = tester.ensureSemantics();
-    await tester.pumpWidget(scene(Builder(
-      builder: (context) => Column(mainAxisSize: MainAxisSize.min, children: [
-        GlassButton(
-          onPressed: () => showGlassActionSheet<String>(
-            context: context,
-            actions: _photoActions,
-            cancel: const GlassActionSheetAction(child: Text('Cancel')),
-          ),
-          child: const Text('Open'),
+    await tester.pumpWidget(
+      scene(
+        Builder(
+          builder:
+              (context) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GlassButton(
+                    onPressed:
+                        () => showGlassActionSheet<String>(
+                          context: context,
+                          actions: _photoActions,
+                          cancel: const GlassActionSheetAction(child: Text('Cancel')),
+                        ),
+                    child: const Text('Open'),
+                  ),
+                  SizedBox(width: 300, child: GlassCard(title: const Text('Card'), onTap: () {})),
+                  const SizedBox(width: 300, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
+                  GlassContextMenu(items: _menuItems([]), child: const Text('Hold me')),
+                ],
+              ),
         ),
-        SizedBox(width: 300, child: GlassCard(title: const Text('Card'), onTap: () {})),
-        const SizedBox(width: 300, child: GlassDisclosure(title: Text('More'), child: Text('Body'))),
-        GlassContextMenu(items: _menuItems([]), child: const Text('Hold me')),
-      ]),
-    )));
+      ),
+    );
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     await tester.tap(find.text('Open'));
     await settle(tester);
@@ -738,16 +813,18 @@ void main() {
 
     testWidgets('action sheet looks right $name', (tester) async {
       await setUpGlass(tester, size: const Size(400, 560));
-      await tester.pumpWidget(opener(
-        dark: dark,
-        (context) => showGlassActionSheet<String>(
-          context: context,
-          title: const Text('Photo'),
-          message: const Text('This photo will be deleted from all your devices.'),
-          actions: _photoActions,
-          cancel: const GlassActionSheetAction(child: Text('Cancel')),
+      await tester.pumpWidget(
+        opener(
+          dark: dark,
+          (context) => showGlassActionSheet<String>(
+            context: context,
+            title: const Text('Photo'),
+            message: const Text('This photo will be deleted from all your devices.'),
+            actions: _photoActions,
+            cancel: const GlassActionSheetAction(child: Text('Cancel')),
+          ),
         ),
-      ));
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       // A finger resting on the second row.
@@ -759,21 +836,23 @@ void main() {
 
     testWidgets('context menu looks right $name', (tester) async {
       await setUpGlass(tester, size: const Size(400, 500));
-      await tester.pumpWidget(MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Material(
-          child: GlassBackdrop(
-            background: Stripes(dark: dark),
-            child: GlassTheme(
-              data: dark ? GlassThemeData.dark() : GlassThemeData.light(),
-              child: Align(
-                alignment: const Alignment(-0.5, -0.3),
-                child: GlassContextMenu(items: _menuItems([]), child: _tile('Photo')),
+      await tester.pumpWidget(
+        MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Material(
+            child: GlassBackdrop(
+              background: Stripes(dark: dark),
+              child: GlassTheme(
+                data: dark ? GlassThemeData.dark() : GlassThemeData.light(),
+                child: Align(
+                  alignment: const Alignment(-0.5, -0.3),
+                  child: GlassContextMenu(items: _menuItems([]), child: _tile('Photo')),
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
       await tester.longPress(find.text('Photo'));
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/surfaces_context_menu_$name.png'));
@@ -781,67 +860,76 @@ void main() {
 
     testWidgets('banner, card and disclosure look right $name', (tester) async {
       await setUpGlass(tester, size: const Size(400, 760));
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Builder(builder: (context) {
-          final theme = GlassTheme.of(context);
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 110, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GlassButton(
-                  onPressed: () => showGlassBanner(
-                    context: context,
-                    leading: Container(
-                      width: 38,
-                      height: 38,
-                      decoration:
-                          BoxDecoration(color: const Color(0xFF34C759), borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.chat_bubble, color: Colors.white, size: 20),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Builder(
+            builder: (context) {
+              final theme = GlassTheme.of(context);
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 110, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    GlassButton(
+                      onPressed:
+                          () => showGlassBanner(
+                            context: context,
+                            leading: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF34C759),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.chat_bubble, color: Colors.white, size: 20),
+                            ),
+                            title: const Text('Messages'),
+                            message: const Text('Ana: Are we still on for dinner at eight?'),
+                            trailing: const Text('now'),
+                            duration: const Duration(minutes: 1),
+                          ),
+                      child: const Text('Open'),
                     ),
-                    title: const Text('Messages'),
-                    message: const Text('Ana: Are we still on for dinner at eight?'),
-                    trailing: const Text('now'),
-                    duration: const Duration(minutes: 1),
-                  ),
-                  child: const Text('Open'),
+                    const SizedBox(height: 12),
+                    GlassCard(
+                      leading: const Icon(Icons.wifi),
+                      title: const Text('Wi-Fi'),
+                      subtitle: const Text('Home network'),
+                      trailing: GlassGlyph.chevron(color: theme.muted, size: 14),
+                      onTap: () {},
+                      child: const Text('Connected, secured, 5 GHz.'),
+                    ),
+                    const SizedBox(height: 12),
+                    const GlassDisclosure(
+                      leading: Icon(Icons.tune),
+                      title: Text('Advanced'),
+                      initiallyExpanded: true,
+                      child: Text('Proxy, DNS and a private address for this network.'),
+                    ),
+                    const SizedBox(height: 12),
+                    const GlassDisclosure(title: Text('Closed section'), child: Text('Body')),
+                    const SizedBox(height: 12),
+                    const GlassListSection(
+                      children: [
+                        GlassListTile(title: Text('Name'), trailing: Text('Home')),
+                        GlassDisclosure(
+                          inset: false,
+                          initiallyExpanded: true,
+                          title: Text('Details'),
+                          childPadding: EdgeInsets.zero,
+                          child: GlassListTile(title: Text('Router'), trailing: Text('192.168.1.1')),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                GlassCard(
-                  leading: const Icon(Icons.wifi),
-                  title: const Text('Wi-Fi'),
-                  subtitle: const Text('Home network'),
-                  trailing: GlassGlyph.chevron(color: theme.muted, size: 14),
-                  onTap: () {},
-                  child: const Text('Connected, secured, 5 GHz.'),
-                ),
-                const SizedBox(height: 12),
-                const GlassDisclosure(
-                  leading: Icon(Icons.tune),
-                  title: Text('Advanced'),
-                  initiallyExpanded: true,
-                  child: Text('Proxy, DNS and a private address for this network.'),
-                ),
-                const SizedBox(height: 12),
-                const GlassDisclosure(title: Text('Closed section'), child: Text('Body')),
-                const SizedBox(height: 12),
-                const GlassListSection(children: [
-                  GlassListTile(title: Text('Name'), trailing: Text('Home')),
-                  GlassDisclosure(
-                    inset: false,
-                    initiallyExpanded: true,
-                    title: Text('Details'),
-                    childPadding: EdgeInsets.zero,
-                    child: GlassListTile(title: Text('Router'), trailing: Text('192.168.1.1')),
-                  ),
-                ]),
-              ],
-            ),
-          );
-        }),
-      ));
+              );
+            },
+          ),
+        ),
+      );
       await tester.tap(find.text('Open'));
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/surfaces_misc_$name.png'));

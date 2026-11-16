@@ -151,9 +151,10 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
     final base = DefaultTextStyle.of(context).style.merge(theme.textStyle);
     final rtl = Directionality.of(context) == TextDirection.rtl;
     final enabled = widget.enabled;
-    final fill = _pressed
-        ? theme.highlight
-        : (_hovered || _focused) && enabled
+    final fill =
+        _pressed
+            ? theme.highlight
+            : (_hovered || _focused) && enabled
             ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6)
             : theme.highlight.withValues(alpha: 0);
 
@@ -226,10 +227,12 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
           SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
         },
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            _toggle();
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              _toggle();
+              return null;
+            },
+          ),
         },
         child: GestureDetector(
           excludeFromSemantics: true,
@@ -261,7 +264,8 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
               child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
             ),
           Padding(
-            padding: widget.childPadding ??
+            padding:
+                widget.childPadding ??
                 (widget.inset
                     ? const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 14)
                     : const EdgeInsetsDirectional.fromSTEB(16, 10, 16, 12)),

@@ -136,10 +136,9 @@ class _GlassInputState extends State<GlassInput> {
     final theme = GlassTheme.of(context);
     final focused = _focus.hasFocus;
     // The page's own font, as the input inherits it on the web.
-    final style = DefaultTextStyle.of(context)
-        .style
-        .merge(theme.textStyle)
-        .copyWith(color: theme.foreground, fontSize: 14, decoration: TextDecoration.none);
+    final style = DefaultTextStyle.of(
+      context,
+    ).style.merge(theme.textStyle).copyWith(color: theme.foreground, fontSize: 14, decoration: TextDecoration.none);
     final showClear = widget.clearable && widget.enabled && _controller.text.isNotEmpty;
 
     final field = CupertinoTextField.borderless(
@@ -196,22 +195,23 @@ class _GlassInputState extends State<GlassInput> {
       tween: ColorTween(end: focused ? theme.glassActive : theme.glass),
       duration: const Duration(milliseconds: 200),
       curve: Curves.ease,
-      builder: (context, color, child) => LiquidGlassBox(
-        radius: widget.height / 2,
-        style: GlassStyle(
-          tint: color ?? theme.glass,
-          edge: theme.edge,
-          drop: theme.drop,
-          rimShine: theme.rimShine,
-          blur: theme.blur,
-          saturation: theme.saturation,
-          bend: theme.glassBend,
-          dispersion: theme.glassDispersion,
-          spec: LensSpec.glass,
-          mode: widget.mode,
-        ),
-        child: child,
-      ),
+      builder:
+          (context, color, child) => LiquidGlassBox(
+            radius: widget.height / 2,
+            style: GlassStyle(
+              tint: color ?? theme.glass,
+              edge: theme.edge,
+              drop: theme.drop,
+              rimShine: theme.rimShine,
+              blur: theme.blur,
+              saturation: theme.saturation,
+              bend: theme.glassBend,
+              dispersion: theme.glassDispersion,
+              spec: LensSpec.glass,
+              mode: widget.mode,
+            ),
+            child: child,
+          ),
       child: SizedBox(
         height: widget.height,
         // The clear button hangs 8px into the padding, as Glisse's margin-right: -8px.
@@ -306,31 +306,31 @@ class GlassGlyph extends StatelessWidget {
 
   /// A magnifying glass.
   const GlassGlyph.magnifier({Key? key, required Color color, double size = 16})
-      : this._(_Glyph.magnifier, color: color, size: size);
+    : this._(_Glyph.magnifier, color: color, size: size);
 
   /// A cross, for clearing.
   const GlassGlyph.clear({Key? key, required Color color, double size = 14})
-      : this._(_Glyph.clear, color: color, size: size);
+    : this._(_Glyph.clear, color: color, size: size);
 
   /// Three dots, as a "more" button.
   const GlassGlyph.ellipsis({Key? key, required Color color, double size = 20})
-      : this._(_Glyph.ellipsis, color: color, size: size);
+    : this._(_Glyph.ellipsis, color: color, size: size);
 
   /// A tick.
   const GlassGlyph.check({Key? key, required Color color, double size = 16})
-      : this._(_Glyph.check, color: color, size: size);
+    : this._(_Glyph.check, color: color, size: size);
 
   /// A chevron pointing right.
   const GlassGlyph.chevron({Key? key, required Color color, double size = 16})
-      : this._(_Glyph.chevron, color: color, size: size);
+    : this._(_Glyph.chevron, color: color, size: size);
 
   /// A plus.
   const GlassGlyph.plus({Key? key, required Color color, double size = 16})
-      : this._(_Glyph.plus, color: color, size: size);
+    : this._(_Glyph.plus, color: color, size: size);
 
   /// A minus.
   const GlassGlyph.minus({Key? key, required Color color, double size = 16})
-      : this._(_Glyph.minus, color: color, size: size);
+    : this._(_Glyph.minus, color: color, size: size);
 
   final _Glyph _kind;
 
@@ -357,12 +357,13 @@ class _GlyphPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 16, size.height / 16);
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final stroke =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
     switch (kind) {
       case _Glyph.magnifier:
         canvas.drawCircle(const Offset(7, 7), 4.75, stroke);

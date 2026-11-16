@@ -52,65 +52,65 @@ class GlassThemeData {
 
   /// Glisse on a light page.
   factory GlassThemeData.light() => const GlassThemeData(
-        brightness: Brightness.light,
-        foreground: Color.fromRGBO(0, 0, 0, 0.88),
-        muted: Color.fromRGBO(60, 60, 67, 0.6),
-        glass: Color.fromRGBO(255, 255, 255, 0.6),
-        glassActive: Color.fromRGBO(236, 236, 240, 0.85),
-        edge: Color.fromRGBO(0, 0, 0, 0.08),
-        drop: Color.fromRGBO(0, 0, 0, 0.06),
-        selection: Color.fromRGBO(0, 0, 0, 0.1),
-        lens: Color.fromRGBO(0, 0, 0, 0.03),
-        lensDrop: Color.fromRGBO(0, 0, 0, 0.11),
-        segmentTrack: Color.fromRGBO(118, 118, 128, 0.12),
-        segmentThumb: Color.fromRGBO(255, 255, 255, 1),
-        segmentLabel: Color.fromRGBO(0, 0, 0, 1),
-        segmentLens: Color.fromRGBO(0, 0, 0, 0.03),
-        surface: Color.fromRGBO(250, 250, 252, 0.86),
-        surfaceEdge: Color.fromRGBO(0, 0, 0, 0.08),
-        shadow: Color.fromRGBO(25, 25, 35, 0.12),
-        highlight: Color.fromRGBO(60, 60, 67, 0.09),
-        separator: Color.fromRGBO(60, 60, 67, 0.15),
-        destructive: Color(0xFFFF383C),
-        track: Color.fromRGBO(59, 59, 66, 0.3),
-        rail: Color.fromRGBO(0, 0, 0, 0.1),
-        on: Color(0xFF34C759),
-        fill: Color(0xFF0088FF),
-        ring: Color.fromRGBO(0, 0, 0, 0.4),
-        lensShine: -1.5,
-        rimShine: 0.3,
-      );
+    brightness: Brightness.light,
+    foreground: Color.fromRGBO(0, 0, 0, 0.88),
+    muted: Color.fromRGBO(60, 60, 67, 0.6),
+    glass: Color.fromRGBO(255, 255, 255, 0.6),
+    glassActive: Color.fromRGBO(236, 236, 240, 0.85),
+    edge: Color.fromRGBO(0, 0, 0, 0.08),
+    drop: Color.fromRGBO(0, 0, 0, 0.06),
+    selection: Color.fromRGBO(0, 0, 0, 0.1),
+    lens: Color.fromRGBO(0, 0, 0, 0.03),
+    lensDrop: Color.fromRGBO(0, 0, 0, 0.11),
+    segmentTrack: Color.fromRGBO(118, 118, 128, 0.12),
+    segmentThumb: Color.fromRGBO(255, 255, 255, 1),
+    segmentLabel: Color.fromRGBO(0, 0, 0, 1),
+    segmentLens: Color.fromRGBO(0, 0, 0, 0.03),
+    surface: Color.fromRGBO(250, 250, 252, 0.86),
+    surfaceEdge: Color.fromRGBO(0, 0, 0, 0.08),
+    shadow: Color.fromRGBO(25, 25, 35, 0.12),
+    highlight: Color.fromRGBO(60, 60, 67, 0.09),
+    separator: Color.fromRGBO(60, 60, 67, 0.15),
+    destructive: Color(0xFFFF383C),
+    track: Color.fromRGBO(59, 59, 66, 0.3),
+    rail: Color.fromRGBO(0, 0, 0, 0.1),
+    on: Color(0xFF34C759),
+    fill: Color(0xFF0088FF),
+    ring: Color.fromRGBO(0, 0, 0, 0.4),
+    lensShine: -1.5,
+    rimShine: 0.3,
+  );
 
   /// Glisse on a dark page.
   factory GlassThemeData.dark() => const GlassThemeData(
-        brightness: Brightness.dark,
-        foreground: Color.fromRGBO(255, 255, 255, 1),
-        muted: Color.fromRGBO(235, 235, 245, 0.6),
-        glass: Color.fromRGBO(40, 40, 40, 0.62),
-        glassActive: Color.fromRGBO(70, 70, 70, 0.62),
-        edge: Color.fromRGBO(255, 255, 255, 0.08),
-        drop: Color(0x00000000),
-        selection: Color.fromRGBO(255, 255, 255, 0.145),
-        lens: Color.fromRGBO(255, 255, 255, 0.055),
-        lensDrop: Color(0x00000000),
-        segmentTrack: Color(0x00000000),
-        segmentThumb: Color.fromRGBO(235, 235, 245, 0.3),
-        segmentLabel: Color.fromRGBO(255, 255, 255, 1),
-        segmentLens: Color(0x00000000),
-        surface: Color.fromRGBO(28, 28, 31, 0.86),
-        surfaceEdge: Color.fromRGBO(255, 255, 255, 0.13),
-        shadow: Color.fromRGBO(0, 0, 0, 0.38),
-        highlight: Color.fromRGBO(235, 235, 245, 0.13),
-        separator: Color.fromRGBO(235, 235, 245, 0.16),
-        destructive: Color(0xFFFF4245),
-        track: Color.fromRGBO(235, 235, 245, 0.3),
-        rail: Color.fromRGBO(255, 255, 255, 0.1),
-        on: Color(0xFF30D158),
-        fill: Color(0xFF0091FF),
-        ring: Color.fromRGBO(255, 255, 255, 0.5),
-        lensShine: 1,
-        rimShine: 0.13,
-      );
+    brightness: Brightness.dark,
+    foreground: Color.fromRGBO(255, 255, 255, 1),
+    muted: Color.fromRGBO(235, 235, 245, 0.6),
+    glass: Color.fromRGBO(40, 40, 40, 0.62),
+    glassActive: Color.fromRGBO(70, 70, 70, 0.62),
+    edge: Color.fromRGBO(255, 255, 255, 0.08),
+    drop: Color(0x00000000),
+    selection: Color.fromRGBO(255, 255, 255, 0.145),
+    lens: Color.fromRGBO(255, 255, 255, 0.055),
+    lensDrop: Color(0x00000000),
+    segmentTrack: Color(0x00000000),
+    segmentThumb: Color.fromRGBO(235, 235, 245, 0.3),
+    segmentLabel: Color.fromRGBO(255, 255, 255, 1),
+    segmentLens: Color(0x00000000),
+    surface: Color.fromRGBO(28, 28, 31, 0.86),
+    surfaceEdge: Color.fromRGBO(255, 255, 255, 0.13),
+    shadow: Color.fromRGBO(0, 0, 0, 0.38),
+    highlight: Color.fromRGBO(235, 235, 245, 0.13),
+    separator: Color.fromRGBO(235, 235, 245, 0.16),
+    destructive: Color(0xFFFF4245),
+    track: Color.fromRGBO(235, 235, 245, 0.3),
+    rail: Color.fromRGBO(255, 255, 255, 0.1),
+    on: Color(0xFF30D158),
+    fill: Color(0xFF0091FF),
+    ring: Color.fromRGBO(255, 255, 255, 0.5),
+    lensShine: 1,
+    rimShine: 0.13,
+  );
 
   /// Glisse for [brightness].
   factory GlassThemeData.fallback(Brightness brightness) =>
@@ -362,12 +362,12 @@ class GlassThemeData {
 
   @override
   int get hashCode => Object.hashAll([
-        brightness, foreground, muted, glass, glassActive, edge, drop, selection, lens, lensDrop, //
-        segmentTrack, segmentThumb, segmentLabel, segmentLens, surface, surfaceEdge, shadow, highlight,
-        separator, destructive, track, rail, on, fill, ring, lensShine, rimShine, blur, saturation,
-        glassBend, glassDispersion, switchBend, sliderBend, segmentBend, tabBend, tabDispersion, textStyle,
-        mode,
-      ]);
+    brightness, foreground, muted, glass, glassActive, edge, drop, selection, lens, lensDrop, //
+    segmentTrack, segmentThumb, segmentLabel, segmentLens, surface, surfaceEdge, shadow, highlight,
+    separator, destructive, track, rail, on, fill, ring, lensShine, rimShine, blur, saturation,
+    glassBend, glassDispersion, switchBend, sliderBend, segmentBend, tabBend, tabDispersion, textStyle,
+    mode,
+  ]);
 }
 
 /// Sets the [GlassThemeData] for the widgets below it.
@@ -399,9 +399,10 @@ class GlassTheme extends InheritedWidget {
     final inherited = context.dependOnInheritedWidgetOfExactType<_GlassBrightness>();
     if (inherited != null) return inherited.brightness;
     if (context.findAncestorWidgetOfExactType<Theme>() != null) return Theme.of(context).brightness;
-    final cupertino = context.findAncestorWidgetOfExactType<CupertinoTheme>() != null
-        ? CupertinoTheme.maybeBrightnessOf(context)
-        : null;
+    final cupertino =
+        context.findAncestorWidgetOfExactType<CupertinoTheme>() != null
+            ? CupertinoTheme.maybeBrightnessOf(context)
+            : null;
     if (cupertino != null) return cupertino;
     return MediaQuery.maybePlatformBrightnessOf(context) ?? Brightness.light;
   }

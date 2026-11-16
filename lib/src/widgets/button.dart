@@ -110,7 +110,8 @@ class _GlassButtonState extends State<GlassButton> {
     final height = widget.height;
     final radius = height / 2;
     final ink = _ink(theme);
-    final padding = widget.padding ??
+    final padding =
+        widget.padding ??
         (iconOnly ? EdgeInsets.zero : EdgeInsets.only(left: widget.icon != null ? 12 : 16, right: 16));
 
     Widget content = Row(
@@ -134,22 +135,23 @@ class _GlassButtonState extends State<GlassButton> {
       // Lights up at once when pressed, as on iOS, and fades on release.
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.ease,
-      builder: (context, color, child) => LiquidGlassBox(
-        radius: radius,
-        style: GlassStyle(
-          tint: color ?? fill,
-          edge: theme.edge,
-          drop: theme.drop,
-          rimShine: theme.rimShine,
-          blur: theme.blur,
-          saturation: theme.saturation,
-          bend: theme.glassBend,
-          dispersion: theme.glassDispersion,
-          spec: LensSpec.glass,
-          mode: widget.mode,
-        ),
-        child: child,
-      ),
+      builder:
+          (context, color, child) => LiquidGlassBox(
+            radius: radius,
+            style: GlassStyle(
+              tint: color ?? fill,
+              edge: theme.edge,
+              drop: theme.drop,
+              rimShine: theme.rimShine,
+              blur: theme.blur,
+              saturation: theme.saturation,
+              bend: theme.glassBend,
+              dispersion: theme.glassDispersion,
+              spec: LensSpec.glass,
+              mode: widget.mode,
+            ),
+            child: child,
+          ),
       child: GlassPressableGlow(
         radius: radius,
         enabled: _enabled,
@@ -163,10 +165,7 @@ class _GlassButtonState extends State<GlassButton> {
 
     if (_focused) {
       // A 2px ring 2px outside the edge, as CSS's outline-offset: 2px.
-      button = CustomPaint(
-        foregroundPainter: _FocusRingPainter(color: theme.ring, radius: radius),
-        child: button,
-      );
+      button = CustomPaint(foregroundPainter: _FocusRingPainter(color: theme.ring, radius: radius), child: button);
     }
 
     button = GlassPressable(
@@ -193,10 +192,12 @@ class _GlassButtonState extends State<GlassButton> {
           SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
         },
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            widget.onPressed?.call();
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onPressed?.call();
+              return null;
+            },
+          ),
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -251,10 +252,7 @@ class _GlowScopeState extends State<_GlowScope> {
       onPointerCancel: (e) => _update(e.localPosition, false),
       child: Stack(
         fit: StackFit.passthrough,
-        children: [
-          widget.child,
-          Positioned.fill(child: PressGlow(state: _state, radius: widget.radius)),
-        ],
+        children: [widget.child, Positioned.fill(child: PressGlow(state: _state, radius: widget.radius))],
       ),
     );
   }

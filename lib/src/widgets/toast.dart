@@ -49,21 +49,22 @@ GlassToastController showGlassToast(
   final overlay = Overlay.of(context, rootOverlay: true);
   late final OverlayEntry entry;
   entry = OverlayEntry(
-    builder: (context) => carried.wrap(
-      _GlassToast(
-        controller: controller,
-        message: message,
-        icon: icon,
-        duration: duration,
-        onTap: onTap,
-        onGone: () {
-          entry.remove();
-          entry.dispose();
-          if (identical(_current, controller)) _current = null;
-          controller._finish();
-        },
-      ),
-    ),
+    builder:
+        (context) => carried.wrap(
+          _GlassToast(
+            controller: controller,
+            message: message,
+            icon: icon,
+            duration: duration,
+            onTap: onTap,
+            onGone: () {
+              entry.remove();
+              entry.dispose();
+              if (identical(_current, controller)) _current = null;
+              controller._finish();
+            },
+          ),
+        ),
   );
   overlay.insert(entry);
   return controller;
@@ -171,12 +172,13 @@ class _GlassToastState extends State<_GlassToast> with TickerProviderStateMixin 
     final top = MediaQuery.paddingOf(context).top;
     final toast = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap == null
-          ? null
-          : () {
-              widget.onTap!();
-              _dismiss();
-            },
+      onTap:
+          widget.onTap == null
+              ? null
+              : () {
+                widget.onTap!();
+                _dismiss();
+              },
       onVerticalDragUpdate: _update,
       onVerticalDragEnd: _end,
       child: GlassSurfaceShadow(

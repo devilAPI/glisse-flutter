@@ -48,8 +48,8 @@ class GlassPicker extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
-  })  : assert((children == null) != (items == null), 'Give either children or items.'),
-        assert(itemExtent > 0);
+  }) : assert((children == null) != (items == null), 'Give either children or items.'),
+       assert(itemExtent > 0);
 
   /// The rows, as widgets.
   final List<Widget>? children;
@@ -130,19 +130,21 @@ class _GlassPickerState extends State<GlassPicker> {
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
     );
-    final picker = LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
-      return SizedBox(
-        width: width,
-        height: widget.height,
-        child: Stack(
-          children: [
-            Positioned.fill(child: Center(child: _Band(theme: theme, height: widget.itemExtent))),
-            Positioned.fill(child: wheel),
-          ],
-        ),
-      );
-    });
+    final picker = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
+        return SizedBox(
+          width: width,
+          height: widget.height,
+          child: Stack(
+            children: [
+              Positioned.fill(child: Center(child: _Band(theme: theme, height: widget.itemExtent))),
+              Positioned.fill(child: wheel),
+            ],
+          ),
+        );
+      },
+    );
     return Opacity(opacity: enabled ? 1 : 0.35, child: picker);
   }
 }
@@ -292,7 +294,9 @@ class _WheelState extends State<_Wheel> {
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     // The page's own font, as GlassInput takes it.
-    final style = DefaultTextStyle.of(context).style.merge(theme.textStyle).copyWith(
+    final style = DefaultTextStyle.of(context).style
+        .merge(theme.textStyle)
+        .copyWith(
           color: theme.foreground,
           fontSize: 20,
           height: 1.2,
@@ -306,27 +310,25 @@ class _WheelState extends State<_Wheel> {
       squeeze: 1.1,
       physics: widget.enabled ? const FixedExtentScrollPhysics() : const NeverScrollableScrollPhysics(),
       onSelectedItemChanged: _changed,
-      childDelegate: ListWheelChildBuilderDelegate(
-        childCount: widget.looping ? null : widget.itemCount,
-        builder: _row,
-      ),
+      childDelegate: ListWheelChildBuilderDelegate(childCount: widget.looping ? null : widget.itemCount, builder: _row),
     );
     // Rows fade out towards the drum's top and bottom.
     wheel = ShaderMask(
       blendMode: BlendMode.dstIn,
-      shaderCallback: (bounds) => const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0x00000000),
-          Color(0x59000000),
-          Color(0xFF000000),
-          Color(0xFF000000),
-          Color(0x59000000),
-          Color(0x00000000)
-        ],
-        stops: [0, 0.2, 0.42, 0.58, 0.8, 1],
-      ).createShader(bounds),
+      shaderCallback:
+          (bounds) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0x00000000),
+              Color(0x59000000),
+              Color(0xFF000000),
+              Color(0xFF000000),
+              Color(0x59000000),
+              Color(0x00000000),
+            ],
+            stops: [0, 0.2, 0.42, 0.58, 0.8, 1],
+          ).createShader(bounds),
       child: DefaultTextStyle(
         style: style,
         maxLines: 1,
@@ -344,9 +346,7 @@ class _WheelState extends State<_Wheel> {
               child: Center(
                 child: Container(
                   height: widget.itemExtent + 4,
-                  decoration: ShapeDecoration(
-                    shape: StadiumBorder(side: BorderSide(color: theme.ring, width: 2)),
-                  ),
+                  decoration: ShapeDecoration(shape: StadiumBorder(side: BorderSide(color: theme.ring, width: 2))),
                 ),
               ),
             ),
@@ -365,10 +365,12 @@ class _WheelState extends State<_Wheel> {
         SingleActivator(LogicalKeyboardKey.pageDown): _MoveIntent(5),
       },
       actions: <Type, Action<Intent>>{
-        _MoveIntent: CallbackAction<_MoveIntent>(onInvoke: (intent) {
-          _nudge(intent.steps);
-          return null;
-        }),
+        _MoveIntent: CallbackAction<_MoveIntent>(
+          onInvoke: (intent) {
+            _nudge(intent.steps);
+            return null;
+          },
+        ),
       },
       child: wheel,
     );
@@ -411,17 +413,17 @@ class _WheelGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     // Narrower than the wheels want, they share what there is.
-    final row = LayoutBuilder(builder: (context, constraints) {
-      final wanted = wheels.fold<double>(0, (sum, w) => sum + w.$1);
-      final room = constraints.hasBoundedWidth ? constraints.maxWidth : wanted;
-      final scale = wanted > room && wanted > 0 ? room / wanted : 1.0;
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (width, wheel) in wheels) SizedBox(width: width * scale, height: height, child: wheel),
-        ],
-      );
-    });
+    final row = LayoutBuilder(
+      builder: (context, constraints) {
+        final wanted = wheels.fold<double>(0, (sum, w) => sum + w.$1);
+        final room = constraints.hasBoundedWidth ? constraints.maxWidth : wanted;
+        final scale = wanted > room && wanted > 0 ? room / wanted : 1.0;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [for (final (width, wheel) in wheels) SizedBox(width: width * scale, height: height, child: wheel)],
+        );
+      },
+    );
     // Frosted as a menu is, so the rows read over a busy page.
     final surface = LiquidGlassBox(
       radius: 24,
@@ -512,14 +514,8 @@ class _GlassDatePickerState extends State<GlassDatePicker> {
     _last = _date;
   }
 
-  DateTime get _date => DateTime(
-        _year,
-        _month,
-        math.min(_day, _daysIn(_year, _month)),
-        _initial.hour,
-        _initial.minute,
-        _initial.second,
-      );
+  DateTime get _date =>
+      DateTime(_year, _month, math.min(_day, _daysIn(_year, _month)), _initial.hour, _initial.minute, _initial.second);
 
   @override
   void dispose() {
@@ -598,8 +594,9 @@ class _GlassDatePickerState extends State<GlassDatePicker> {
               enabled: _enabled,
               onSelected: _dayChanged,
               // Days the month doesn't have show, muted, as on iOS.
-              itemBuilder: (context, index) =>
-                  Text('${index + 1}', style: index + 1 > days ? TextStyle(color: theme.muted) : null),
+              itemBuilder:
+                  (context, index) =>
+                      Text('${index + 1}', style: index + 1 > days ? TextStyle(color: theme.muted) : null),
               semanticLabel: 'Day',
               semanticValue: (index) => '${math.min(index + 1, days)}',
             ),
@@ -672,10 +669,12 @@ class _GlassTimePickerState extends State<GlassTimePicker> {
   late final DateTime _initial = widget.initialTime ?? DateTime.now();
   late int _hour = _initial.hour;
   late int _minute = _initial.minute - _initial.minute % widget.minuteInterval;
-  late final FixedExtentScrollController _hours =
-      FixedExtentScrollController(initialItem: widget.use24hFormat ? _hour : _hour % 12);
-  late final FixedExtentScrollController _minutes =
-      FixedExtentScrollController(initialItem: _minute ~/ widget.minuteInterval);
+  late final FixedExtentScrollController _hours = FixedExtentScrollController(
+    initialItem: widget.use24hFormat ? _hour : _hour % 12,
+  );
+  late final FixedExtentScrollController _minutes = FixedExtentScrollController(
+    initialItem: _minute ~/ widget.minuteInterval,
+  );
   late final FixedExtentScrollController _periods = FixedExtentScrollController(initialItem: _hour >= 12 ? 1 : 0);
   // Which turn of twelve the hour wheel is on, to flip AM and PM between.
   late int _turn = _hours.initialItem ~/ 12;

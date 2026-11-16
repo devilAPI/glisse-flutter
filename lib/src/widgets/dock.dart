@@ -30,13 +30,7 @@ class GlassDockItem {
 /// opened. A finger dragged along it swells them too.
 class GlassDock extends StatefulWidget {
   /// Creates a dock.
-  const GlassDock({
-    super.key,
-    required this.items,
-    this.iconSize = 48,
-    this.magnification = 1.6,
-    this.spacing = 8,
-  });
+  const GlassDock({super.key, required this.items, this.iconSize = 48, this.magnification = 1.6, this.spacing = 8});
 
   /// The apps, in order.
   final List<GlassDockItem> items;
@@ -222,13 +216,7 @@ class _GlassDockState extends State<GlassDock> with TickerProviderStateMixin {
               clipBehavior: Clip.none,
               alignment: Alignment.bottomCenter,
               children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: bar,
-                  child: const Glass(borderRadius: 22),
-                ),
+                Positioned(left: 0, right: 0, bottom: 0, height: bar, child: const Glass(borderRadius: 22)),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: _pad),
                   child: Row(

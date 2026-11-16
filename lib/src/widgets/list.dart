@@ -11,13 +11,7 @@ import 'hairline.dart';
 /// [header] and over a muted [footer].
 class GlassListSection extends StatelessWidget {
   /// Creates a list section of [children].
-  const GlassListSection({
-    super.key,
-    this.header,
-    this.footer,
-    required this.children,
-    this.borderRadius = 26,
-  });
+  const GlassListSection({super.key, this.header, this.footer, required this.children, this.borderRadius = 26});
 
   /// Shown above the rows, in muted text.
   final Widget? header;
@@ -34,11 +28,9 @@ class GlassListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
-    final muted = DefaultTextStyle.of(context).style.merge(theme.textStyle).copyWith(
-          color: theme.muted,
-          fontSize: 13,
-          height: 1.3,
-        );
+    final muted = DefaultTextStyle.of(
+      context,
+    ).style.merge(theme.textStyle).copyWith(color: theme.muted, fontSize: 13, height: 1.3);
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       rows.add(children[i]);
@@ -50,10 +42,12 @@ class GlassListSection extends StatelessWidget {
           _ => false,
         };
         final inset = leading ? 16.0 + 28 + 12 : 16.0;
-        rows.add(Padding(
-          padding: EdgeInsetsDirectional.only(start: inset),
-          child: Container(height: hairline(context), color: theme.separator),
-        ));
+        rows.add(
+          Padding(
+            padding: EdgeInsetsDirectional.only(start: inset),
+            child: Container(height: hairline(context), color: theme.separator),
+          ),
+        );
       }
     }
     return Column(
@@ -69,8 +63,11 @@ class GlassListSection extends StatelessWidget {
           borderRadius: borderRadius,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
-            child:
-                Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: rows),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: rows,
+            ),
           ),
         ),
         if (footer != null)
@@ -130,9 +127,10 @@ class _GlassListTileState extends State<GlassListTile> {
     final theme = GlassTheme.of(context);
     final base = DefaultTextStyle.of(context).style.merge(theme.textStyle);
     final tappable = widget.onTap != null;
-    final fill = _pressed
-        ? theme.highlight
-        : (_hovered || _focused) && tappable
+    final fill =
+        _pressed
+            ? theme.highlight
+            : (_hovered || _focused) && tappable
             ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6)
             : const Color(0x00000000);
 
@@ -201,10 +199,12 @@ class _GlassListTileState extends State<GlassListTile> {
         onShowHoverHighlight: (v) => setState(() => _hovered = v),
         onShowFocusHighlight: (v) => setState(() => _focused = v),
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            widget.onTap?.call();
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap?.call();
+              return null;
+            },
+          ),
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,

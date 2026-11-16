@@ -13,21 +13,24 @@ import 'helpers.dart';
 final GlobalKey shot = GlobalKey();
 
 Widget scrollingApp(Key key, ScrollController c) => MaterialApp(
-      home: RepaintBoundary(
-        key: shot,
-        child: Material(
-          child: GlassBackdrop(
-            key: key,
-            background: const Stripes(),
-            child: ListView(controller: c, children: [
-              const SizedBox(height: 100),
-              const Glass(height: 80, bend: 1, child: SizedBox(width: 200, height: 80)),
-              const SizedBox(height: 2000),
-            ]),
-          ),
+  home: RepaintBoundary(
+    key: shot,
+    child: Material(
+      child: GlassBackdrop(
+        key: key,
+        background: const Stripes(),
+        child: ListView(
+          controller: c,
+          children: [
+            const SizedBox(height: 100),
+            const Glass(height: 80, bend: 1, child: SizedBox(width: 200, height: 80)),
+            const SizedBox(height: 2000),
+          ],
         ),
       ),
-    );
+    ),
+  ),
+);
 
 Future<List<int>> grab(WidgetTester tester) async {
   final boundary = shot.currentContext!.findRenderObject()! as RenderRepaintBoundary;
@@ -43,17 +46,18 @@ Future<List<int>> grab(WidgetTester tester) async {
 void main() {
   testWidgets('glass inside a backdrop\'s background settles instead of copying itself', (tester) async {
     await setUpGlass(tester);
-    await tester.pumpWidget(const MaterialApp(
-      home: Material(
-        child: GlassBackdrop(
-          background: Stack(children: [
-            Positioned.fill(child: Stripes()),
-            Center(child: Glass(width: 100, height: 60)),
-          ]),
-          child: SizedBox.expand(),
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: GlassBackdrop(
+            background: Stack(
+              children: [Positioned.fill(child: Stripes()), Center(child: Glass(width: 100, height: 60))],
+            ),
+            child: SizedBox.expand(),
+          ),
         ),
       ),
-    ));
+    );
     var frames = 0;
     for (var i = 0; i < 200; i++) {
       await tester.pump(const Duration(milliseconds: 16));
@@ -67,13 +71,16 @@ void main() {
     await setUpGlass(tester);
     var n = 0;
     late StateSetter set;
-    await tester.pumpWidget(scene(StatefulBuilder(builder: (context, s) {
-      set = s;
-      return GlassPopover(
-        popoverBuilder: (_) => Text('Card $n'),
-        child: const Text('Anchor'),
-      );
-    })));
+    await tester.pumpWidget(
+      scene(
+        StatefulBuilder(
+          builder: (context, s) {
+            set = s;
+            return GlassPopover(popoverBuilder: (_) => Text('Card $n'), child: const Text('Anchor'));
+          },
+        ),
+      ),
+    );
     await tester.tap(find.text('Anchor'));
     await settle(tester);
     expect(find.text('Card 0'), findsOneWidget);
@@ -118,10 +125,12 @@ void main() {
   });
 
   testWidgets('HitPadding round an empty child takes no hits and does not throw', (tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(child: HitPadding(padding: EdgeInsets.all(10), child: SizedBox.shrink())),
-    ));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: HitPadding(padding: EdgeInsets.all(10), child: SizedBox.shrink())),
+      ),
+    );
     await tester.tapAt(tester.getCenter(find.byType(HitPadding)) + const Offset(3, 3));
     final error = tester.takeException();
     expect(error, isNull);
@@ -130,24 +139,26 @@ void main() {
   testWidgets('RTL segments: semantics match the drawn labels', (tester) async {
     await setUpGlass(tester);
     final handle = tester.ensureSemantics();
-    await tester.pumpWidget(MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Material(
-          child: Center(
-            child: GlassSegmentedControl<int>(
-              segments: const [
-                GlassSegment(value: 0, label: 'First'),
-                GlassSegment(value: 1, label: 'Second'),
-                GlassSegment(value: 2, label: 'Third'),
-              ],
-              value: 0,
-              onChanged: (_) {},
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: GlassSegmentedControl<int>(
+                segments: const [
+                  GlassSegment(value: 0, label: 'First'),
+                  GlassSegment(value: 1, label: 'Second'),
+                  GlassSegment(value: 2, label: 'Third'),
+                ],
+                value: 0,
+                onChanged: (_) {},
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
     final bar = tester.getRect(find.byType(GlassSegmentedControl<int>));
     final first = tester.getRect(find.bySemanticsLabel('First'));
     // The painter and pointer code put index 0 at the left.
@@ -158,11 +169,9 @@ void main() {
   testWidgets('the magnifier keeps every move, even two in one frame', (tester) async {
     await setUpGlass(tester);
     final moves = <Offset>[];
-    await tester.pumpWidget(scene(SizedBox(
-      width: 400,
-      height: 300,
-      child: GlassMagnifier(size: 60, position: null, onMoved: moves.add),
-    )));
+    await tester.pumpWidget(
+      scene(SizedBox(width: 400, height: 300, child: GlassMagnifier(size: 60, position: null, onMoved: moves.add))),
+    );
     final start = tester.getCenter(find.bySemanticsLabel('Magnifier'));
     final g = await tester.startGesture(start, kind: PointerDeviceKind.touch);
     await g.moveBy(const Offset(30, 0));
@@ -179,11 +188,9 @@ void main() {
   testWidgets('a popover mounted with an open controller shows its card', (tester) async {
     await setUpGlass(tester);
     final c = GlassPopoverController()..show();
-    await tester.pumpWidget(scene(GlassPopover(
-      controller: c,
-      popoverBuilder: (_) => const Text('Card'),
-      child: const Text('Anchor'),
-    )));
+    await tester.pumpWidget(
+      scene(GlassPopover(controller: c, popoverBuilder: (_) => const Text('Card'), child: const Text('Anchor'))),
+    );
     await settle(tester);
     expect(find.text('Card'), findsOneWidget);
   });
@@ -192,10 +199,16 @@ void main() {
     await setUpGlass(tester);
     var items = const [GlassSegment(value: 0, label: 'A'), GlassSegment(value: 1, label: 'B')];
     late StateSetter set;
-    await tester.pumpWidget(scene(StatefulBuilder(builder: (context, s) {
-      set = s;
-      return GlassTabBar<int>(items: items, value: 0, onChanged: (_) {});
-    })));
+    await tester.pumpWidget(
+      scene(
+        StatefulBuilder(
+          builder: (context, s) {
+            set = s;
+            return GlassTabBar<int>(items: items, value: 0, onChanged: (_) {});
+          },
+        ),
+      ),
+    );
     final g = await tester.startGesture(tester.getCenter(find.byType(GlassTabBar<int>)));
     await tester.pump();
     set(() => items = const []);
@@ -208,20 +221,24 @@ void main() {
 
   testWidgets('RTL dock: hovering an icon labels that icon', (tester) async {
     await setUpGlass(tester);
-    await tester.pumpWidget(MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Material(
-          child: Center(
-            child: GlassDock(items: [
-              GlassDockItem(icon: const ColoredBox(color: Colors.red), label: 'Zero', onPressed: () {}),
-              GlassDockItem(icon: const ColoredBox(color: Colors.green), label: 'One', onPressed: () {}),
-              GlassDockItem(icon: const ColoredBox(color: Colors.blue), label: 'Two', onPressed: () {}),
-            ]),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: GlassDock(
+                items: [
+                  GlassDockItem(icon: const ColoredBox(color: Colors.red), label: 'Zero', onPressed: () {}),
+                  GlassDockItem(icon: const ColoredBox(color: Colors.green), label: 'One', onPressed: () {}),
+                  GlassDockItem(icon: const ColoredBox(color: Colors.blue), label: 'Two', onPressed: () {}),
+                ],
+              ),
+            ),
           ),
         ),
       ),
-    ));
+    );
     final dock = tester.getRect(find.byType(GlassDock));
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset(dock.left + 8 + 24, dock.bottom - 20));
@@ -238,10 +255,14 @@ void main() {
     await setUpGlass(tester);
     final controller = TextEditingController(text: 'glass');
     addTearDown(controller.dispose);
-    await tester.pumpWidget(scene(Directionality(
-      textDirection: TextDirection.rtl,
-      child: SizedBox(width: 300, child: GlassSearchField(controller: controller)),
-    )));
+    await tester.pumpWidget(
+      scene(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: SizedBox(width: 300, child: GlassSearchField(controller: controller)),
+        ),
+      ),
+    );
     await settle(tester);
     final field = tester.getRect(find.byType(GlassSearchField));
     final clear = tester.getRect(find.bySemanticsLabel('Clear'));
@@ -253,31 +274,34 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     late GlassBackdropController backdrop;
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: GlassBackdrop(
-          background: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (context, i) => SizedBox(
-              height: 60,
-              child: ColoredBox(color: Colors.primaries[i % 12], child: Text('Row $i')),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: GlassBackdrop(
+            background: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder:
+                  (context, i) =>
+                      SizedBox(height: 60, child: ColoredBox(color: Colors.primaries[i % 12], child: Text('Row $i'))),
             ),
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Builder(builder: (context) {
-              backdrop = GlassBackdrop.maybeOf(context)!;
-              return GlassTabBar<int>(
-                items: const [GlassSegment(value: 0, label: 'One'), GlassSegment(value: 1, label: 'Two')],
-                value: 0,
-                onChanged: (_) {},
-              );
-            }),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Builder(
+                builder: (context) {
+                  backdrop = GlassBackdrop.maybeOf(context)!;
+                  return GlassTabBar<int>(
+                    items: const [GlassSegment(value: 0, label: 'One'), GlassSegment(value: 1, label: 'Two')],
+                    value: 0,
+                    onChanged: (_) {},
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
-    ));
+    );
     await settle(tester);
     final before = backdrop.image;
     expect(before, isNotNull);
@@ -291,19 +315,23 @@ void main() {
 
   group('second review', () {
     Widget menu({required bool show, required bool enabled, ValueChanged<bool>? onOpenChanged, List<String>? log}) {
-      return scene(StatefulBuilder(
-        builder: (context, setState) => show
-            ? GlassContextMenu(
-                enabled: enabled,
-                onOpenChanged: onOpenChanged,
-                items: [
-                  GlassMenuItem(label: const Text('Copy'), onSelected: () => log?.add('copy')),
-                  GlassMenuItem(label: const Text('Share'), onSelected: () => log?.add('share')),
-                ],
-                child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
-              )
-            : const SizedBox(),
-      ));
+      return scene(
+        StatefulBuilder(
+          builder:
+              (context, setState) =>
+                  show
+                      ? GlassContextMenu(
+                        enabled: enabled,
+                        onOpenChanged: onOpenChanged,
+                        items: [
+                          GlassMenuItem(label: const Text('Copy'), onSelected: () => log?.add('copy')),
+                          GlassMenuItem(label: const Text('Share'), onSelected: () => log?.add('share')),
+                        ],
+                        child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
+                      )
+                      : const SizedBox(),
+        ),
+      );
     }
 
     testWidgets('a context menu removed while open does not throw or leak', (tester) async {
@@ -311,16 +339,22 @@ void main() {
       var open = false;
       late StateSetter outer;
       var show = true;
-      await tester.pumpWidget(scene(StatefulBuilder(builder: (context, setState) {
-        outer = setState;
-        return show
-            ? GlassContextMenu(
-                onOpenChanged: (v) => setState(() => open = v),
-                items: [GlassMenuItem(label: const Text('Copy'), onSelected: () {})],
-                child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
-              )
-            : const SizedBox();
-      })));
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder: (context, setState) {
+              outer = setState;
+              return show
+                  ? GlassContextMenu(
+                    onOpenChanged: (v) => setState(() => open = v),
+                    items: [GlassMenuItem(label: const Text('Copy'), onSelected: () {})],
+                    child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
+                  )
+                  : const SizedBox();
+            },
+          ),
+        ),
+      );
       await tester.tap(find.text('Photo'), buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
       await settle(tester);
       expect(open, isTrue);
@@ -340,10 +374,12 @@ void main() {
       await settle(tester);
       expect(tester.takeException(), isNull);
 
-      Widget disclosure(bool enabled) => scene(SizedBox(
-            width: 300,
-            child: GlassDisclosure(enabled: enabled, title: const Text('More'), child: const Text('Body')),
-          ));
+      Widget disclosure(bool enabled) => scene(
+        SizedBox(
+          width: 300,
+          child: GlassDisclosure(enabled: enabled, title: const Text('More'), child: const Text('Body')),
+        ),
+      );
       await tester.pumpWidget(disclosure(true));
       final hold = await tester.startGesture(tester.getCenter(find.text('More')));
       await tester.pump(const Duration(milliseconds: 50));
@@ -373,20 +409,30 @@ void main() {
       var value = 3.7;
       final focus = FocusNode();
       addTearDown(focus.dispose);
-      await tester.pumpWidget(scene(StatefulBuilder(
-        builder: (context, setState) =>
-            GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
-      )));
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder:
+                (context, setState) =>
+                    GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
+          ),
+        ),
+      );
       focus.requestFocus();
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await settle(tester);
       expect(value, 4);
       value = 4.3;
-      await tester.pumpWidget(scene(StatefulBuilder(
-        builder: (context, setState) =>
-            GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
-      )));
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder:
+                (context, setState) =>
+                    GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
+          ),
+        ),
+      );
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await settle(tester);
       expect(value, 4);
@@ -403,15 +449,17 @@ void main() {
     testWidgets('calendar reports the month a new selection brings into view', (tester) async {
       await setUpGlass(tester, size: const Size(400, 500));
       final months = <DateTime>[];
-      Widget calendar(DateTime selected) => scene(SizedBox(
-            width: 340,
-            child: GlassCalendar(
-              selectedDate: selected,
-              initialMonth: DateTime(2026, 3),
-              onDateSelected: (_) {},
-              onMonthChanged: months.add,
-            ),
-          ));
+      Widget calendar(DateTime selected) => scene(
+        SizedBox(
+          width: 340,
+          child: GlassCalendar(
+            selectedDate: selected,
+            initialMonth: DateTime(2026, 3),
+            onDateSelected: (_) {},
+            onMonthChanged: months.add,
+          ),
+        ),
+      );
       await tester.pumpWidget(calendar(DateTime(2026, 3, 10)));
       await tester.pumpWidget(calendar(DateTime(2026, 7, 4)));
       await settle(tester);
@@ -431,11 +479,11 @@ void main() {
     testWidgets('a backdrop copies only for glass that can read the copy', (tester) async {
       await setUpGlass(tester);
       Widget page(GlassMode mode) => MaterialApp(
-            home: GlassBackdrop(
-              background: const Stripes(),
-              child: Center(child: Glass(mode: mode, width: 120, height: 60)),
-            ),
-          );
+        home: GlassBackdrop(
+          background: const Stripes(),
+          child: Center(child: Glass(mode: mode, width: 120, height: 60)),
+        ),
+      );
       GlassBackdropController controller() => GlassBackdrop.maybeOf(tester.element(find.byType(Glass)))!;
 
       await tester.pumpWidget(page(GlassMode.frost));

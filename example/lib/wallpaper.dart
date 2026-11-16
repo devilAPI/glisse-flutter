@@ -38,9 +38,7 @@ class _WallpaperState extends State<Wallpaper> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(painter: _WallpaperPainter(widget.dark, _drift), size: Size.infinite),
-    );
+    return RepaintBoundary(child: CustomPaint(painter: _WallpaperPainter(widget.dark, _drift), size: Size.infinite));
   }
 }
 
@@ -59,9 +57,10 @@ class _WallpaperPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: dark
-              ? const [Color(0xFF0B1026), Color(0xFF2A1450), Color(0xFF071E2E)]
-              : const [Color(0xFFFFE3C7), Color(0xFFE2D9FF), Color(0xFFC8F1FF)],
+          colors:
+              dark
+                  ? const [Color(0xFF0B1026), Color(0xFF2A1450), Color(0xFF071E2E)]
+                  : const [Color(0xFFFFE3C7), Color(0xFFE2D9FF), Color(0xFFC8F1FF)],
         ).createShader(rect),
     );
 
@@ -85,9 +84,10 @@ class _WallpaperPainter extends CustomPainter {
     }
 
     // Fine lines, which show the bend at the glass's rim best.
-    final line = Paint()
-      ..color = (dark ? Colors.white : Colors.black).withValues(alpha: 0.10)
-      ..strokeWidth = 1;
+    final line =
+        Paint()
+          ..color = (dark ? Colors.white : Colors.black).withValues(alpha: 0.10)
+          ..strokeWidth = 1;
     for (var x = 0.0; x < size.width; x += 28) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), line);
     }

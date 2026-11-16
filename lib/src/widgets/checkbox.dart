@@ -111,8 +111,13 @@ class _GlassCheckboxState extends State<GlassCheckbox> with TickerProviderStateM
           child: SizedBox.square(
             dimension: _box,
             child: CustomPaint(
-              painter:
-                  _MarkPainter(progress: _draw.value, dash: mixed, opacity: t, outline: _outline(theme, t), radius: 7),
+              painter: _MarkPainter(
+                progress: _draw.value,
+                dash: mixed,
+                opacity: t,
+                outline: _outline(theme, t),
+                radius: 7,
+              ),
             ),
           ),
         );
@@ -171,20 +176,22 @@ class _MarkPainter extends CustomPainter {
     _paintOutline(canvas, size, outline, radius);
     if (progress <= 0.001 || opacity <= 0.001) return;
     final s = size.width / _box;
-    final path = dash
-        ? (Path()
-          ..moveTo(6.5 * s, 11 * s)
-          ..lineTo(15.5 * s, 11 * s))
-        : (Path()
-          ..moveTo(6 * s, 11.5 * s)
-          ..lineTo(9.6 * s, 15 * s)
-          ..lineTo(16.2 * s, 7.2 * s));
-    final paint = Paint()
-      ..color = const Color(0xFFFFFFFF).withValues(alpha: opacity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2 * s
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final path =
+        dash
+            ? (Path()
+              ..moveTo(6.5 * s, 11 * s)
+              ..lineTo(15.5 * s, 11 * s))
+            : (Path()
+              ..moveTo(6 * s, 11.5 * s)
+              ..lineTo(9.6 * s, 15 * s)
+              ..lineTo(16.2 * s, 7.2 * s));
+    final paint =
+        Paint()
+          ..color = const Color(0xFFFFFFFF).withValues(alpha: opacity)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.2 * s
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(_trim(path, progress.clamp(0.0, 1.0)), paint);
   }
 

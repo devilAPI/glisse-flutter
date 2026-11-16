@@ -22,16 +22,17 @@ Widget _range(
     child: SizedBox(
       width: 236,
       child: StatefulBuilder(
-        builder: (context, setState) => GlassRangeSlider(
-          values: get(),
-          divisions: divisions,
-          focusNode: focusNode,
-          endFocusNode: endFocusNode,
-          onChangeStart: onStart,
-          onChangeEnd: onEnd,
-          semanticLabel: 'Price',
-          onChanged: enabled ? (v) => setState(() => set(v)) : null,
-        ),
+        builder:
+            (context, setState) => GlassRangeSlider(
+              values: get(),
+              divisions: divisions,
+              focusNode: focusNode,
+              endFocusNode: endFocusNode,
+              onChangeStart: onStart,
+              onChangeEnd: onEnd,
+              semanticLabel: 'Price',
+              onChanged: enabled ? (v) => setState(() => set(v)) : null,
+            ),
       ),
     ),
   );
@@ -66,15 +67,19 @@ void main() {
       var started = 0;
       var ended = 0;
       GlassRange? last;
-      await tester.pumpWidget(scene(_range(
-        () => values,
-        (v) => values = v,
-        onStart: (_) => started++,
-        onEnd: (v) {
-          ended++;
-          last = v;
-        },
-      )));
+      await tester.pumpWidget(
+        scene(
+          _range(
+            () => values,
+            (v) => values = v,
+            onStart: (_) => started++,
+            onEnd: (v) {
+              ended++;
+              last = v;
+            },
+          ),
+        ),
+      );
       final gesture = await tester.startGesture(_at(tester, 0.6));
       await gesture.moveBy(const Offset(20, 0));
       await gesture.moveBy(const Offset(20, 0));
@@ -224,8 +229,9 @@ void main() {
       var values = const GlassRange(0.4, 0.8);
       final start = FocusNode();
       addTearDown(start.dispose);
-      await tester
-          .pumpWidget(scene(_range(() => values, (v) => values = v, focusNode: start, direction: TextDirection.rtl)));
+      await tester.pumpWidget(
+        scene(_range(() => values, (v) => values = v, focusNode: start, direction: TextDirection.rtl)),
+      );
       start.requestFocus();
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -238,10 +244,7 @@ void main() {
       final handle = tester.ensureSemantics();
       var values = const GlassRange(0.2, 0.6);
       await tester.pumpWidget(scene(_range(() => values, (v) => values = v)));
-      expect(
-        find.bySemanticsLabel('Start'),
-        findsOneWidget,
-      );
+      expect(find.bySemanticsLabel('Start'), findsOneWidget);
       final startNode = tester.getSemantics(find.bySemanticsLabel('Start'));
       expect(
         startNode,
@@ -284,18 +287,17 @@ void main() {
       bool looping = false,
       int initial = 0,
       FocusNode? focusNode,
-    }) =>
-        SizedBox(
-          width: 200,
-          child: GlassPicker(
-            items: fruits,
-            initialItem: initial,
-            looping: looping,
-            focusNode: focusNode,
-            semanticLabel: 'Fruit',
-            onSelectedItemChanged: onChanged,
-          ),
-        );
+    }) => SizedBox(
+      width: 200,
+      child: GlassPicker(
+        items: fruits,
+        initialItem: initial,
+        looping: looping,
+        focusNode: focusNode,
+        semanticLabel: 'Fruit',
+        onSelectedItemChanged: onChanged,
+      ),
+    );
 
     testWidgets('scrolling selects a row, with a click each', (tester) async {
       await setUpGlass(tester);
@@ -398,10 +400,11 @@ void main() {
     testWidgets('an empty picker builds, looping or not', (tester) async {
       await setUpGlass(tester);
       for (final looping in [false, true]) {
-        await tester.pumpWidget(scene(SizedBox(
-          width: 200,
-          child: GlassPicker(items: const [], looping: looping, onSelectedItemChanged: (_) {}),
-        )));
+        await tester.pumpWidget(
+          scene(
+            SizedBox(width: 200, child: GlassPicker(items: const [], looping: looping, onSelectedItemChanged: (_) {})),
+          ),
+        );
         await _turn(tester, find.byType(GlassPicker), 1);
         await settle(tester);
         expect(tester.takeException(), isNull);
@@ -412,13 +415,17 @@ void main() {
       await setUpGlass(tester);
       _recordHaptics(tester);
       int? selected;
-      await tester.pumpWidget(scene(SizedBox(
-        width: 200,
-        child: GlassPicker(
-          onSelectedItemChanged: (i) => selected = i,
-          children: const [Text('One'), Text('Two'), Text('Three')],
+      await tester.pumpWidget(
+        scene(
+          SizedBox(
+            width: 200,
+            child: GlassPicker(
+              onSelectedItemChanged: (i) => selected = i,
+              children: const [Text('One'), Text('Two'), Text('Three')],
+            ),
+          ),
         ),
-      )));
+      );
       expect(find.text('Two'), findsOneWidget);
       await _turn(tester, find.byType(GlassPicker), 1);
       await settle(tester);
@@ -433,10 +440,7 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       _recordHaptics(tester);
       final dates = <DateTime>[];
-      await tester.pumpWidget(scene(GlassDatePicker(
-        initialDate: DateTime(2023, 1, 30),
-        onDateTimeChanged: dates.add,
-      )));
+      await tester.pumpWidget(scene(GlassDatePicker(initialDate: DateTime(2023, 1, 30), onDateTimeChanged: dates.add)));
       // January to February.
       await _turn(tester, wheel(0), 1);
       await settle(tester);
@@ -459,10 +463,9 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       _recordHaptics(tester);
       final dates = <DateTime>[];
-      await tester.pumpWidget(scene(GlassDatePicker(
-        initialDate: DateTime(2024, 3, 30, 8, 15),
-        onDateTimeChanged: dates.add,
-      )));
+      await tester.pumpWidget(
+        scene(GlassDatePicker(initialDate: DateTime(2024, 3, 30, 8, 15), onDateTimeChanged: dates.add)),
+      );
       // March back to February.
       await _turn(tester, wheel(0), -1);
       await settle(tester);
@@ -477,12 +480,16 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       _recordHaptics(tester);
       final dates = <DateTime>[];
-      await tester.pumpWidget(scene(GlassDatePicker(
-        initialDate: DateTime(2030, 5, 5),
-        minimumYear: 2000,
-        maximumYear: 2025,
-        onDateTimeChanged: dates.add,
-      )));
+      await tester.pumpWidget(
+        scene(
+          GlassDatePicker(
+            initialDate: DateTime(2030, 5, 5),
+            minimumYear: 2000,
+            maximumYear: 2025,
+            onDateTimeChanged: dates.add,
+          ),
+        ),
+      );
       expect(find.text('2025'), findsOneWidget);
       await _turn(tester, wheel(2), 5);
       await settle(tester);
@@ -492,11 +499,9 @@ void main() {
     testWidgets('each wheel is described', (tester) async {
       await setUpGlass(tester, size: const Size(400, 400));
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(scene(GlassDatePicker(
-        initialDate: DateTime(2024, 7, 4),
-        semanticLabel: 'Birthday',
-        onDateTimeChanged: (_) {},
-      )));
+      await tester.pumpWidget(
+        scene(GlassDatePicker(initialDate: DateTime(2024, 7, 4), semanticLabel: 'Birthday', onDateTimeChanged: (_) {})),
+      );
       expect(tester.getSemantics(find.bySemanticsLabel('Month')), containsSemantics(value: 'July'));
       expect(tester.getSemantics(find.bySemanticsLabel('Day')), containsSemantics(value: '4'));
       expect(tester.getSemantics(find.bySemanticsLabel('Year')), containsSemantics(value: '2024'));
@@ -512,10 +517,9 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       _recordHaptics(tester);
       final times = <DateTime>[];
-      await tester.pumpWidget(scene(GlassTimePicker(
-        initialTime: DateTime(2026, 3, 1, 11, 30),
-        onDateTimeChanged: times.add,
-      )));
+      await tester.pumpWidget(
+        scene(GlassTimePicker(initialTime: DateTime(2026, 3, 1, 11, 30), onDateTimeChanged: times.add)),
+      );
       await _turn(tester, wheel(0), 1);
       await settle(tester);
       expect(times.last, DateTime(2026, 3, 1, 12, 30));
@@ -536,12 +540,16 @@ void main() {
       await setUpGlass(tester, size: const Size(400, 400));
       _recordHaptics(tester);
       final times = <DateTime>[];
-      await tester.pumpWidget(scene(GlassTimePicker(
-        initialTime: DateTime(2026, 3, 1, 21, 7),
-        use24hFormat: true,
-        minuteInterval: 5,
-        onDateTimeChanged: times.add,
-      )));
+      await tester.pumpWidget(
+        scene(
+          GlassTimePicker(
+            initialTime: DateTime(2026, 3, 1, 21, 7),
+            use24hFormat: true,
+            minuteInterval: 5,
+            onDateTimeChanged: times.add,
+          ),
+        ),
+      );
       expect(find.byType(ListWheelScrollView), findsNWidgets(2));
       expect(find.text('AM'), findsNothing);
       await _turn(tester, wheel(1), 2);
@@ -565,13 +573,14 @@ void main() {
       return Directionality(
         textDirection: direction,
         child: StatefulBuilder(
-          builder: (context, setState) => GlassRating(
-            value: get(),
-            allowHalf: allowHalf,
-            focusNode: focusNode,
-            semanticLabel: 'Rating',
-            onChanged: enabled ? (v) => setState(() => set(v)) : null,
-          ),
+          builder:
+              (context, setState) => GlassRating(
+                value: get(),
+                allowHalf: allowHalf,
+                focusNode: focusNode,
+                semanticLabel: 'Rating',
+                onChanged: enabled ? (v) => setState(() => set(v)) : null,
+              ),
         ),
       );
     }
@@ -853,24 +862,29 @@ void main() {
 
     testWidgets('wheels look right $name', (tester) async {
       await setUpGlass(tester, size: const Size(340, 520), ratio: 2);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          SizedBox(
-            width: 220,
-            child: GlassPicker(
-              items: const ['Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Mango'],
-              initialItem: 2,
-              height: 150,
-              onSelectedItemChanged: (_) {},
-            ),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 220,
+                child: GlassPicker(
+                  items: const ['Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Mango'],
+                  initialItem: 2,
+                  height: 150,
+                  onSelectedItemChanged: (_) {},
+                ),
+              ),
+              const SizedBox(height: 12),
+              GlassDatePicker(initialDate: DateTime(2024, 2, 14), height: 150, onDateTimeChanged: (_) {}),
+              const SizedBox(height: 12),
+              GlassTimePicker(initialTime: DateTime(2024, 2, 14, 9, 41), height: 150, onDateTimeChanged: (_) {}),
+            ],
           ),
-          const SizedBox(height: 12),
-          GlassDatePicker(initialDate: DateTime(2024, 2, 14), height: 150, onDateTimeChanged: (_) {}),
-          const SizedBox(height: 12),
-          GlassTimePicker(initialTime: DateTime(2024, 2, 14, 9, 41), height: 150, onDateTimeChanged: (_) {}),
-        ]),
-      ));
+        ),
+      );
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/pickers_wheels_$name.png'));
     });
@@ -881,27 +895,35 @@ void main() {
       final wrong = TextEditingController(text: '1234');
       addTearDown(typed.dispose);
       addTearDown(wrong.dispose);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        SizedBox(
-          width: 320,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            GlassRangeSlider(values: const GlassRange(0.25, 0.7), onChanged: (_) {}),
-            const SizedBox(height: 8),
-            const GlassRangeSlider(values: GlassRange(0.4, 0.6), onChanged: null),
-            const SizedBox(height: 16),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              GlassRating(value: 3.5, allowHalf: true, onChanged: (_) {}),
-              const SizedBox(width: 16),
-              const GlassRating(value: 4.3, onChanged: null, size: 16, spacing: 2),
-            ]),
-            const SizedBox(height: 16),
-            GlassPinField(controller: typed, autofocus: true),
-            const SizedBox(height: 12),
-            GlassPinField(length: 4, controller: wrong, error: true, obscure: true),
-          ]),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlassRangeSlider(values: const GlassRange(0.25, 0.7), onChanged: (_) {}),
+                const SizedBox(height: 8),
+                const GlassRangeSlider(values: GlassRange(0.4, 0.6), onChanged: null),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GlassRating(value: 3.5, allowHalf: true, onChanged: (_) {}),
+                    const SizedBox(width: 16),
+                    const GlassRating(value: 4.3, onChanged: null, size: 16, spacing: 2),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                GlassPinField(controller: typed, autofocus: true),
+                const SizedBox(height: 12),
+                GlassPinField(length: 4, controller: wrong, error: true, obscure: true),
+              ],
+            ),
+          ),
         ),
-      ));
+      );
       await settle(tester);
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/pickers_inputs_$name.png'));
     });

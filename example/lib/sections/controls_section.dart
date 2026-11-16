@@ -48,14 +48,16 @@ class _ControlsSectionState extends State<ControlsSection> {
     final theme = GlassTheme.of(context);
     final label = TextStyle(color: theme.foreground, fontSize: 14);
     Widget row(Widget leading, String text, [Widget? trailing]) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(children: [
-            leading,
-            const SizedBox(width: 12),
-            Expanded(child: Text(text, style: label)),
-            if (trailing != null) trailing,
-          ]),
-        );
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: label)),
+          if (trailing != null) trailing,
+        ],
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,14 +68,16 @@ class _ControlsSectionState extends State<ControlsSection> {
           'Select all (tristate)',
         ),
         const SizedBox(height: 4),
-        Row(children: [
-          for (final (value, name) in const [('s', 'Small'), ('m', 'Medium'), ('l', 'Large')]) ...[
-            GlassRadio<String>(value: value, groupValue: _size, onChanged: (v) => setState(() => _size = v)),
-            const SizedBox(width: 8),
-            Text(name, style: label),
-            const SizedBox(width: 18),
+        Row(
+          children: [
+            for (final (value, name) in const [('s', 'Small'), ('m', 'Medium'), ('l', 'Large')]) ...[
+              GlassRadio<String>(value: value, groupValue: _size, onChanged: (v) => setState(() => _size = v)),
+              const SizedBox(width: 8),
+              Text(name, style: label),
+              const SizedBox(width: 18),
+            ],
           ],
-        ]),
+        ),
         const SizedBox(height: 8),
         row(
           const Icon(Icons.group_outlined),
@@ -81,39 +85,47 @@ class _ControlsSectionState extends State<ControlsSection> {
           GlassStepper(value: _guests, min: 1, max: 12, onChanged: (v) => setState(() => _guests = v)),
         ),
         const SizedBox(height: 10),
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final filter in const ['All', 'Photos', 'Videos', 'Live'])
-            GlassChip(
-              label: Text(filter),
-              selected: _filters.contains(filter),
-              onSelected: (on) => setState(() => on ? _filters.add(filter) : _filters.remove(filter)),
-            ),
-          for (final tag in _tags)
-            GlassChip(
-              label: Text(tag),
-              icon: const Icon(Icons.tag),
-              onSelected: (_) {},
-              onDeleted: () => setState(() => _tags.remove(tag)),
-            ),
-        ]),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final filter in const ['All', 'Photos', 'Videos', 'Live'])
+              GlassChip(
+                label: Text(filter),
+                selected: _filters.contains(filter),
+                onSelected: (on) => setState(() => on ? _filters.add(filter) : _filters.remove(filter)),
+              ),
+            for (final tag in _tags)
+              GlassChip(
+                label: Text(tag),
+                icon: const Icon(Icons.tag),
+                onSelected: (_) {},
+                onDeleted: () => setState(() => _tags.remove(tag)),
+              ),
+          ],
+        ),
         const SizedBox(height: 18),
-        Row(children: [
-          Expanded(child: GlassProgressBar(value: _progress)),
-          const SizedBox(width: 16),
-          GlassProgressRing(value: _progress, child: Text('${(_progress * 100).round()}')),
-        ]),
+        Row(
+          children: [
+            Expanded(child: GlassProgressBar(value: _progress)),
+            const SizedBox(width: 16),
+            GlassProgressRing(value: _progress, child: Text('${(_progress * 100).round()}')),
+          ],
+        ),
         const SizedBox(height: 14),
-        Row(children: [
-          Expanded(child: GlassProgressBar(value: _loading ? null : 1)),
-          const SizedBox(width: 16),
-          GlassActivityIndicator(animating: _loading),
-          const SizedBox(width: 8),
-          GlassButton(
-            icon: Icon(_loading ? Icons.stop : Icons.play_arrow),
-            semanticLabel: _loading ? 'Stop' : 'Start',
-            onPressed: () => setState(() => _loading = !_loading),
-          ),
-        ]),
+        Row(
+          children: [
+            Expanded(child: GlassProgressBar(value: _loading ? null : 1)),
+            const SizedBox(width: 16),
+            GlassActivityIndicator(animating: _loading),
+            const SizedBox(width: 8),
+            GlassButton(
+              icon: Icon(_loading ? Icons.stop : Icons.play_arrow),
+              semanticLabel: _loading ? 'Stop' : 'Start',
+              onPressed: () => setState(() => _loading = !_loading),
+            ),
+          ],
+        ),
         const SizedBox(height: 18),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -127,21 +139,23 @@ class _ControlsSectionState extends State<ControlsSection> {
                 child: Icon(Icons.mail_outline, size: 28, color: theme.foreground),
               ),
             ),
-            GlassButtonGroup(children: [
-              GlassButtonGroupItem(
-                icon: const Icon(Icons.format_bold),
-                semanticLabel: 'Bold',
-                selected: _bold,
-                onPressed: () => setState(() => _bold = !_bold),
-              ),
-              GlassButtonGroupItem(
-                icon: const Icon(Icons.format_italic),
-                semanticLabel: 'Italic',
-                selected: _italic,
-                onPressed: () => setState(() => _italic = !_italic),
-              ),
-              GlassButtonGroupItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
-            ]),
+            GlassButtonGroup(
+              children: [
+                GlassButtonGroupItem(
+                  icon: const Icon(Icons.format_bold),
+                  semanticLabel: 'Bold',
+                  selected: _bold,
+                  onPressed: () => setState(() => _bold = !_bold),
+                ),
+                GlassButtonGroupItem(
+                  icon: const Icon(Icons.format_italic),
+                  semanticLabel: 'Italic',
+                  selected: _italic,
+                  onPressed: () => setState(() => _italic = !_italic),
+                ),
+                GlassButtonGroupItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
+              ],
+            ),
           ],
         ),
       ],

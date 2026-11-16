@@ -144,7 +144,9 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
       builder: (context, constraints) {
         final area = constraints.biggest;
         final max = Offset(
-            (area.width - lens.width).clamp(0, double.infinity), (area.height - lens.height).clamp(0, double.infinity));
+          (area.width - lens.width).clamp(0, double.infinity),
+          (area.height - lens.height).clamp(0, double.infinity),
+        );
         Offset clampTo(Offset o) => Offset(o.dx.clamp(0, max.dx), o.dy.clamp(0, max.dy));
         final at = clampTo(widget.position ?? _own ?? Offset(max.dx / 2, max.dy / 2));
         return Stack(
@@ -276,11 +278,7 @@ class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerPr
                   child: IgnorePointer(
                     child: Opacity(
                       opacity: t.clamp(0.0, 1.0),
-                      child: Transform.scale(
-                        scale: 0.6 + 0.4 * t,
-                        alignment: Alignment.bottomCenter,
-                        child: child,
-                      ),
+                      child: Transform.scale(scale: 0.6 + 0.4 * t, alignment: Alignment.bottomCenter, child: child),
                     ),
                   ),
                 );

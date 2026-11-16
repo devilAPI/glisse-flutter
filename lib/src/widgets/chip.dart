@@ -74,9 +74,10 @@ class _GlassChipState extends State<GlassChip> {
     final selectedColor = widget.selectedColor ?? theme.fill;
     final ink = widget.selected ? const Color(0xFFFFFFFF) : theme.foreground;
     final base = widget.selected ? selectedColor : theme.glass;
-    final tint = widget.selected
-        ? (_pressed ? Color.lerp(base, const Color(0xFF000000), 0.15)! : base)
-        : (_pressed || _hovered ? theme.glassActive : base);
+    final tint =
+        widget.selected
+            ? (_pressed ? Color.lerp(base, const Color(0xFF000000), 0.15)! : base)
+            : (_pressed || _hovered ? theme.glassActive : base);
 
     final name = widget.semanticLabel ?? (widget.label is Text ? (widget.label as Text).data : null);
     final children = <Widget>[
@@ -99,9 +100,7 @@ class _GlassChipState extends State<GlassChip> {
             child: SizedBox(
               width: 24,
               height: _height,
-              child: Center(
-                child: GlassGlyph.clear(color: ink.withValues(alpha: ink.a * 0.7), size: 12),
-              ),
+              child: Center(child: GlassGlyph.clear(color: ink.withValues(alpha: ink.a * 0.7), size: 12)),
             ),
           ),
         ),
@@ -111,11 +110,9 @@ class _GlassChipState extends State<GlassChip> {
     Widget chip = TweenAnimationBuilder<Color?>(
       tween: ColorTween(end: tint),
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
-      builder: (context, color, child) => LiquidGlassBox(
-        radius: _height / 2,
-        style: themedGlass(theme, tint: color ?? tint),
-        child: child,
-      ),
+      builder:
+          (context, color, child) =>
+              LiquidGlassBox(radius: _height / 2, style: themedGlass(theme, tint: color ?? tint), child: child),
       child: GlassPressableGlow(
         radius: _height / 2,
         enabled: _interactive,

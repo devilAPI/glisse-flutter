@@ -45,12 +45,9 @@ class _PickersSectionState extends State<PickersSection> {
     final label = TextStyle(color: theme.foreground, fontSize: 14);
     final muted = TextStyle(color: theme.muted, fontSize: 13);
     Widget caption(String title, String value) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(children: [
-            Expanded(child: Text(title, style: label)),
-            Text(value, style: muted),
-          ]),
-        );
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(children: [Expanded(child: Text(title, style: label)), Text(value, style: muted)]),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,13 +85,15 @@ class _PickersSectionState extends State<PickersSection> {
           ),
         ),
         const SizedBox(height: 20),
-        Row(children: [
-          Expanded(child: caption('Time', _timeLabel)),
-          const SizedBox(width: 12),
-          Text('24-hour', style: muted),
-          const SizedBox(width: 8),
-          GlassSwitch(value: _use24h, onChanged: (v) => setState(() => _use24h = v)),
-        ]),
+        Row(
+          children: [
+            Expanded(child: caption('Time', _timeLabel)),
+            const SizedBox(width: 12),
+            Text('24-hour', style: muted),
+            const SizedBox(width: 8),
+            GlassSwitch(value: _use24h, onChanged: (v) => setState(() => _use24h = v)),
+          ],
+        ),
         Center(
           child: GlassTimePicker(
             // A new key rebuilds the wheels when the format changes.
@@ -108,29 +107,32 @@ class _PickersSectionState extends State<PickersSection> {
         ),
         const SizedBox(height: 20),
         caption('Rating', '$_rating of 5'),
-        Row(children: [
-          GlassRating(
-            value: _rating,
-            allowHalf: true,
-            semanticLabel: 'Rating',
-            onChanged: (v) => setState(() => _rating = v),
-          ),
-          const SizedBox(width: 16),
-          Text('Average', style: muted),
-          const SizedBox(width: 8),
-          const GlassRating(value: 4.3, onChanged: null, size: 16, spacing: 2),
-        ]),
+        Row(
+          children: [
+            GlassRating(
+              value: _rating,
+              allowHalf: true,
+              semanticLabel: 'Rating',
+              onChanged: (v) => setState(() => _rating = v),
+            ),
+            const SizedBox(width: 16),
+            Text('Average', style: muted),
+            const SizedBox(width: 8),
+            const GlassRating(value: 4.3, onChanged: null, size: 16, spacing: 2),
+          ],
+        ),
         const SizedBox(height: 20),
         caption('Verification code', _codeStatus ?? (_code.isEmpty ? 'Type 123456' : _code)),
         Center(
           child: GlassPinField(
             error: _codeError,
             semanticLabel: 'Verification code',
-            onChanged: (v) => setState(() {
-              _code = v;
-              _codeError = false;
-              _codeStatus = null;
-            }),
+            onChanged:
+                (v) => setState(() {
+                  _code = v;
+                  _codeError = false;
+                  _codeStatus = null;
+                }),
             onCompleted: _codeCompleted,
           ),
         ),

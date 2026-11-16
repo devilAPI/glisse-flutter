@@ -75,16 +75,14 @@ Future<void> setUpGlass(WidgetTester tester, {Size size = const Size(400, 300), 
 
 /// [child] over stripes, themed.
 Widget scene(Widget child, {bool dark = false, bool backdrop = true}) {
-  final content = GlassTheme(
-    data: dark ? GlassThemeData.dark() : GlassThemeData.light(),
-    child: Center(child: child),
-  );
+  final content = GlassTheme(data: dark ? GlassThemeData.dark() : GlassThemeData.light(), child: Center(child: child));
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Material(
-      child: backdrop
-          ? GlassBackdrop(background: Stripes(dark: dark), child: content)
-          : Stack(children: [Positioned.fill(child: Stripes(dark: dark)), content]),
+      child:
+          backdrop
+              ? GlassBackdrop(background: Stripes(dark: dark), child: content)
+              : Stack(children: [Positioned.fill(child: Stripes(dark: dark)), content]),
     ),
   );
 }

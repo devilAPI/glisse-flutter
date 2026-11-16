@@ -14,16 +14,18 @@ const _segments = [
 Widget _control({String? initial = 'day', void Function(String)? onChanged, bool enabled = true}) {
   var value = initial;
   return StatefulBuilder(
-    builder: (context, setState) => GlassSegmentedControl<String>(
-      segments: _segments,
-      value: value,
-      onChanged: enabled
-          ? (v) {
-              setState(() => value = v);
-              onChanged?.call(v);
-            }
-          : null,
-    ),
+    builder:
+        (context, setState) => GlassSegmentedControl<String>(
+          segments: _segments,
+          value: value,
+          onChanged:
+              enabled
+                  ? (v) {
+                    setState(() => value = v);
+                    onChanged?.call(v);
+                  }
+                  : null,
+        ),
   );
 }
 
@@ -126,14 +128,24 @@ void main() {
   for (final dark in [false, true]) {
     testWidgets('looks right ${dark ? 'dark' : 'light'}', (tester) async {
       await setUpGlass(tester, size: const Size(320, 150), ratio: 3);
-      await tester.pumpWidget(scene(
-        dark: dark,
-        Column(mainAxisSize: MainAxisSize.min, children: [
-          GlassSegmentedControl<String>(segments: _segments, value: 'week', onChanged: (_) {}),
-          const SizedBox(height: 28),
-          GlassSegmentedControl<String>(key: const Key('held'), segments: _segments, value: 'day', onChanged: (_) {}),
-        ]),
-      ));
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlassSegmentedControl<String>(segments: _segments, value: 'week', onChanged: (_) {}),
+              const SizedBox(height: 28),
+              GlassSegmentedControl<String>(
+                key: const Key('held'),
+                segments: _segments,
+                value: 'day',
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+        ),
+      );
       await settle(tester);
       final box = tester.getRect(find.byKey(const Key('held')));
       final gesture = await tester.startGesture(Offset(box.left + 42, box.center.dy));
@@ -143,7 +155,9 @@ void main() {
       }
       await settle(tester);
       await expectLater(
-          find.byType(MaterialApp), matchesGoldenFile('goldens/segmented_${dark ? 'dark' : 'light'}.png'));
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/segmented_${dark ? 'dark' : 'light'}.png'),
+      );
       await gesture.up();
       await settle(tester);
     });

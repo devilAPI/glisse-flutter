@@ -200,44 +200,46 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
-    Widget result = LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
-      _width = width;
-      final paint = CustomPaint(
-        size: Size(width, _height),
-        painter: _SliderPainter(
-          state: this,
-          theme: theme,
-          progress: _progress,
-          activeColor: widget.activeColor ?? theme.fill,
-          devicePixelRatio: dpr,
-          focused: _focused,
-          repaint: _repaint,
-        ),
-      );
-      return Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // The page under the lifted thumb, frosted, under its lens.
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _repaint,
-              builder: (context, _) {
-                final lift = _lift.value;
-                if (lift <= 0.01) return const SizedBox.shrink();
-                final travel = math.max(0.0, width - 2 * _inset) * _progress;
-                final thumb = Rect.fromLTWH(travel - 12, 0, _thumbWidth, _thumbHeight);
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [ThumbFrost(rect: scaleAbout(thumb, 0.6 + 0.4 * lift), lift: lift)],
-                );
-              },
-            ),
+    Widget result = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
+        _width = width;
+        final paint = CustomPaint(
+          size: Size(width, _height),
+          painter: _SliderPainter(
+            state: this,
+            theme: theme,
+            progress: _progress,
+            activeColor: widget.activeColor ?? theme.fill,
+            devicePixelRatio: dpr,
+            focused: _focused,
+            repaint: _repaint,
           ),
-          paint,
-        ],
-      );
-    });
+        );
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // The page under the lifted thumb, frosted, under its lens.
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _repaint,
+                builder: (context, _) {
+                  final lift = _lift.value;
+                  if (lift <= 0.01) return const SizedBox.shrink();
+                  final travel = math.max(0.0, width - 2 * _inset) * _progress;
+                  final thumb = Rect.fromLTWH(travel - 12, 0, _thumbWidth, _thumbHeight);
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [ThumbFrost(rect: scaleAbout(thumb, 0.6 + 0.4 * lift), lift: lift)],
+                  );
+                },
+              ),
+            ),
+            paint,
+          ],
+        );
+      },
+    );
     result = SizedBox(height: _height, child: result);
     result = Listener(
       onPointerDown: _down,
@@ -275,14 +277,18 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
         SingleActivator(LogicalKeyboardKey.end): _JumpIntent(1),
       },
       actions: <Type, Action<Intent>>{
-        _NudgeIntent: CallbackAction<_NudgeIntent>(onInvoke: (intent) {
-          _nudge(intent.steps);
-          return null;
-        }),
-        _JumpIntent: CallbackAction<_JumpIntent>(onInvoke: (intent) {
-          _jump(intent.progress);
-          return null;
-        }),
+        _NudgeIntent: CallbackAction<_NudgeIntent>(
+          onInvoke: (intent) {
+            _nudge(intent.steps);
+            return null;
+          },
+        ),
+        _JumpIntent: CallbackAction<_JumpIntent>(
+          onInvoke: (intent) {
+            _jump(intent.progress);
+            return null;
+          },
+        ),
       },
       child: result,
     );

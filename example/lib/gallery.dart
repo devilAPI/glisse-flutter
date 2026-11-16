@@ -84,10 +84,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     padding: const EdgeInsets.fromLTRB(16, 72, 16, 140),
                     children: [
                       Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 560),
-                          child: _content(theme),
-                        ),
+                        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: _content(theme)),
                       ),
                     ],
                   ),
@@ -149,12 +146,13 @@ class _GalleryPageState extends State<GalleryPage> {
               GlassMenuItem(
                 label: const Text('Reset tuning'),
                 icon: const Icon(Icons.restart_alt),
-                onSelected: () => setState(() {
-                  _bend = 2;
-                  _dispersion = 0.6;
-                  _blur = 3;
-                  _rim = 0.3;
-                }),
+                onSelected:
+                    () => setState(() {
+                      _bend = 2;
+                      _dispersion = 0.6;
+                      _blur = 3;
+                      _rim = 0.3;
+                    }),
               ),
               const GlassMenuSeparator(),
               GlassMenuItem(
@@ -236,32 +234,36 @@ class _GalleryPageState extends State<GalleryPage> {
         _Section(
           title: 'Slider',
           children: [
-            Row(children: [
-              Icon(Icons.volume_down, color: theme.muted),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: GlassSlider(value: _volume, onChanged: (v) => setState(() => _volume = v)),
-                ),
-              ),
-              Icon(Icons.volume_up, color: theme.muted),
-            ]),
-            const SizedBox(height: 8),
-            Row(children: [
-              Icon(Icons.brightness_low, color: theme.muted),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: GlassSlider(
-                    value: _brightness,
-                    divisions: 10,
-                    activeColor: Colors.amber,
-                    onChanged: (v) => setState(() => _brightness = v),
+            Row(
+              children: [
+                Icon(Icons.volume_down, color: theme.muted),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: GlassSlider(value: _volume, onChanged: (v) => setState(() => _volume = v)),
                   ),
                 ),
-              ),
-              Icon(Icons.brightness_high, color: theme.muted),
-            ]),
+                Icon(Icons.volume_up, color: theme.muted),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.brightness_low, color: theme.muted),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: GlassSlider(
+                      value: _brightness,
+                      divisions: 10,
+                      activeColor: Colors.amber,
+                      onChanged: (v) => setState(() => _brightness = v),
+                    ),
+                  ),
+                ),
+                Icon(Icons.brightness_high, color: theme.muted),
+              ],
+            ),
           ],
         ),
         _Section(
@@ -370,12 +372,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 top: at.dy,
                 child: GestureDetector(
                   onPanUpdate: (d) => setState(() => _lens = at + d.delta),
-                  child: const Glass(
-                    width: 200,
-                    height: 120,
-                    borderRadius: 60,
-                    child: Center(child: Text('Drag me')),
-                  ),
+                  child: const Glass(width: 200, height: 120, borderRadius: 60, child: Center(child: Text('Drag me'))),
                 ),
               ),
             ],

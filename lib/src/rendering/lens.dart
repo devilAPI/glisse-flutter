@@ -121,23 +121,35 @@ class LensSpec {
 
   @override
   int get hashCode => Object.hash(
-      strength, dispersion, depth, dome, splay, relative, bezel, maxDepth, ink, blur, paintsLight, darkStrength);
+    strength,
+    dispersion,
+    depth,
+    dome,
+    splay,
+    relative,
+    bezel,
+    maxDepth,
+    ink,
+    blur,
+    paintsLight,
+    darkStrength,
+  );
 
   /// A copy with the given [strength], [dispersion] or [blur] replaced.
   LensSpec copyWith({double? strength, double? dispersion, double? blur}) => LensSpec(
-        strength: strength ?? this.strength,
-        dispersion: dispersion ?? this.dispersion,
-        depth: depth,
-        dome: dome,
-        splay: splay,
-        relative: relative,
-        bezel: bezel,
-        maxDepth: maxDepth,
-        ink: ink,
-        blur: blur ?? this.blur,
-        paintsLight: paintsLight,
-        darkStrength: darkStrength,
-      );
+    strength: strength ?? this.strength,
+    dispersion: dispersion ?? this.dispersion,
+    depth: depth,
+    dome: dome,
+    splay: splay,
+    relative: relative,
+    bezel: bezel,
+    maxDepth: maxDepth,
+    ink: ink,
+    blur: blur ?? this.blur,
+    paintsLight: paintsLight,
+    darkStrength: darkStrength,
+  );
 }
 
 /// Where the light catches a lens's rim.
@@ -176,12 +188,26 @@ class LensLight {
   final double edgePower;
 
   /// Aave's light for dark surroundings.
-  static const LensLight dark =
-      LensLight(angle: 45, glow: 0.4, spread: 0.5, glowPower: 1.5, edge: 0.5, edgeWidth: 2, edgePower: 1.5);
+  static const LensLight dark = LensLight(
+    angle: 45,
+    glow: 0.4,
+    spread: 0.5,
+    glowPower: 1.5,
+    edge: 0.5,
+    edgeWidth: 2,
+    edgePower: 1.5,
+  );
 
   /// Aave's light for light surroundings.
-  static const LensLight light =
-      LensLight(angle: 30, glow: 0.4, spread: 0.5, glowPower: 2, edge: 0.5, edgeWidth: 1.5, edgePower: 1);
+  static const LensLight light = LensLight(
+    angle: 30,
+    glow: 0.4,
+    spread: 0.5,
+    glowPower: 2,
+    edge: 0.5,
+    edgeWidth: 1.5,
+    edgePower: 1,
+  );
 }
 
 /// What texture a lens draw samples.
@@ -268,12 +294,14 @@ class GlassShaders {
       onError: (Object error, StackTrace stack) {
         _error = error;
         _loading = null;
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: error,
-          stack: stack,
-          library: 'glisse',
-          context: ErrorDescription('while loading the Liquid Glass shader'),
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+            library: 'glisse',
+            context: ErrorDescription('while loading the Liquid Glass shader'),
+          ),
+        );
         return null;
       },
     );
@@ -472,31 +500,31 @@ class LensDraw {
   /// control's lens bends its own recorded content. What only a live
   /// backdrop needs is left unset.
   LensDraw onImage(List<double> uv) => LensDraw(
-        rect: rect,
-        shape: shape,
-        radius: radius,
-        spec: spec,
-        devicePixelRatio: devicePixelRatio,
-        reach: reach,
-        dispersion: dispersion,
-        blur: blur,
-        saturation: saturation,
-        brightness: brightness,
-        texture: LensTexture.image,
-        uv: uv,
-        clearOutside: true,
-        shine: shine,
-        light: light,
-        inkPage: inkPage,
-        tint: tint,
-        edge: edge,
-        rim: rim,
-        rimShine: rimShine,
-        rimOpacity: rimOpacity,
-        softensBend: softensBend,
-        magnification: magnification,
-        magnifyOffset: magnifyOffset,
-      );
+    rect: rect,
+    shape: shape,
+    radius: radius,
+    spec: spec,
+    devicePixelRatio: devicePixelRatio,
+    reach: reach,
+    dispersion: dispersion,
+    blur: blur,
+    saturation: saturation,
+    brightness: brightness,
+    texture: LensTexture.image,
+    uv: uv,
+    clearOutside: true,
+    shine: shine,
+    light: light,
+    inkPage: inkPage,
+    tint: tint,
+    edge: edge,
+    rim: rim,
+    rimShine: rimShine,
+    rimOpacity: rimOpacity,
+    softensBend: softensBend,
+    magnification: magnification,
+    magnifyOffset: magnifyOffset,
+  );
 
   static double _premul(Color c, double channel) => channel * c.a;
 
@@ -619,7 +647,8 @@ class LensDraw {
 
 /// A 1x1 clear image, bound when a draw samples nothing (every sampler must
 /// be bound).
-ui.Image get emptyImage => _empty ??= () {
+ui.Image get emptyImage =>
+    _empty ??= () {
       final recorder = ui.PictureRecorder();
       ui.Canvas(recorder);
       return recorder.endRecording().toImageSync(1, 1);

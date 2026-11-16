@@ -25,8 +25,8 @@ class GlassStepper extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(max >= min),
-        assert(step > 0);
+  }) : assert(max >= min),
+       assert(step > 0);
 
   /// The current value, from [min] to [max].
   final double value;
@@ -120,9 +120,10 @@ class _GlassStepperState extends State<GlassStepper> {
 
   Widget _half(GlassThemeData theme, int direction) {
     final can = _can(direction);
-    final glyph = direction < 0
-        ? GlassGlyph.minus(color: theme.foreground, size: 16)
-        : GlassGlyph.plus(color: theme.foreground, size: 16);
+    final glyph =
+        direction < 0
+            ? GlassGlyph.minus(color: theme.foreground, size: 16)
+            : GlassGlyph.plus(color: theme.foreground, size: 16);
     return Expanded(
       child: Semantics(
         button: true,
@@ -192,10 +193,12 @@ class _GlassStepperState extends State<GlassStepper> {
         },
         child: Actions(
           actions: <Type, Action<Intent>>{
-            _StepIntent: CallbackAction<_StepIntent>(onInvoke: (intent) {
-              _stepBy(intent.direction);
-              return null;
-            }),
+            _StepIntent: CallbackAction<_StepIntent>(
+              onInvoke: (intent) {
+                _stepBy(intent.direction);
+                return null;
+              },
+            ),
           },
           child: GlassFocusable(
             enabled: _enabled,

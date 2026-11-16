@@ -81,26 +81,26 @@ class GlassAvatar extends StatelessWidget {
     } else if (icon != null) {
       face = IconTheme.merge(data: IconThemeData(color: theme.muted, size: size * 0.5), child: icon!);
     } else {
-      face = SizedBox.square(
-        dimension: size * 0.62,
-        child: CustomPaint(painter: _PersonPainter(theme.muted)),
-      );
+      face = SizedBox.square(dimension: size * 0.62, child: CustomPaint(painter: _PersonPainter(theme.muted)));
     }
     Widget content = Center(child: face);
     if (image != null) {
-      content = Stack(fit: StackFit.expand, children: [
-        content,
-        ClipOval(
-          child: Image(
-            image: image!,
-            fit: BoxFit.cover,
-            excludeFromSemantics: true,
-            // Until it loads, or if it fails, the face underneath shows.
-            frameBuilder: (context, child, frame, sync) => frame == null && !sync ? const SizedBox.shrink() : child,
-            errorBuilder: (context, error, stack) => const SizedBox.shrink(),
+      content = Stack(
+        fit: StackFit.expand,
+        children: [
+          content,
+          ClipOval(
+            child: Image(
+              image: image!,
+              fit: BoxFit.cover,
+              excludeFromSemantics: true,
+              // Until it loads, or if it fails, the face underneath shows.
+              frameBuilder: (context, child, frame, sync) => frame == null && !sync ? const SizedBox.shrink() : child,
+              errorBuilder: (context, error, stack) => const SizedBox.shrink(),
+            ),
           ),
-        ),
-      ]);
+        ],
+      );
     }
 
     Widget avatar = LiquidGlassBox(
@@ -158,9 +158,10 @@ class GlassAvatar extends StatelessWidget {
 String? _letters(String? initials) {
   final words = (initials ?? '').trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
   if (words.isEmpty) return null;
-  final letters = words.length > 1
-      ? '${words.first.characters.first}${words.last.characters.first}'
-      : words.first.characters.take(2).toString();
+  final letters =
+      words.length > 1
+          ? '${words.first.characters.first}${words.last.characters.first}'
+          : words.first.characters.take(2).toString();
   return letters.toUpperCase();
 }
 
@@ -175,7 +176,10 @@ class _CutOutClipper extends CustomClipper<Path> {
     var path = Path()..addRect(Offset.zero & size);
     for (final (center, radius) in holes) {
       path = Path.combine(
-          PathOperation.difference, path, Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
+        PathOperation.difference,
+        path,
+        Path()..addOval(Rect.fromCircle(center: center, radius: radius)),
+      );
     }
     return path;
   }
@@ -226,8 +230,8 @@ class GlassAvatarGroup extends StatelessWidget {
     this.size = 40,
     this.overlap = 0.3,
     this.semanticLabel,
-  })  : assert(max == null || max > 0),
-        assert(overlap >= 0 && overlap < 1);
+  }) : assert(max == null || max > 0),
+       assert(overlap >= 0 && overlap < 1);
 
   /// The avatars, usually [GlassAvatar]s; each is laid out [size] across.
   final List<Widget> children;
@@ -299,13 +303,16 @@ class GlassAvatarGroup extends StatelessWidget {
                 top: 0,
                 width: size,
                 height: size,
-                child: i == items.length - 1 || overlap == 0
-                    ? items[i]
-                    : ClipPath(
-                        // Cut where the next one sits, with a gap.
-                        clipper: _CutOutClipper([(Offset(size / 2 + (rtl ? -step : step), size / 2), size / 2 + gap)]),
-                        child: items[i],
-                      ),
+                child:
+                    i == items.length - 1 || overlap == 0
+                        ? items[i]
+                        : ClipPath(
+                          // Cut where the next one sits, with a gap.
+                          clipper: _CutOutClipper([
+                            (Offset(size / 2 + (rtl ? -step : step), size / 2), size / 2 + gap),
+                          ]),
+                          child: items[i],
+                        ),
               ),
           ],
         ),

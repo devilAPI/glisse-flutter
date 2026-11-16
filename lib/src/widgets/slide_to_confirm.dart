@@ -35,8 +35,8 @@ class GlassSlideToConfirm extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(threshold > 0 && threshold <= 1),
-        assert(height >= 32);
+  }) : assert(threshold > 0 && threshold <= 1),
+       assert(height >= 32);
 
   /// Called once the slide is confirmed. Null disables the control.
   final VoidCallback? onConfirmed;
@@ -78,8 +78,10 @@ class GlassSlideToConfirm extends StatefulWidget {
 class _GlassSlideToConfirmState extends State<GlassSlideToConfirm> with TickerProviderStateMixin {
   // How far along the knob is, from 0 to 1.
   late final GlassSpring _position = GlassSpring(vsync: this, stiffness: 420, damping: 34);
-  late final AnimationController _shine =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 2400));
+  late final AnimationController _shine = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
 
   bool _reduceMotion = false;
   bool _dragging = false;
@@ -203,12 +205,13 @@ class _GlassSlideToConfirmState extends State<GlassSlideToConfirm> with TickerPr
         final c = rtl ? -at : at;
         return ShaderMask(
           blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) => LinearGradient(
-            begin: Alignment(c - 1, 0),
-            end: Alignment(c + 1, 0),
-            colors: [theme.muted, theme.foreground, theme.muted],
-            stops: const [0.3, 0.5, 0.7],
-          ).createShader(bounds),
+          shaderCallback:
+              (bounds) => LinearGradient(
+                begin: Alignment(c - 1, 0),
+                end: Alignment(c + 1, 0),
+                colors: [theme.muted, theme.foreground, theme.muted],
+                stops: const [0.3, 0.5, 0.7],
+              ).createShader(bounds),
           child: child,
         );
       },
@@ -233,12 +236,13 @@ class _GlassSlideToConfirmState extends State<GlassSlideToConfirm> with TickerPr
       child: SizedBox.square(
         dimension: knobSize,
         child: Center(
-          child: _confirmed
-              ? GlassGlyph.check(color: accent, size: knobSize * 0.46)
-              : SizedBox.square(
-                  dimension: knobSize * 0.42,
-                  child: CustomPaint(painter: _ArrowPainter(color: accent, flip: rtl)),
-                ),
+          child:
+              _confirmed
+                  ? GlassGlyph.check(color: accent, size: knobSize * 0.46)
+                  : SizedBox.square(
+                    dimension: knobSize * 0.42,
+                    child: CustomPaint(painter: _ArrowPainter(color: accent, flip: rtl)),
+                  ),
         ),
       ),
     );
@@ -255,76 +259,77 @@ class _GlassSlideToConfirmState extends State<GlassSlideToConfirm> with TickerPr
     );
 
     final label = _label(theme);
-    final done = widget.confirmedLabel == null
-        ? null
-        : Text(
-            widget.confirmedLabel!,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textStyle.copyWith(
-              color: const Color(0xFFFFFFFF),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
-          );
+    final done =
+        widget.confirmedLabel == null
+            ? null
+            : Text(
+              widget.confirmedLabel!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textStyle.copyWith(
+                color: const Color(0xFFFFFFFF),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.2,
+              ),
+            );
 
-    Widget track = LayoutBuilder(builder: (context, constraints) {
-      final width = constraints.hasBoundedWidth ? constraints.maxWidth : 300.0;
-      _travel = math.max(1.0, width - 2 * _inset - knobSize);
-      return SizedBox(
-        width: width,
-        height: height,
-        child: AnimatedBuilder(
-          animation: _position,
-          child: knob,
-          builder: (context, knob) {
-            final t = _position.value;
-            final p = t.clamp(0.0, 1.0);
-            final start = _inset + t * _travel;
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // The label, which the fill covers as it comes.
-                PositionedDirectional(
-                  start: _inset + knobSize + 8,
-                  end: 16,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Opacity(opacity: (1 - p / 0.35).clamp(0.0, 1.0), child: label),
-                  ),
-                ),
-                // The accent, revealed behind the knob as it goes.
-                PositionedDirectional(
-                  start: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: math.min(width, math.max(height, start + knobSize + _inset)),
-                  child: Opacity(
-                    opacity: (p * 5).clamp(0.0, 1.0),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(height / 2)),
-                    ),
-                  ),
-                ),
-                if (done != null)
+    Widget track = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? constraints.maxWidth : 300.0;
+        _travel = math.max(1.0, width - 2 * _inset - knobSize);
+        return SizedBox(
+          width: width,
+          height: height,
+          child: AnimatedBuilder(
+            animation: _position,
+            child: knob,
+            builder: (context, knob) {
+              final t = _position.value;
+              final p = t.clamp(0.0, 1.0);
+              final start = _inset + t * _travel;
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // The label, which the fill covers as it comes.
                   PositionedDirectional(
-                    start: 16,
-                    end: _inset + knobSize + 8,
+                    start: _inset + knobSize + 8,
+                    end: 16,
                     top: 0,
                     bottom: 0,
-                    child: Center(
-                      child: Opacity(opacity: _confirmed ? ((p - 0.6) / 0.4).clamp(0.0, 1.0) : 0, child: done),
+                    child: Center(child: Opacity(opacity: (1 - p / 0.35).clamp(0.0, 1.0), child: label)),
+                  ),
+                  // The accent, revealed behind the knob as it goes.
+                  PositionedDirectional(
+                    start: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: math.min(width, math.max(height, start + knobSize + _inset)),
+                    child: Opacity(
+                      opacity: (p * 5).clamp(0.0, 1.0),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(height / 2)),
+                      ),
                     ),
                   ),
-                PositionedDirectional(start: start, top: _inset, width: knobSize, height: knobSize, child: knob!),
-              ],
-            );
-          },
-        ),
-      );
-    });
+                  if (done != null)
+                    PositionedDirectional(
+                      start: 16,
+                      end: _inset + knobSize + 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: Opacity(opacity: _confirmed ? ((p - 0.6) / 0.4).clamp(0.0, 1.0) : 0, child: done),
+                      ),
+                    ),
+                  PositionedDirectional(start: start, top: _inset, width: knobSize, height: knobSize, child: knob!),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
 
     track = LiquidGlassBox(radius: double.infinity, style: themedGlass(theme), child: track);
     track = GestureDetector(
@@ -366,12 +371,13 @@ class _ArrowPainter extends CustomPainter {
       canvas.translate(16, 0);
       canvas.scale(-1, 1);
     }
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final stroke =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.8
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
     canvas.drawLine(const Offset(2.5, 8), const Offset(13, 8), stroke);
     canvas.drawPath(
       Path()

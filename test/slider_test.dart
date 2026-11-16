@@ -9,11 +9,12 @@ Widget _slider(double Function() get, void Function(double) set, {int? divisions
   return SizedBox(
     width: 236,
     child: StatefulBuilder(
-      builder: (context, setState) => GlassSlider(
-        value: get(),
-        divisions: divisions,
-        onChanged: enabled ? (v) => setState(() => set(v)) : null,
-      ),
+      builder:
+          (context, setState) => GlassSlider(
+            value: get(),
+            divisions: divisions,
+            onChanged: enabled ? (v) => setState(() => set(v)) : null,
+          ),
     ),
   );
 }
@@ -24,17 +25,22 @@ void main() {
     var value = 0.0;
     var started = 0;
     var ended = 0;
-    await tester.pumpWidget(scene(SizedBox(
-      width: 236,
-      child: StatefulBuilder(
-        builder: (context, setState) => GlassSlider(
-          value: value,
-          onChangeStart: (_) => started++,
-          onChangeEnd: (_) => ended++,
-          onChanged: (v) => setState(() => value = v),
+    await tester.pumpWidget(
+      scene(
+        SizedBox(
+          width: 236,
+          child: StatefulBuilder(
+            builder:
+                (context, setState) => GlassSlider(
+                  value: value,
+                  onChangeStart: (_) => started++,
+                  onChangeEnd: (_) => ended++,
+                  onChanged: (v) => setState(() => value = v),
+                ),
+          ),
         ),
       ),
-    )));
+    );
     final box = tester.getRect(find.byType(GlassSlider));
     // The thumb's centre travels from 18px in: 200px of travel.
     final gesture = await tester.startGesture(Offset(box.left + 18, box.center.dy));
@@ -83,16 +89,18 @@ void main() {
     var value = 0.5;
     final focus = FocusNode();
     addTearDown(focus.dispose);
-    await tester.pumpWidget(scene(SizedBox(
-      width: 236,
-      child: StatefulBuilder(
-        builder: (context, setState) => GlassSlider(
-          value: value,
-          focusNode: focus,
-          onChanged: (v) => setState(() => value = v),
+    await tester.pumpWidget(
+      scene(
+        SizedBox(
+          width: 236,
+          child: StatefulBuilder(
+            builder:
+                (context, setState) =>
+                    GlassSlider(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
+          ),
         ),
       ),
-    )));
+    );
     focus.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -111,10 +119,9 @@ void main() {
   testWidgets('has slider semantics', (tester) async {
     await setUpGlass(tester);
     final handle = tester.ensureSemantics();
-    await tester.pumpWidget(scene(SizedBox(
-      width: 236,
-      child: GlassSlider(value: 0.3, onChanged: (_) {}, semanticLabel: 'Volume'),
-    )));
+    await tester.pumpWidget(
+      scene(SizedBox(width: 236, child: GlassSlider(value: 0.3, onChanged: (_) {}, semanticLabel: 'Volume'))),
+    );
     expect(
       tester.getSemantics(find.byType(GlassSlider)),
       containsSemantics(
@@ -136,27 +143,30 @@ void main() {
     testWidgets('looks right ${dark ? 'dark' : 'light'}', (tester) async {
       await setUpGlass(tester, size: const Size(300, 220), ratio: 3);
       var held = 0.35;
-      await tester.pumpWidget(scene(
-        dark: dark,
-        SizedBox(
-          width: 240,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            GlassSlider(value: 0, onChanged: (_) {}),
-            const SizedBox(height: 8),
-            GlassSlider(value: 0.6, onChanged: (_) {}),
-            const SizedBox(height: 8),
-            StatefulBuilder(
-              builder: (context, setState) => GlassSlider(
-                key: const Key('held'),
-                value: held,
-                onChanged: (v) => setState(() => held = v),
-              ),
+      await tester.pumpWidget(
+        scene(
+          dark: dark,
+          SizedBox(
+            width: 240,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlassSlider(value: 0, onChanged: (_) {}),
+                const SizedBox(height: 8),
+                GlassSlider(value: 0.6, onChanged: (_) {}),
+                const SizedBox(height: 8),
+                StatefulBuilder(
+                  builder:
+                      (context, setState) =>
+                          GlassSlider(key: const Key('held'), value: held, onChanged: (v) => setState(() => held = v)),
+                ),
+                const SizedBox(height: 8),
+                const GlassSlider(value: 0.8, onChanged: null),
+              ],
             ),
-            const SizedBox(height: 8),
-            const GlassSlider(value: 0.8, onChanged: null),
-          ]),
+          ),
         ),
-      ));
+      );
       await settle(tester);
       final box = tester.getRect(find.byKey(const Key('held')));
       final gesture = await tester.startGesture(Offset(box.left + 18 + (box.width - 36) * 0.35, box.center.dy));

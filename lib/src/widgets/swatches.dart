@@ -27,8 +27,8 @@ class GlassColorSwatches extends StatefulWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(size > 0),
-        assert(labels == null || labels.length == colors.length);
+  }) : assert(size > 0),
+       assert(labels == null || labels.length == colors.length);
 
   /// The colours to pick from.
   final List<Color> colors;
@@ -137,14 +137,18 @@ class _GlassColorSwatchesState extends State<GlassColorSwatches> {
         },
         child: Actions(
           actions: <Type, Action<Intent>>{
-            _MoveIntent: CallbackAction<_MoveIntent>(onInvoke: (intent) {
-              _move(intent.delta);
-              return null;
-            }),
-            _EdgeIntent: CallbackAction<_EdgeIntent>(onInvoke: (intent) {
-              _select(intent.end ? widget.colors.length - 1 : 0);
-              return null;
-            }),
+            _MoveIntent: CallbackAction<_MoveIntent>(
+              onInvoke: (intent) {
+                _move(intent.delta);
+                return null;
+              },
+            ),
+            _EdgeIntent: CallbackAction<_EdgeIntent>(
+              onInvoke: (intent) {
+                _select(intent.end ? widget.colors.length - 1 : 0);
+                return null;
+              },
+            ),
           },
           child: GlassFocusable(
             enabled: _enabled,

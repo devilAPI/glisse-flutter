@@ -7,16 +7,16 @@ import '../rendering/liquid_glass.dart';
 
 /// The theme's glass, tinted [tint] (the theme's frost by default).
 GlassStyle themedGlass(GlassThemeData theme, {Color? tint, bool shadow = true}) => GlassStyle(
-      tint: tint ?? theme.glass,
-      edge: theme.edge,
-      drop: shadow ? theme.drop : const Color(0x00000000),
-      rimShine: theme.rimShine,
-      blur: theme.blur,
-      saturation: theme.saturation,
-      bend: theme.glassBend,
-      dispersion: theme.glassDispersion,
-      spec: LensSpec.glass,
-    );
+  tint: tint ?? theme.glass,
+  edge: theme.edge,
+  drop: shadow ? theme.drop : const Color(0x00000000),
+  rimShine: theme.rimShine,
+  blur: theme.blur,
+  saturation: theme.saturation,
+  bend: theme.glassBend,
+  dispersion: theme.glassDispersion,
+  spec: LensSpec.glass,
+);
 
 /// Makes a control take focus and answer space and enter, with a ring while
 /// it has keyboard focus.
@@ -91,10 +91,12 @@ class _GlassFocusableState extends State<GlassFocusable> {
         SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
       },
       actions: <Type, Action<Intent>>{
-        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-          widget.onActivate?.call();
-          return null;
-        }),
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onActivate?.call();
+            return null;
+          },
+        ),
       },
       child: child,
     );

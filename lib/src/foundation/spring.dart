@@ -10,15 +10,11 @@ import 'package:flutter/scheduler.dart';
 /// frame rate. [stiffness] and [damping] are per unit mass.
 class GlassSpring extends ChangeNotifier implements ValueListenable<double> {
   /// Creates a spring at rest on [value], driven by a ticker from [vsync].
-  GlassSpring({
-    required TickerProvider vsync,
-    double value = 0,
-    required double stiffness,
-    required double damping,
-  })  : _value = value,
-        _target = value,
-        _stiffness = stiffness,
-        _damping = damping {
+  GlassSpring({required TickerProvider vsync, double value = 0, required double stiffness, required double damping})
+    : _value = value,
+      _target = value,
+      _stiffness = stiffness,
+      _damping = damping {
     _ticker = vsync.createTicker(_tick);
   }
 
@@ -99,9 +95,10 @@ class GlassSpring extends ChangeNotifier implements ValueListenable<double> {
 
   void _tick(Duration elapsed) {
     // The first frame already shows one frame's worth of motion.
-    final dt = _last == Duration.zero && elapsed == Duration.zero
-        ? 1 / 60
-        : math.min(0.1, math.max(0.0, (elapsed - _last).inMicroseconds / 1e6));
+    final dt =
+        _last == Duration.zero && elapsed == Duration.zero
+            ? 1 / 60
+            : math.min(0.1, math.max(0.0, (elapsed - _last).inMicroseconds / 1e6));
     _last = elapsed;
     _advance(dt);
     if ((_value - _target).abs() < 1e-4 && _velocity.abs() < 1e-3) {

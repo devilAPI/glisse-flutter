@@ -64,7 +64,7 @@ class _ExtrasSectionState extends State<ExtrasSection> {
                   'Ken T',
                   'Barbara L',
                   'Don K',
-                  'Edsger D'
+                  'Edsger D',
                 ])
                   GlassAvatar(initials: name, size: 36),
               ],
@@ -85,38 +85,44 @@ class _ExtrasSectionState extends State<ExtrasSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Column(children: [
-              GlassKnob(
-                value: _volume,
-                activeColor: _accent,
-                semanticLabel: 'Volume',
-                onChanged: (v) => setState(() => _volume = v),
-                child: Text('${(_volume * 100).round()}'),
-              ),
-              const SizedBox(height: 6),
-              Text('Volume', style: muted),
-            ]),
-            Column(children: [
-              GlassKnob(
-                value: _temperature,
-                min: 16,
-                max: 28,
-                divisions: 24,
-                size: 72,
-                activeColor: _accent,
-                semanticLabel: 'Temperature',
-                semanticFormatter: (v) => '${v.toStringAsFixed(1)} degrees',
-                onChanged: (v) => setState(() => _temperature = v),
-                child: Text('${_temperature.toStringAsFixed(1)}°'),
-              ),
-              const SizedBox(height: 6),
-              Text('Temperature', style: muted),
-            ]),
-            Column(children: [
-              const GlassKnob(value: 0.3, onChanged: null, semanticLabel: 'Locked'),
-              const SizedBox(height: 6),
-              Text('Disabled', style: muted),
-            ]),
+            Column(
+              children: [
+                GlassKnob(
+                  value: _volume,
+                  activeColor: _accent,
+                  semanticLabel: 'Volume',
+                  onChanged: (v) => setState(() => _volume = v),
+                  child: Text('${(_volume * 100).round()}'),
+                ),
+                const SizedBox(height: 6),
+                Text('Volume', style: muted),
+              ],
+            ),
+            Column(
+              children: [
+                GlassKnob(
+                  value: _temperature,
+                  min: 16,
+                  max: 28,
+                  divisions: 24,
+                  size: 72,
+                  activeColor: _accent,
+                  semanticLabel: 'Temperature',
+                  semanticFormatter: (v) => '${v.toStringAsFixed(1)} degrees',
+                  onChanged: (v) => setState(() => _temperature = v),
+                  child: Text('${_temperature.toStringAsFixed(1)}°'),
+                ),
+                const SizedBox(height: 6),
+                Text('Temperature', style: muted),
+              ],
+            ),
+            Column(
+              children: [
+                const GlassKnob(value: 0.3, onChanged: null, semanticLabel: 'Locked'),
+                const SizedBox(height: 6),
+                Text('Disabled', style: muted),
+              ],
+            ),
           ],
         ),
         const SizedBox(height: 18),

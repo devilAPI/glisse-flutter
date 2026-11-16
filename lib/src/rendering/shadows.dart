@@ -27,10 +27,11 @@ void paintDropShadow(
   final shadow = rrect.inflate(spread).shift(offset);
   final reach = sigma * 3 + spread.abs() + offset.distance + 2;
   canvas.save();
-  final outside = Path()
-    ..fillType = PathFillType.evenOdd
-    ..addRect(rrect.outerRect.inflate(reach))
-    ..addRRect(rrect);
+  final outside =
+      Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(rrect.outerRect.inflate(reach))
+        ..addRRect(rrect);
   canvas.clipPath(outside);
   final paint = Paint()..color = color;
   if (sigma > 0) paint.maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
@@ -53,10 +54,11 @@ void paintInsetShadow(
   canvas.clipRRect(rrect);
   final hole = rrect.deflate(spread).shift(offset);
   final reach = sigma * 3 + spread.abs() + offset.distance + 4;
-  final ring = Path()
-    ..fillType = PathFillType.evenOdd
-    ..addRect(rrect.outerRect.inflate(reach))
-    ..addRRect(hole);
+  final ring =
+      Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(rrect.outerRect.inflate(reach))
+        ..addRRect(hole);
   final paint = Paint()..color = color;
   if (sigma > 0) paint.maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
   canvas.drawPath(ring, paint);
@@ -65,11 +67,11 @@ void paintInsetShadow(
 
 /// CSS's `saturate()` as a colour matrix.
 List<double> saturationMatrix(double s) => <double>[
-      0.213 + 0.787 * s, 0.715 - 0.715 * s, 0.072 - 0.072 * s, 0, 0, //
-      0.213 - 0.213 * s, 0.715 + 0.285 * s, 0.072 - 0.072 * s, 0, 0,
-      0.213 - 0.213 * s, 0.715 - 0.715 * s, 0.072 + 0.928 * s, 0, 0,
-      0, 0, 0, 1, 0,
-    ];
+  0.213 + 0.787 * s, 0.715 - 0.715 * s, 0.072 - 0.072 * s, 0, 0, //
+  0.213 - 0.213 * s, 0.715 + 0.285 * s, 0.072 - 0.072 * s, 0, 0,
+  0.213 - 0.213 * s, 0.715 - 0.715 * s, 0.072 + 0.928 * s, 0, 0,
+  0, 0, 0, 1, 0,
+];
 
 /// CSS's `brightness()` then `saturate()`, as one colour matrix.
 List<double> brightnessSaturationMatrix(double b, double s) {

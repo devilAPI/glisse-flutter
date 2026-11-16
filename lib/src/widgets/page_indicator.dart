@@ -121,10 +121,12 @@ class _GlassPageIndicatorState extends State<GlassPageIndicator> with SingleTick
         },
         child: Actions(
           actions: <Type, Action<Intent>>{
-            _PageIntent: CallbackAction<_PageIntent>(onInvoke: (intent) {
-              _go(_current + intent.delta);
-              return null;
-            }),
+            _PageIntent: CallbackAction<_PageIntent>(
+              onInvoke: (intent) {
+                _go(_current + intent.delta);
+                return null;
+              },
+            ),
           },
           child: GlassFocusable(
             enabled: widget.onTap != null,
@@ -146,7 +148,7 @@ class _PageIntent extends Intent {
 
 class _DotsPainter extends CustomPainter {
   _DotsPainter({required this.count, required this.page, required this.active, required this.idle})
-      : super(repaint: page);
+    : super(repaint: page);
 
   final int count;
   final GlassSpring page;

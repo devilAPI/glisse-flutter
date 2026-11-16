@@ -18,12 +18,12 @@ class _NavigationSectionState extends State<NavigationSection> {
   String _opened = 'Nothing opened yet';
 
   static Widget _appIcon(List<Color> colors, IconData icon) => DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        ),
-        child: SizedBox.square(dimension: 48, child: Icon(icon, color: Colors.white, size: 28)),
-      );
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+    ),
+    child: SizedBox.square(dimension: 48, child: Icon(icon, color: Colors.white, size: 28)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +36,13 @@ class _NavigationSectionState extends State<NavigationSection> {
           leading: GlassBackButton(label: 'Settings', onPressed: () {}),
           title: const Text('General'),
           actions: [
-            GlassToolbar(padding: 0, children: [
-              GlassToolbarItem(icon: const Icon(Icons.search), semanticLabel: 'Search', onPressed: () {}),
-              GlassToolbarItem(icon: const Icon(Icons.more_horiz), semanticLabel: 'More', onPressed: () {}),
-            ]),
+            GlassToolbar(
+              padding: 0,
+              children: [
+                GlassToolbarItem(icon: const Icon(Icons.search), semanticLabel: 'Search', onPressed: () {}),
+                GlassToolbarItem(icon: const Icon(Icons.more_horiz), semanticLabel: 'More', onPressed: () {}),
+              ],
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -64,23 +67,25 @@ class _NavigationSectionState extends State<NavigationSection> {
         ),
         const SizedBox(height: 16),
         Center(
-          child: GlassToolbar(children: [
-            GlassToolbarItem(
-              icon: const Icon(Icons.format_bold),
-              semanticLabel: 'Bold',
-              selected: _bold,
-              onPressed: () => setState(() => _bold = !_bold),
-            ),
-            GlassToolbarItem(
-              icon: const Icon(Icons.format_italic),
-              semanticLabel: 'Italic',
-              selected: _italic,
-              onPressed: () => setState(() => _italic = !_italic),
-            ),
-            const GlassToolbarSpacer(),
-            GlassToolbarItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
-            GlassToolbarItem(icon: const Icon(Icons.redo), semanticLabel: 'Redo', onPressed: () {}),
-          ]),
+          child: GlassToolbar(
+            children: [
+              GlassToolbarItem(
+                icon: const Icon(Icons.format_bold),
+                semanticLabel: 'Bold',
+                selected: _bold,
+                onPressed: () => setState(() => _bold = !_bold),
+              ),
+              GlassToolbarItem(
+                icon: const Icon(Icons.format_italic),
+                semanticLabel: 'Italic',
+                selected: _italic,
+                onPressed: () => setState(() => _italic = !_italic),
+              ),
+              const GlassToolbarSpacer(),
+              GlassToolbarItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
+              GlassToolbarItem(icon: const Icon(Icons.redo), semanticLabel: 'Redo', onPressed: () {}),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         Center(
@@ -98,30 +103,32 @@ class _NavigationSectionState extends State<NavigationSection> {
         ),
         const SizedBox(height: 16),
         Center(
-          child: GlassDock(items: [
-            GlassDockItem(
-              icon: _appIcon([Colors.blue, Colors.cyan], Icons.public),
-              label: 'Browser',
-              running: true,
-              onPressed: () => setState(() => _opened = 'Opened Browser'),
-            ),
-            GlassDockItem(
-              icon: _appIcon([Colors.green, Colors.teal], Icons.message),
-              label: 'Messages',
-              onPressed: () => setState(() => _opened = 'Opened Messages'),
-            ),
-            GlassDockItem(
-              icon: _appIcon([Colors.orange, Colors.red], Icons.photo),
-              label: 'Photos',
-              running: true,
-              onPressed: () => setState(() => _opened = 'Opened Photos'),
-            ),
-            GlassDockItem(
-              icon: _appIcon([Colors.purple, Colors.pink], Icons.music_note),
-              label: 'Music',
-              onPressed: () => setState(() => _opened = 'Opened Music'),
-            ),
-          ]),
+          child: GlassDock(
+            items: [
+              GlassDockItem(
+                icon: _appIcon([Colors.blue, Colors.cyan], Icons.public),
+                label: 'Browser',
+                running: true,
+                onPressed: () => setState(() => _opened = 'Opened Browser'),
+              ),
+              GlassDockItem(
+                icon: _appIcon([Colors.green, Colors.teal], Icons.message),
+                label: 'Messages',
+                onPressed: () => setState(() => _opened = 'Opened Messages'),
+              ),
+              GlassDockItem(
+                icon: _appIcon([Colors.orange, Colors.red], Icons.photo),
+                label: 'Photos',
+                running: true,
+                onPressed: () => setState(() => _opened = 'Opened Photos'),
+              ),
+              GlassDockItem(
+                icon: _appIcon([Colors.purple, Colors.pink], Icons.music_note),
+                label: 'Music',
+                onPressed: () => setState(() => _opened = 'Opened Music'),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         Text(_opened, textAlign: TextAlign.center, style: TextStyle(color: theme.muted, fontSize: 13)),

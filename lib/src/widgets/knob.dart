@@ -40,8 +40,8 @@ class GlassKnob extends StatefulWidget {
     this.semanticFormatter,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(divisions == null || divisions > 0),
-        assert(size >= 32);
+  }) : assert(divisions == null || divisions > 0),
+       assert(size >= 32);
 
   /// The current value, from [min] to [max].
   final double value;
@@ -242,12 +242,7 @@ class _GlassKnobState extends State<GlassKnob> with TickerProviderStateMixin {
       builder: (context, child) {
         final progress = _shown.value.clamp(0.0, 1.0);
         return CustomPaint(
-          painter: _ArcPainter(
-            progress: progress,
-            rail: theme.rail,
-            fill: accent,
-            focus: _focused ? theme.ring : null,
-          ),
+          painter: _ArcPainter(progress: progress, rail: theme.rail, fill: accent, focus: _focused ? theme.ring : null),
           child: Center(
             child: Transform.scale(
               scale: 1 + 0.05 * _lift.value,
@@ -266,15 +261,16 @@ class _GlassKnobState extends State<GlassKnob> with TickerProviderStateMixin {
           ),
         );
       },
-      child: widget.child == null
-          ? null
-          : Center(
-              child: DefaultTextStyle.merge(
-                style: theme.textStyle.copyWith(color: theme.foreground, fontSize: 12, fontWeight: FontWeight.w600),
-                maxLines: 1,
-                child: widget.child!,
+      child:
+          widget.child == null
+              ? null
+              : Center(
+                child: DefaultTextStyle.merge(
+                  style: theme.textStyle.copyWith(color: theme.foreground, fontSize: 12, fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  child: widget.child!,
+                ),
               ),
-            ),
     );
     knob = SizedBox.square(dimension: size, child: knob);
     knob = Listener(
@@ -312,14 +308,18 @@ class _GlassKnobState extends State<GlassKnob> with TickerProviderStateMixin {
         const SingleActivator(LogicalKeyboardKey.end): const _JumpIntent(1),
       },
       actions: <Type, Action<Intent>>{
-        _NudgeIntent: CallbackAction<_NudgeIntent>(onInvoke: (intent) {
-          _nudge(intent.steps);
-          return null;
-        }),
-        _JumpIntent: CallbackAction<_JumpIntent>(onInvoke: (intent) {
-          _jump(intent.progress);
-          return null;
-        }),
+        _NudgeIntent: CallbackAction<_NudgeIntent>(
+          onInvoke: (intent) {
+            _nudge(intent.steps);
+            return null;
+          },
+        ),
+        _JumpIntent: CallbackAction<_JumpIntent>(
+          onInvoke: (intent) {
+            _jump(intent.progress);
+            return null;
+          },
+        ),
       },
       child: knob,
     );
@@ -363,10 +363,11 @@ class _ArcPainter extends CustomPainter {
     final center = size.center(Offset.zero);
     final radius = size.shortestSide / 2 - _stroke / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _stroke
-      ..strokeCap = StrokeCap.round;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _stroke
+          ..strokeCap = StrokeCap.round;
     canvas.drawArc(rect, _start, _sweep, false, paint..color = rail);
     if (progress > 0.001) canvas.drawArc(rect, _start, _sweep * progress, false, paint..color = fill);
     if (focus != null) {

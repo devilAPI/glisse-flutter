@@ -75,12 +75,36 @@ class _Metrics {
   final double fontSize;
   final double iconSize;
 
-  static const _Metrics tabBar =
-      _Metrics(tabWidth: 84, tabHeight: 32, inset: 4, thumbInset: 0, growX: 27, growY: 20, fontSize: 14, iconSize: 0);
-  static const _Metrics tabBarIcons =
-      _Metrics(tabWidth: 72, tabHeight: 52, inset: 4, thumbInset: 0, growX: 24, growY: 16, fontSize: 10, iconSize: 26);
-  static const _Metrics segmented =
-      _Metrics(tabWidth: 84, tabHeight: 32, inset: 0, thumbInset: 2, growX: 24, growY: 16, fontSize: 13, iconSize: 0);
+  static const _Metrics tabBar = _Metrics(
+    tabWidth: 84,
+    tabHeight: 32,
+    inset: 4,
+    thumbInset: 0,
+    growX: 27,
+    growY: 20,
+    fontSize: 14,
+    iconSize: 0,
+  );
+  static const _Metrics tabBarIcons = _Metrics(
+    tabWidth: 72,
+    tabHeight: 52,
+    inset: 4,
+    thumbInset: 0,
+    growX: 24,
+    growY: 16,
+    fontSize: 10,
+    iconSize: 26,
+  );
+  static const _Metrics segmented = _Metrics(
+    tabWidth: 84,
+    tabHeight: 32,
+    inset: 0,
+    thumbInset: 2,
+    growX: 24,
+    growY: 16,
+    fontSize: 13,
+    iconSize: 0,
+  );
 }
 
 class _MoveIntent extends Intent {
@@ -577,10 +601,12 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
           SingleActivator(LogicalKeyboardKey.end): _MoveIntent(2),
         },
         actions: <Type, Action<Intent>>{
-          _MoveIntent: CallbackAction<_MoveIntent>(onInvoke: (intent) {
-            _keyMove(intent.to);
-            return null;
-          }),
+          _MoveIntent: CallbackAction<_MoveIntent>(
+            onInvoke: (intent) {
+              _keyMove(intent.to);
+              return null;
+            },
+          ),
         },
         child: Opacity(opacity: _enabled ? 1 : 0.35, child: bar),
       ),
@@ -670,10 +696,11 @@ class _SegmentsPainter<T> extends CustomPainter {
       canvas.save();
       canvas.clipRRect(barRRect);
       canvas.drawRect(
-          barRect,
-          Paint()
-            ..shader = glow
-            ..color = Color.fromRGBO(0, 0, 0, lifted));
+        barRect,
+        Paint()
+          ..shader = glow
+          ..color = Color.fromRGBO(0, 0, 0, lifted),
+      );
       canvas.restore();
     }
 
@@ -681,8 +708,13 @@ class _SegmentsPainter<T> extends CustomPainter {
       // The lens's shadow, faded in with its lift.
       final drop = theme.lensDrop;
       if (drop.a > 0 && lifted > 0) {
-        paintDropShadow(canvas, lensRRect,
-            color: drop.withValues(alpha: drop.a * lifted), offset: const Offset(0, 7), blur: 11);
+        paintDropShadow(
+          canvas,
+          lensRRect,
+          color: drop.withValues(alpha: drop.a * lifted),
+          offset: const Offset(0, 7),
+          blur: 11,
+        );
       }
       // A segmented control's thumb, which fades as the lens lifts.
       if (segmented) {
@@ -736,7 +768,11 @@ class _SegmentsPainter<T> extends CustomPainter {
 
     if (lensing) {
       final room = Rect.fromLTRB(
-          -m.growX / 2 - 4, -m.growY / 2 - 4, size.width + m.growX / 2 + 4, size.height + m.growY / 2 + 4);
+        -m.growX / 2 - 4,
+        -m.growY / 2 - 4,
+        size.width + m.growX / 2 + 4,
+        size.height + m.growY / 2 + 4,
+      );
       canvas.saveLayer(room, Paint());
       paintLabels(canvas, realColor, active);
       cutOut(canvas, lensRRect);
@@ -750,7 +786,8 @@ class _SegmentsPainter<T> extends CustomPainter {
       final spec = segmented ? LensSpec.segment : LensSpec.tab;
       final shape = Size(width, height);
       final strength = segmented ? theme.segmentBend : theme.tabBend;
-      final reach = spec.reachOf(shape, strengthOverride: strength, dark: !light) *
+      final reach =
+          spec.reachOf(shape, strengthOverride: strength, dark: !light) *
           (math.min(lens.width, lens.height) / math.min(width, height)) *
           lifted;
       paintContentLens(

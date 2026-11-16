@@ -21,13 +21,7 @@ import 'package:flutter/widgets.dart';
 /// ```
 class GlassBackdrop extends StatefulWidget {
   /// Lays [background] under [child] and keeps a copy of it for glass to bend.
-  const GlassBackdrop({
-    super.key,
-    required this.background,
-    required this.child,
-    this.pixelRatio,
-    this.enabled = true,
-  });
+  const GlassBackdrop({super.key, required this.background, required this.child, this.pixelRatio, this.enabled = true});
 
   /// What the glass in [child] bends: laid out to fill this widget, behind [child].
   final Widget background;
@@ -176,13 +170,10 @@ class _CaptureBoundary extends SingleChildRenderObjectWidget {
 /// under it changed: its layer is asked to add itself to the scene only then.
 class RenderGlassCapture extends RenderProxyBox {
   /// Creates a boundary that copies itself for [controller] at [pixelRatio].
-  RenderGlassCapture({
-    required GlassBackdropController controller,
-    required double pixelRatio,
-    required bool enabled,
-  })  : _controller = controller,
-        _pixelRatio = pixelRatio,
-        _enabled = enabled {
+  RenderGlassCapture({required GlassBackdropController controller, required double pixelRatio, required bool enabled})
+    : _controller = controller,
+      _pixelRatio = pixelRatio,
+      _enabled = enabled {
     _controller._render = this;
   }
 
@@ -250,12 +241,14 @@ class RenderGlassCapture extends RenderProxyBox {
       _capturing = false;
       _controller._setImage(image);
     } catch (error, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: error,
-        stack: stack,
-        library: 'glisse',
-        context: ErrorDescription('while copying a GlassBackdrop'),
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'glisse',
+          context: ErrorDescription('while copying a GlassBackdrop'),
+        ),
+      );
     } finally {
       _capturing = false;
     }

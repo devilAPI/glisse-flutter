@@ -16,10 +16,10 @@ import '../rendering/shadows.dart';
 class GlassOverlayContext {
   /// Captures what [context] gives glass: its theme, backdrop, text style and text direction.
   GlassOverlayContext.of(BuildContext context)
-      : theme = GlassTheme.of(context),
-        backdrop = GlassBackdrop.maybeOf(context),
-        textStyle = DefaultTextStyle.of(context).style,
-        direction = Directionality.maybeOf(context) ?? TextDirection.ltr;
+    : theme = GlassTheme.of(context),
+      backdrop = GlassBackdrop.maybeOf(context),
+      textStyle = DefaultTextStyle.of(context).style,
+      direction = Directionality.maybeOf(context) ?? TextDirection.ltr;
 
   /// The page's glass theme.
   final GlassThemeData theme;
@@ -55,12 +55,12 @@ class GlassOverlayContext {
 class GlassSpringCurve extends Curve {
   /// Creates a curve of a spring with the given [stiffness] and [dampingRatio] (1 is critical damping), run for [duration] seconds.
   GlassSpringCurve({double stiffness = 400, double dampingRatio = 0.8, this.duration = 0.5})
-      : _simulation = SpringSimulation(
-          SpringDescription(mass: 1, stiffness: stiffness, damping: dampingRatio * 2 * math.sqrt(stiffness)),
-          0,
-          1,
-          0,
-        );
+    : _simulation = SpringSimulation(
+        SpringDescription(mass: 1, stiffness: stiffness, damping: dampingRatio * 2 * math.sqrt(stiffness)),
+        0,
+        1,
+        0,
+      );
 
   final SpringSimulation _simulation;
 

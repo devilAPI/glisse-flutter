@@ -30,14 +30,11 @@ class GlassProgressBar extends StatefulWidget {
 }
 
 class _GlassProgressBarState extends State<GlassProgressBar> with TickerProviderStateMixin {
-  late final GlassSpring _progress = GlassSpring(
+  late final GlassSpring _progress = GlassSpring(vsync: this, value: widget.value ?? 0, stiffness: 180, damping: 26);
+  late final AnimationController _sweep = AnimationController(
     vsync: this,
-    value: widget.value ?? 0,
-    stiffness: 180,
-    damping: 26,
+    duration: const Duration(milliseconds: 1400),
   );
-  late final AnimationController _sweep =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
 
   @override
   void initState() {
@@ -94,7 +91,7 @@ class _GlassProgressBarState extends State<GlassProgressBar> with TickerProvider
 
 class _BarPainter extends CustomPainter {
   _BarPainter({required this.rail, required this.fill, required this.progress, required this.sweep})
-      : super(repaint: Listenable.merge([progress, if (sweep != null) sweep]));
+    : super(repaint: Listenable.merge([progress, if (sweep != null) sweep]));
 
   final Color rail;
   final Color fill;
@@ -216,9 +213,10 @@ class _SpokesPainter extends CustomPainter {
     final center = size.center(Offset.zero);
     // Steps from spoke to spoke, as UIActivityIndicatorView does, rather than gliding.
     final head = (turn.value * spokes).floor();
-    final paint = Paint()
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = radius * (spokes > 8 ? 0.16 : 0.22);
+    final paint =
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = radius * (spokes > 8 ? 0.16 : 0.22);
     for (var i = 0; i < spokes; i++) {
       final age = (head - i) % spokes;
       final alpha = 1 - 0.85 * age / (spokes - 1);
@@ -236,8 +234,14 @@ class _SpokesPainter extends CustomPainter {
 /// A ring of progress on a disc of glass.
 class GlassProgressRing extends StatefulWidget {
   /// Creates a progress ring showing [value].
-  const GlassProgressRing(
-      {super.key, required this.value, this.size = 36, this.strokeWidth = 4, this.color, this.child});
+  const GlassProgressRing({
+    super.key,
+    required this.value,
+    this.size = 36,
+    this.strokeWidth = 4,
+    this.color,
+    this.child,
+  });
 
   /// From 0 to 1.
   final double value;
@@ -296,17 +300,18 @@ class _GlassProgressRingState extends State<GlassProgressRing> with SingleTicker
               strokeWidth: widget.strokeWidth,
               progress: _progress,
             ),
-            child: widget.child == null
-                ? null
-                : Center(
-                    child: DefaultTextStyle.merge(
-                      style: theme.textStyle.copyWith(color: theme.foreground, fontSize: widget.size * 0.28),
-                      child: IconTheme.merge(
-                        data: IconThemeData(color: theme.foreground, size: widget.size * 0.4),
-                        child: widget.child!,
+            child:
+                widget.child == null
+                    ? null
+                    : Center(
+                      child: DefaultTextStyle.merge(
+                        style: theme.textStyle.copyWith(color: theme.foreground, fontSize: widget.size * 0.28),
+                        child: IconTheme.merge(
+                          data: IconThemeData(color: theme.foreground, size: widget.size * 0.4),
+                          child: widget.child!,
+                        ),
                       ),
                     ),
-                  ),
           ),
         ),
       ),
@@ -316,7 +321,7 @@ class _GlassProgressRingState extends State<GlassProgressRing> with SingleTicker
 
 class _RingPainter extends CustomPainter {
   _RingPainter({required this.rail, required this.fill, required this.strokeWidth, required this.progress})
-      : super(repaint: progress);
+    : super(repaint: progress);
 
   final Color rail;
   final Color fill;
@@ -327,10 +332,11 @@ class _RingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final inset = strokeWidth / 2 + size.width * 0.12;
     final rect = (Offset.zero & size).deflate(inset);
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final stroke =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
     canvas.drawArc(rect, 0, 2 * math.pi, false, stroke..color = rail);
     final v = progress.value.clamp(0.0, 1.0);
     if (v > 0) canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * v, false, stroke..color = fill);

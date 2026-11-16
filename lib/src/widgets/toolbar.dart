@@ -52,13 +52,14 @@ class _GlassToolbarItemState extends State<GlassToolbarItem> {
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     final ink = widget.tint ?? (widget.selected ? theme.fill : theme.foreground);
-    final fill = widget.selected
-        ? theme.selection
-        : _pressed
+    final fill =
+        widget.selected
+            ? theme.selection
+            : _pressed
             ? theme.highlight
             : _hovered
-                ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6)
-                : const Color(0x00000000);
+            ? theme.highlight.withValues(alpha: theme.highlight.a * 0.6)
+            : const Color(0x00000000);
     Widget item = AnimatedContainer(
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
       curve: Curves.ease,
@@ -67,9 +68,10 @@ class _GlassToolbarItemState extends State<GlassToolbarItem> {
       decoration: ShapeDecoration(
         color: fill,
         shape: CircleBorder(
-          side: _focused
-              ? BorderSide(color: theme.ring, width: 2, strokeAlign: BorderSide.strokeAlignInside)
-              : BorderSide.none,
+          side:
+              _focused
+                  ? BorderSide(color: theme.ring, width: 2, strokeAlign: BorderSide.strokeAlignInside)
+                  : BorderSide.none,
         ),
       ),
       alignment: Alignment.center,
@@ -93,10 +95,12 @@ class _GlassToolbarItemState extends State<GlassToolbarItem> {
         onShowHoverHighlight: (v) => setState(() => _hovered = v),
         onShowFocusHighlight: (v) => setState(() => _focused = v),
         actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
-            widget.onPressed?.call();
-            return null;
-          }),
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onPressed?.call();
+              return null;
+            },
+          ),
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -157,11 +161,7 @@ class GlassToolbar extends StatelessWidget {
     return Glass(
       borderRadius: double.infinity,
       padding: EdgeInsets.all(padding),
-      child: Flex(
-        direction: direction,
-        mainAxisSize: grows ? MainAxisSize.max : MainAxisSize.min,
-        children: list,
-      ),
+      child: Flex(direction: direction, mainAxisSize: grows ? MainAxisSize.max : MainAxisSize.min, children: list),
     );
   }
 }

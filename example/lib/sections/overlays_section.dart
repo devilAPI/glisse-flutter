@@ -15,75 +15,90 @@ class OverlaysSection extends StatelessWidget {
       children: [
         GlassButton(
           icon: const Icon(Icons.warning_amber_rounded),
-          onPressed: () => showGlassDialog<void>(
-            context: context,
-            builder: (context) => GlassAlertDialog(
-              title: const Text('Delete this photo?'),
-              content: const Text('It will be removed from all your devices. This can’t be undone.'),
-              actions: [
-                const GlassDialogAction(child: Text('Cancel')),
-                GlassDialogAction(
-                  destructive: true,
-                  onPressed: () => showGlassToast(
-                    context,
-                    icon: Icon(Icons.delete_outline, color: theme.destructive),
-                    message: const Text('Photo deleted'),
-                  ),
-                  child: const Text('Delete'),
-                ),
-              ],
-            ),
-          ),
+          onPressed:
+              () => showGlassDialog<void>(
+                context: context,
+                builder:
+                    (context) => GlassAlertDialog(
+                      title: const Text('Delete this photo?'),
+                      content: const Text('It will be removed from all your devices. This can’t be undone.'),
+                      actions: [
+                        const GlassDialogAction(child: Text('Cancel')),
+                        GlassDialogAction(
+                          destructive: true,
+                          onPressed:
+                              () => showGlassToast(
+                                context,
+                                icon: Icon(Icons.delete_outline, color: theme.destructive),
+                                message: const Text('Photo deleted'),
+                              ),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+              ),
           child: const Text('Alert'),
         ),
         GlassButton(
           icon: const Icon(Icons.vertical_align_top),
-          onPressed: () => showGlassSheet<void>(
-            context: context,
-            builder: (context) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text('Share', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                Text('Drag the sheet down, or tap outside it, to close it.', style: TextStyle(color: theme.muted)),
-                const SizedBox(height: 16),
-                GlassButton(
-                  variant: GlassButtonVariant.filled,
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Send'),
-                ),
-                const SizedBox(height: 8),
-                GlassButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Save for later')),
-              ],
-            ),
-          ),
+          onPressed:
+              () => showGlassSheet<void>(
+                context: context,
+                builder:
+                    (context) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text('Share', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Drag the sheet down, or tap outside it, to close it.',
+                          style: TextStyle(color: theme.muted),
+                        ),
+                        const SizedBox(height: 16),
+                        GlassButton(
+                          variant: GlassButtonVariant.filled,
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Send'),
+                        ),
+                        const SizedBox(height: 8),
+                        GlassButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Save for later')),
+                      ],
+                    ),
+              ),
           child: const Text('Sheet'),
         ),
         GlassButton(
           icon: const Icon(Icons.notifications_none),
-          onPressed: () => showGlassToast(
-            context,
-            icon: const Icon(Icons.check_circle, color: Colors.green),
-            message: const Text('Copied to clipboard'),
-          ),
+          onPressed:
+              () => showGlassToast(
+                context,
+                icon: const Icon(Icons.check_circle, color: Colors.green),
+                message: const Text('Copied to clipboard'),
+              ),
           child: const Text('Toast'),
         ),
         GlassPopover(
           width: 240,
-          popoverBuilder: (context) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Popover', style: TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              Text('A card of glass that springs out of its anchor. Tap outside to close it.',
-                  style: TextStyle(color: theme.muted)),
-            ],
-          ),
+          popoverBuilder:
+              (context) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Popover', style: TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'A card of glass that springs out of its anchor. Tap outside to close it.',
+                    style: TextStyle(color: theme.muted),
+                  ),
+                ],
+              ),
           child: IgnorePointer(
             child: GlassButton(
-                icon: const Icon(Icons.chat_bubble_outline), onPressed: () {}, child: const Text('Popover')),
+              icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () {},
+              child: const Text('Popover'),
+            ),
           ),
         ),
         GlassTooltip(
