@@ -1,16 +1,25 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'lens.dart';
 import 'shadows.dart';
 
+/// How many images [recordImage] has made, for tests that a lens doesn't
+/// record its content every frame.
+@visibleForTesting
+int debugImagesRecorded = 0;
+
 /// Records [draw] (in logical px over [size]) into an image at [pixelRatio],
-/// for a lens to bend. Content of a widget's own, like a switch's track or a
-/// tab bar's labels, is small, so recording it again each frame a lens moves
-/// is cheap.
+/// for a lens to bend.
+///
+/// On the web this reads the image back from the GPU, synchronously, so
+/// lenses keep their images in a [ContentImageCache] rather than recording
+/// one each frame.
 ui.Image recordImage(Size size, double pixelRatio, void Function(Canvas canvas) draw) {
+  debugImagesRecorded++;
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   canvas.scale(pixelRatio);
@@ -22,6 +31,36 @@ ui.Image recordImage(Size size, double pixelRatio, void Function(Canvas canvas) 
   );
   picture.dispose();
   return image;
+}
+
+/// One recorded image, kept while what it shows stays the same, so a lens
+/// that moves or grows over unchanged content doesn't record it again.
+///
+/// Recording is cheap on native platforms, but on the web each recording
+/// stalls on a GPU read-back: a slider dragged slowly, recording every frame,
+/// brought Firefox to a halt.
+class ContentImageCache {
+  Object? _key;
+  ui.Image? _image;
+
+  /// The image for [key], recording it with [draw] if the key has changed.
+  ///
+  /// Two keys are the same content when they're equal, so a record of the
+  /// size, pixel ratio and colours that [draw] uses makes a good key.
+  ui.Image get(Object key, Size size, double pixelRatio, void Function(Canvas canvas) draw) {
+    final image = _image;
+    if (image != null && _key == key) return image;
+    image?.dispose();
+    _key = key;
+    return _image = recordImage(size, pixelRatio, draw);
+  }
+
+  /// Lets go of the image.
+  void dispose() {
+    _image?.dispose();
+    _image = null;
+    _key = null;
+  }
 }
 
 /// Draws [image], which covers [imageRect] in local px, through the lens

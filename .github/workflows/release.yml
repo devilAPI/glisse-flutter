@@ -1,0 +1,196 @@
+# Releases a version when its tag is pushed, as `tool/release.sh 0.3.1` does:
+#
+# 1. checks that the tag matches pubspec.yaml's version and that CHANGELOG.md
+#    has a section for it, then analyzes and tests;
+# 2. builds the gallery for the web, Android, Linux, Windows and macOS;
+# 3. creates the GitHub release, with that CHANGELOG section as its notes and
+#    the builds attached;
+# 4. publishes the package to pub.dev, once that's turned on (below).
+#
+# Publishing to pub.dev is off until the repository variable PUB_DEV_PUBLISH
+# is "true". To turn it on:
+#   - publish one version by hand with `flutter pub publish`;
+#   - on pub.dev, open the package's Admin tab and, under "Automated
+#     publishing", enable GitHub Actions for devilAPI/glisse-flutter with the
+#     tag pattern v{{version}};
+#   - run `gh variable set PUB_DEV_PUBLISH --body true` (or add the variable
+#     under Settings > Secrets and variables > Actions > Variables).
+#
+# Run it by hand from the Actions tab to rebuild the release of a tag that
+# already exists; that never publishes to pub.dev, which accepts only tag
+# pushes.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag to release again, such as v0.3.0'
+        required: true
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: 3.35.6
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - id: version
+        name: The tag, pubspec.yaml and CHANGELOG.md agree
+        run: |
+          version=$(sed -n 's/^version: *//p' pubspec.yaml)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::The tag $TAG doesn't match pubspec.yaml's version $version."
+            exit 1
+          fi
+          if ! grep -q "^## $version\$" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## $version' section."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed --line-length 120 lib test example/lib example/integration_test
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter pub publish --dry-run
+
+  build:
+    name: Build the gallery (${{ matrix.target }})
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: web
+            os: ubuntu-latest
+          - target: android
+            os: ubuntu-latest
+          - target: linux
+            os: ubuntu-latest
+          - target: windows
+            os: windows-2022
+          - target: macos
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Linux build dependencies
+        if: matrix.target == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev
+      - name: Build and package
+        working-directory: example
+        shell: bash
+        run: |
+          name="glisse-gallery-$TAG"
+          mkdir -p ../dist
+          case "${{ matrix.target }}" in
+            web)
+              flutter build web --release
+              (cd build/web && zip -qr "../../../dist/$name-web.zip" .)
+              ;;
+            android)
+              flutter build apk --release
+              cp build/app/outputs/flutter-apk/app-release.apk "../dist/$name-android.apk"
+              ;;
+            linux)
+              flutter build linux --release
+              tar -czf "../dist/$name-linux-x64.tar.gz" -C build/linux/x64/release bundle
+              ;;
+            windows)
+              flutter build windows --release
+              (cd build/windows/x64/runner/Release && 7z a -bd "../../../../../../dist/$name-windows-x64.zip" . > /dev/null)
+              ;;
+            macos)
+              flutter build macos --release
+              ditto -c -k --keepParent build/macos/Build/Products/Release/glisse_example.app "../dist/$name-macos.zip"
+              ;;
+          esac
+          ls -la ../dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gallery-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  github-release:
+    needs: [verify, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Notes from CHANGELOG.md
+        run: |
+          version='${{ needs.verify.outputs.version }}'
+          awk -v head="## $version" '$0 == head {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          cat >> notes.md <<NOTES
+
+          ---
+
+          **Install:** \`flutter pub add glisse\` · **Gallery:** https://devilapi.github.io/glisse-flutter/ · **API reference:** https://devilapi.github.io/glisse-flutter/api/
+
+          The attached builds are the example gallery, unsigned: on macOS, open it with right-click > Open the first time.
+          NOTES
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file notes.md
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" --verify-tag --title "$TAG" --notes-file notes.md dist/*
+          fi
+
+  pub-dev:
+    needs: [verify, github-release]
+    if: github.event_name == 'push' && vars.PUB_DEV_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write # pub.dev's OIDC token
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1 # sets up the token that pub publish uses
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: flutter pub publish --force

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glisse/glisse.dart';
+import 'package:glisse/src/rendering/content_lens.dart' show debugImagesRecorded;
 
 import 'helpers.dart';
 
@@ -580,6 +581,58 @@ void main() {
       await press.up();
       await settle(tester);
       expect(find.byType(LiquidGlassBox), findsNothing);
+    });
+  });
+
+  group('lenses on the web', () {
+    // On the web each recording reads the GPU back synchronously, and a
+    // slider recording every frame of a slow drag brought Firefox to a halt.
+    testWidgets('dragging a slider or a tab bar slowly records nothing new', (tester) async {
+      await setUpGlass(tester, size: const Size(500, 300));
+      var value = 0.3;
+      var tab = 0;
+      await tester.pumpWidget(
+        scene(
+          StatefulBuilder(
+            builder:
+                (context, setState) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: 300, child: GlassSlider(value: value, onChanged: (v) => setState(() => value = v))),
+                    GlassTabBar<int>(
+                      items: const [
+                        GlassSegment(value: 0, label: 'One'),
+                        GlassSegment(value: 1, label: 'Two'),
+                        GlassSegment(value: 2, label: 'Three'),
+                      ],
+                      value: tab,
+                      onChanged: (v) => setState(() => tab = v),
+                    ),
+                  ],
+                ),
+          ),
+        ),
+      );
+      final slider = tester.getTopLeft(find.byType(GlassSlider)) + Offset(18 + 264 * value, 20);
+      final bar = tester.getRect(find.byType(GlassTabBar<int>));
+      for (final (target, start) in [
+        ('slider', slider),
+        ('tab bar', Offset(bar.left + bar.width / 6, bar.center.dy)),
+      ]) {
+        final drag = await tester.startGesture(start, kind: PointerDeviceKind.touch);
+        await tester.pump(const Duration(milliseconds: 100));
+        // Lifting may record, once the lens is up.
+        await drag.moveBy(const Offset(12, 0));
+        await settle(tester);
+        final before = debugImagesRecorded;
+        for (var i = 0; i < 60; i++) {
+          await drag.moveBy(const Offset(0.5, 0));
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        expect(debugImagesRecorded - before, lessThanOrEqualTo(2), reason: 'recorded while dragging $target');
+        await drag.up();
+        await settle(tester);
+      }
     });
   });
 }

@@ -13,6 +13,7 @@ The first release on pub.dev.
 
 ### Fixes
 
+* Dragging a slider slowly no longer bogs down the web, where it could bring Firefox to a halt. The slider, switch, segmented control and tab bar recorded their lens content into an image every frame, and on the web each recording waits on a GPU read-back. Now each records once and draws from the same image while it moves. In Firefox on a desktop GPU, a slow slider drag went from about 20 ms a frame to about 11 ms.
 * `GlassCalendar` no longer fails an assertion when it gets almost no width, as when a window opens.
 * A new test squeezes every widget to zero and near-zero sizes, and fails on anything worse than an overflow.
 
@@ -20,7 +21,7 @@ The first release on pub.dev.
 
 * Needs Flutter 3.29 (Dart 3.7) or newer: `ImageFilter.shader` arrived in 3.29.
 * Screenshots and the guides ship with the package. The example has a README with a minimal app, and `flutter_lints` is on 6.0.
-* A GitHub Actions workflow publishes to pub.dev when a version tag is pushed.
+* A release workflow runs when a version tag is pushed, as `tool/release.sh 0.3.1` does. It checks the version, builds the gallery for the web, Android, Linux, Windows and macOS, and creates the GitHub release with the builds attached. It can also publish to pub.dev; that stays off until it's turned on.
 
 ## 0.2.0
 

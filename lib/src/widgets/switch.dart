@@ -70,6 +70,8 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
   late final Listenable _repaint = Listenable.merge([_position, _color, _lift, GlassShaders.ready]);
 
   ui.FragmentShader? _shader;
+  // The track the lifted thumb shows, recorded only when its colour moves.
+  final ContentImageCache _bed = ContentImageCache();
   double? _dragFrom;
   double _dragDx = 0;
   bool _focused = false;
@@ -104,6 +106,7 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
     _color.dispose();
     _lift.dispose();
     _shader?.dispose();
+    _bed.dispose();
     super.dispose();
   }
 
@@ -371,13 +374,29 @@ class _SwitchPainter extends CustomPainter {
       // What the lifted thumb shows in place of the track: the track a little
       // smaller, so the glass rings it, growing as the thumb does.
       final bedRect = Rect.fromLTRB(box.left - 12, box.top - 6, box.right + 12, box.bottom + 6);
-      final insetWidth = (bedRect.width - 24) * (0.85 + 0.1 * lifted);
-      final insetHeight = (bedRect.height - 12) * 0.75 * (0.525 + 0.45 * lifted);
-      final inset = Rect.fromCenter(center: bedRect.center, width: insetWidth, height: insetHeight);
-      final image = recordImage(bedRect.size, devicePixelRatio, (canvas) {
-        canvas.translate(-bedRect.left, -bedRect.top);
-        _paintTrack(canvas, roundedRect(inset, double.infinity), fill);
-      });
+      // Recorded once at its fully lifted size, and laid smaller while the
+      // thumb lifts; recorded again only as the colour moves, in steps too
+      // small to see.
+      final inset = Rect.fromCenter(
+        center: bedRect.center,
+        width: (bedRect.width - 24) * 0.95,
+        height: (bedRect.height - 12) * 0.75 * 0.975,
+      );
+      final shade = (fill.clamp(0.0, 1.0) * 32).roundToDouble() / 32;
+      final image = state._bed.get(
+        (bedRect.size, devicePixelRatio, theme.track, activeColor, shade),
+        bedRect.size,
+        devicePixelRatio,
+        (canvas) {
+          canvas.translate(-bedRect.left, -bedRect.top);
+          _paintTrack(canvas, roundedRect(inset, double.infinity), shade);
+        },
+      );
+      final imageRect = Rect.fromCenter(
+        center: bedRect.center,
+        width: bedRect.width * (0.85 + 0.1 * lifted) / 0.95,
+        height: bedRect.height * (0.525 + 0.45 * lifted) / 0.975,
+      );
       final settled = 1 - lifted;
       final spec = LensSpec.switchThumb;
       final shape = thumb.size;
@@ -386,7 +405,7 @@ class _SwitchPainter extends CustomPainter {
         canvas,
         shader,
         image: image,
-        imageRect: bedRect,
+        imageRect: imageRect,
         draw: LensDraw(
           rect: lens,
           shape: shape,
@@ -401,7 +420,6 @@ class _SwitchPainter extends CustomPainter {
           light: theme.lensShine < 0 ? LensLight.light : LensLight.dark,
         ),
       );
-      image.dispose();
     } else {
       _paintTrack(canvas, track, fill);
     }

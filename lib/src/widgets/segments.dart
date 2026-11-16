@@ -168,6 +168,9 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
   late final Listenable _repaint = Listenable.merge([_x, _lift, _glow, GlassShaders.ready]);
 
   ui.FragmentShader? _lensShader;
+  // Every label in the selected colour, for the lens: recorded again only
+  // when the labels or the active one change, not as the lens moves.
+  final ContentImageCache _lensLabels = ContentImageCache();
   ui.FragmentShader? _rimShader;
   _Gesture? _gesture;
   bool _shown = false;
@@ -326,6 +329,7 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
     _lift.dispose();
     _glow.dispose();
     _lensShader?.dispose();
+    _lensLabels.dispose();
     _rimShader?.dispose();
     for (final painter in _painters.values) {
       painter.dispose();
@@ -779,10 +783,15 @@ class _SegmentsPainter<T> extends CustomPainter {
       canvas.restore();
 
       // Through the lens, every label in the selected colour, bent at its rim.
-      final image = recordImage(room.size, devicePixelRatio, (canvas) {
-        canvas.translate(-room.left, -room.top);
-        paintLabels(canvas, (_) => selectedColor, active);
-      });
+      final image = state._lensLabels.get(
+        (room, devicePixelRatio, selectedColor, active, theme, state.widget.items, size),
+        room.size,
+        devicePixelRatio,
+        (canvas) {
+          canvas.translate(-room.left, -room.top);
+          paintLabels(canvas, (_) => selectedColor, active);
+        },
+      );
       final spec = segmented ? LensSpec.segment : LensSpec.tab;
       final shape = Size(width, height);
       final strength = segmented ? theme.segmentBend : theme.tabBend;
@@ -811,7 +820,6 @@ class _SegmentsPainter<T> extends CustomPainter {
           inkPage: light ? Brightness.light : Brightness.dark,
         ),
       );
-      image.dispose();
     } else {
       paintLabels(canvas, realColor, active);
       // The tint: the labels again in the selected colour, seen only through

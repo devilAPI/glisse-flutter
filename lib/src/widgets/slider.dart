@@ -83,6 +83,11 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
   late final Listenable _repaint = Listenable.merge([_lift, GlassShaders.ready]);
 
   ui.FragmentShader? _shader;
+  ui.FragmentShader? _railShader;
+  // What the lifted thumb shows, recorded once: the track bare, and with its
+  // fill all the way along. Dragging only moves where one gives way to the other.
+  final ContentImageCache _railBed = ContentImageCache();
+  final ContentImageCache _fillBed = ContentImageCache();
   bool _focused = false;
   bool _dragging = false;
   double _width = 0;
@@ -119,6 +124,9 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
   void dispose() {
     _lift.dispose();
     _shader?.dispose();
+    _railShader?.dispose();
+    _railBed.dispose();
+    _fillBed.dispose();
     super.dispose();
   }
 
@@ -376,43 +384,73 @@ class _SliderPainter extends CustomPainter {
       // of either end the fill gives way from the middle of the thumb to the
       // end of the track, so an empty slider shows no fill and a full one no
       // bare rail.
+      //
+      // The track is recorded once at its full thickness, bare and filled all
+      // the way, and squashed to the thickness of the moment by where the
+      // image is laid. The lens draws the filled one up to the fill's end and
+      // the bare one beyond, so a drag records nothing.
+      const centre = 20.0;
+      const fullLine = 8.0;
       final bed = Rect.fromLTRB(-16, -4, width + 16, size.height + 4);
-      final line = 8 * (0.6 + 0.4 * lifted);
+      final line = fullLine * (0.6 + 0.4 * lifted);
       final rest = math.max(0.0, width - 2 * _inset) - travel;
-      final fillWidth = travel + math.min(_inset, travel * 4) + math.max(0.0, _inset - rest * 4);
-      final magnifiedTrack = Rect.fromLTWH(0, 20 - line / 2, width, line);
-      final magnifiedFill = Rect.fromLTWH(0, 20 - line / 2, math.min(width, fillWidth), line);
-      final image = recordImage(bed.size, devicePixelRatio, (canvas) {
+      final fillEnd = math.min(width, travel + math.min(_inset, travel * 4) + math.max(0.0, _inset - rest * 4));
+      final key = (bed.size, devicePixelRatio, theme.rail, activeColor);
+      final bar = Rect.fromLTWH(0, centre - fullLine / 2, width, fullLine);
+      void paintBar(Canvas canvas, {required bool filled}) {
         canvas.translate(-bed.left, -bed.top);
-        canvas.drawRRect(roundedRect(magnifiedTrack, double.infinity), Paint()..color = theme.rail);
-        if (magnifiedFill.width > 0) {
-          canvas.drawRRect(roundedRect(magnifiedFill, double.infinity), Paint()..color = activeColor);
-        }
-      });
+        canvas.drawRRect(roundedRect(bar, double.infinity), Paint()..color = theme.rail);
+        if (filled) canvas.drawRRect(roundedRect(bar, double.infinity), Paint()..color = activeColor);
+      }
+
+      final railImage = state._railBed.get(key, bed.size, devicePixelRatio, (c) => paintBar(c, filled: false));
+      final fillImage = state._fillBed.get(key, bed.size, devicePixelRatio, (c) => paintBar(c, filled: true));
+      final squash = line / fullLine;
+      final imageRect = Rect.fromLTRB(
+        bed.left,
+        centre + (bed.top - centre) * squash,
+        bed.right,
+        centre + (bed.bottom - centre) * squash,
+      );
       final settled = 1 - lifted;
       const spec = LensSpec.sliderThumb;
       final shape = thumb.size;
       final reach = spec.reachOf(shape, strengthOverride: theme.sliderBend, dark: theme.isDark) * scale;
-      paintContentLens(
-        canvas,
-        shader,
-        image: image,
-        imageRect: bed,
-        draw: LensDraw(
-          rect: lens,
-          shape: shape,
-          radius: double.infinity,
-          spec: spec,
-          devicePixelRatio: devicePixelRatio,
-          reach: reach,
-          blur: 2 * settled + 0.5 * lifted,
-          brightness: 1 + 0.15 * settled,
-          saturation: 1.5,
-          shine: theme.lensShine,
-          light: theme.lensShine < 0 ? LensLight.light : LensLight.dark,
-        ),
+      final draw = LensDraw(
+        rect: lens,
+        shape: shape,
+        radius: double.infinity,
+        spec: spec,
+        devicePixelRatio: devicePixelRatio,
+        reach: reach,
+        blur: 2 * settled + 0.5 * lifted,
+        brightness: 1 + 0.15 * settled,
+        saturation: 1.5,
+        shine: theme.lensShine,
+        light: theme.lensShine < 0 ? LensLight.light : LensLight.dark,
       );
-      image.dispose();
+      // The fill, up to its rounded end; the bare rail everywhere else.
+      final everywhere = lens.inflate(4);
+      final filled =
+          fillEnd > everywhere.left
+              ? (Path()..addRRect(
+                roundedRect(
+                  Rect.fromLTRB(everywhere.left, centre - line / 2, fillEnd, centre + line / 2),
+                  double.infinity,
+                ),
+              ))
+              : Path();
+      canvas.save();
+      canvas.clipPath(filled);
+      paintContentLens(canvas, shader, image: fillImage, imageRect: imageRect, draw: draw);
+      canvas.restore();
+      final railShader = state._railShader ??= GlassShaders.create();
+      if (railShader != null) {
+        canvas.save();
+        canvas.clipPath(Path.combine(PathOperation.difference, Path()..addRect(everywhere), filled));
+        paintContentLens(canvas, railShader, image: railImage, imageRect: imageRect, draw: draw);
+        canvas.restore();
+      }
     } else {
       paintTrack(canvas);
     }

@@ -20,3 +20,6 @@ build/
 *.log
 pubspec.lock
 example/pubspec.lock
+
+# Release tooling.
+tool/

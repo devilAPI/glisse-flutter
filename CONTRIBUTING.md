@@ -43,6 +43,16 @@ flutter test integration_test/gallery_test.dart -d linux   # or macos, windows
 
 See [doc/architecture.md](doc/architecture.md) for how the shader, the backdrop and the modes fit together.
 
+## Releasing
+
+1. Add a `## x.y.z` section at the top of `CHANGELOG.md` and commit it.
+2. Run `tool/release.sh x.y.z`. It sets the version in `pubspec.yaml`, runs the checks, commits, and pushes the tag `vx.y.z`.
+3. The [Release workflow](.github/workflows/release.yml) builds the gallery for the web, Android, Linux, Windows and macOS. It then creates the GitHub release, with the changelog section as its notes and the builds attached.
+4. If pub.dev publishing is turned on, the workflow publishes the package as well. To turn it on:
+   - publish once by hand with `flutter pub publish`;
+   - on pub.dev, enable automated publishing from GitHub Actions for this repository, with the tag pattern `v{{version}}`;
+   - run `gh variable set PUB_DEV_PUBLISH --body true`.
+
 ## Licence
 
 By contributing you agree that your work is released under the [MIT License](LICENSE).
