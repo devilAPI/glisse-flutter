@@ -107,7 +107,12 @@ class _GlassCheckboxState extends State<GlassCheckbox> with TickerProviderStateM
       },
     );
     box = GlassPressable(enabled: _enabled, child: box);
-    box = GestureDetector(behavior: HitTestBehavior.opaque, onTap: _enabled ? _toggle : null, child: box);
+    box = GestureDetector(
+      excludeFromSemantics: true,
+      behavior: HitTestBehavior.opaque,
+      onTap: _enabled ? _toggle : null,
+      child: box,
+    );
     box = HitPadding(padding: const EdgeInsets.all(11), child: box);
     return Semantics(
       checked: widget.value == true,
@@ -309,7 +314,12 @@ class _GlassRadioState<T> extends State<GlassRadio<T>> with TickerProviderStateM
       },
     );
     circle = GlassPressable(enabled: _enabled, child: circle);
-    circle = GestureDetector(behavior: HitTestBehavior.opaque, onTap: _enabled ? _select : null, child: circle);
+    circle = GestureDetector(
+      excludeFromSemantics: true,
+      behavior: HitTestBehavior.opaque,
+      onTap: _enabled ? _select : null,
+      child: circle,
+    );
     circle = HitPadding(padding: const EdgeInsets.all(11), child: circle);
     return Semantics(
       checked: _selected,

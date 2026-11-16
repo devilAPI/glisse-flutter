@@ -151,6 +151,7 @@ class _GlassInputState extends State<GlassInput> {
           Transform.translate(
             offset: const Offset(8, 0),
             child: Semantics(
+              container: true,
               button: true,
               label: 'Clear',
               child: GestureDetector(
@@ -195,7 +196,9 @@ class _GlassInputState extends State<GlassInput> {
     );
 
     glass = GestureDetector(
-      // A press anywhere on the glass focuses the field.
+      // A press anywhere on the glass focuses the field; the field itself
+      // is what assistive technology taps.
+      excludeFromSemantics: true,
       onTapDown: widget.enabled ? (_) => _focus.requestFocus() : null,
       child: glass,
     );

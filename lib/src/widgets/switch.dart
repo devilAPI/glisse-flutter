@@ -175,6 +175,8 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
       onPointerCancel: _up,
       behavior: HitTestBehavior.opaque,
       child: GestureDetector(
+        // The Semantics below gives the switch its one tap action.
+        excludeFromSemantics: true,
         behavior: HitTestBehavior.opaque,
         onTap: _enabled ? _toggle : null,
         onHorizontalDragStart: _enabled ? _dragStart : null,

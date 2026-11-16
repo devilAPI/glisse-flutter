@@ -115,6 +115,7 @@ class _GlassStepperState extends State<GlassStepper> {
         label: direction < 0 ? 'Decrement' : 'Increment',
         onTap: can ? () => _stepBy(direction) : null,
         child: GestureDetector(
+          excludeFromSemantics: true,
           behavior: HitTestBehavior.opaque,
           onTapDown: (_) => _down(direction),
           onTapUp: (_) {

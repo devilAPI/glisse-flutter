@@ -21,9 +21,14 @@ class GlassChip extends StatefulWidget {
     this.selectedColor,
     this.enabled = true,
     this.focusNode,
+    this.semanticLabel,
   });
 
   final Widget label;
+
+  /// The chip's name for assistive technology. Defaults to [label]'s text
+  /// when it is a [Text].
+  final String? semanticLabel;
   final Widget? icon;
   final bool selected;
 
@@ -61,17 +66,21 @@ class _GlassChipState extends State<GlassChip> {
         ? (_pressed ? Color.lerp(base, const Color(0xFF000000), 0.15)! : base)
         : (_pressed || _hovered ? theme.glassActive : base);
 
+    final name = widget.semanticLabel ?? (widget.label is Text ? (widget.label as Text).data : null);
     final children = <Widget>[
       if (widget.icon != null) ...[
         IconTheme.merge(data: IconThemeData(color: ink, size: 16), child: widget.icon!),
         const SizedBox(width: 6),
       ],
-      widget.label,
+      // Named once, on the chip itself, so the remove button beside it
+      // doesn't split the name from the chip.
+      if (name != null) ExcludeSemantics(child: widget.label) else widget.label,
       if (widget.onDeleted != null) ...[
         const SizedBox(width: 4),
         Semantics(
+          container: true,
           button: true,
-          label: 'Remove',
+          label: name == null ? 'Remove' : 'Remove $name',
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.enabled ? widget.onDeleted : null,
@@ -122,9 +131,15 @@ class _GlassChipState extends State<GlassChip> {
     chip = MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _interactive ? _tap : null, child: chip),
+      child: GestureDetector(
+        excludeFromSemantics: true,
+        behavior: HitTestBehavior.opaque,
+        onTap: _interactive ? _tap : null,
+        child: chip,
+      ),
     );
     return Semantics(
+      label: name,
       button: widget.onSelected != null,
       selected: widget.selected,
       enabled: widget.enabled,

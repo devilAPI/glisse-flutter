@@ -131,7 +131,7 @@ void main() {
     await tester.tap(find.text('Photos'));
     await settle(tester);
     expect(selected, isTrue);
-    await tester.tap(find.bySemanticsLabel('Remove'));
+    await tester.tap(find.bySemanticsLabel(RegExp('^Remove')));
     await settle(tester);
     expect(deleted, isTrue);
     expect(selected, isTrue);
