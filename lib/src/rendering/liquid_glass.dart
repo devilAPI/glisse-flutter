@@ -174,6 +174,7 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   GlassStyle? _outer;
+  GlassMode? _lastMode;
 
   /// The glass this glass sits in, if any.
   set outer(GlassStyle? value) {
@@ -243,11 +244,35 @@ class RenderLiquidGlass extends RenderProxyBox {
     return GlassMode.frost;
   }
 
+  // The layer of the nearest glass around this one that bends the live
+  // backdrop: Impeller binds that layer, not the view, as this glass's
+  // backdrop. In the view's device px.
+  Rect? _outerLayerRect() {
+    for (var node = parent; node != null; node = node.parent) {
+      if (node is RenderLiquidGlass && node._lastMode == GlassMode.backdropFilter && node.hasSize) {
+        final box = MatrixUtils.transformRect(node.getTransformTo(null), Offset.zero & node.size);
+        return Rect.fromLTRB(
+          box.left * _devicePixelRatio,
+          box.top * _devicePixelRatio,
+          box.right * _devicePixelRatio,
+          box.bottom * _devicePixelRatio,
+        );
+      }
+    }
+    return null;
+  }
+
+  Size get _screenSize {
+    final view = ui.PlatformDispatcher.instance.implicitView;
+    return view?.physicalSize ?? Size.zero;
+  }
+
   LensDraw _draw({
     required Rect rect,
     LensTexture texture = LensTexture.none,
     List<double>? uv,
     List<double>? inverse,
+    Rect? outerBackdrop,
   }) {
     final s = _style;
     final spec = s.spec;
@@ -275,6 +300,8 @@ class RenderLiquidGlass extends RenderProxyBox {
       rimShine: s.rimShine,
       filterInverse: inverse,
       magnification: s.magnification,
+      outerBackdrop: outerBackdrop,
+      screenSize: texture == LensTexture.backdrop ? _screenSize : Size.zero,
     );
   }
 
@@ -288,7 +315,9 @@ class RenderLiquidGlass extends RenderProxyBox {
     final rrect = _rrect(rect);
     paintDropShadow(context.canvas, rrect, color: _style.drop, offset: const Offset(0, 1), blur: 3);
 
-    switch (_resolve()) {
+    final mode = _resolve();
+    _lastMode = mode;
+    switch (mode) {
       case GlassMode.captured:
         _clipLayer.layer = null;
         _clipRectLayer.layer = null;
@@ -296,7 +325,7 @@ class RenderLiquidGlass extends RenderProxyBox {
         _paintCaptured(context.canvas, offset);
         super.paint(context, offset);
       case GlassMode.backdropFilter:
-        _clipLayer.layer = null;
+        _clipRectLayer.layer = null;
         _paintFiltered(context, offset);
       case GlassMode.frost:
       case GlassMode.auto:
@@ -331,19 +360,27 @@ class RenderLiquidGlass extends RenderProxyBox {
     final det = a * e - b * d;
     if (det.abs() < 1e-9) return;
     final inverse = <double>[e / det, -b / det, (b * f - e * c) / det, -d / det, a / det, (d * c - a * f) / det];
-    _draw(rect: Offset.zero & size, texture: LensTexture.backdrop, uv: [a, b, c, d, e, f], inverse: inverse)
-        .apply(shader, image: emptyImage);
+    _draw(
+      rect: Offset.zero & size,
+      texture: LensTexture.backdrop,
+      uv: [a, b, c, d, e, f],
+      inverse: inverse,
+      outerBackdrop: _outerLayerRect(),
+    ).apply(shader, image: emptyImage);
     final filter = ui.ImageFilter.shader(shader);
-    _clipRectLayer.layer = context.pushClipRect(
+    // Clipped to the glass's shape, so glass whose backdrop it can't place
+    // (see the shader) still keeps its shape.
+    _clipLayer.layer = context.pushClipRRect(
       true,
       offset,
       Offset.zero & size,
+      _rrect(Offset.zero & size),
       (context, offset) {
         final layer = _filterLayer.layer ??= BackdropFilterLayer();
         layer.filter = filter;
         context.pushLayer(layer, super.paint, offset);
       },
-      oldLayer: _clipRectLayer.layer,
+      oldLayer: _clipLayer.layer,
     );
   }
 

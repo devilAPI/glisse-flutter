@@ -35,7 +35,8 @@ class _GalleryPageState extends State<GalleryPage> {
   double _dispersion = 0.6;
   double _blur = 3;
   double _rim = 0.3;
-  GlassMode _mode = GlassMode.auto;
+  // --dart-define=MODE=captured|backdropFilter|frost starts in that mode.
+  GlassMode _mode = GlassMode.values.asNameMap()[const String.fromEnvironment('MODE')] ?? GlassMode.auto;
   late bool _animate = widget.animateWallpaper;
 
   bool _wifi = true;

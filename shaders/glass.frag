@@ -38,6 +38,8 @@ uniform vec4 uEdge;     // The edge line's colour, premultiplied.
 uniform vec4 uRim;      // rim mode (0 none, 1 glass, 2 selection, 3 bright selection), shine, opacity, magnification.
 uniform vec4 uFilter;   // Mode 2: local x = a fx + b fy + c from the fragment's coordinates; w: enabled.
 uniform vec4 uFilterY;  // Mode 2: local y = d fx + e fy + f.
+uniform vec4 uOuter;    // Mode 2: the glass this glass sits in, whose layer may be the backdrop: x, y, width, height (device px).
+uniform vec4 uScreen;   // Mode 2: the view's size (device px); unused; unused.
 
 uniform sampler2D uTexture;
 
@@ -92,11 +94,29 @@ float domeSlope(float x, float radius, float scale) {
   return inside / sqrt(radius * radius - inside * inside) * scale;
 }
 
+// Mode 2: where the backdrop texture's first pixel lies in the view, in
+// device px. Impeller binds the view's whole backdrop, or, for glass in other
+// glass, that glass's layer; their sizes tell them apart.
+bool matches(vec2 size) {
+  return size.x > 0.0 && abs(uSize.x - size.x) < 2.5 && abs(uSize.y - size.y) < 2.5;
+}
+
+vec2 backdropOrigin() {
+  if (matches(uOuter.zw)) {
+    return uOuter.xy;
+  }
+  return vec2(0.0);
+}
+
+bool backdropKnown() {
+  return matches(uOuter.zw) || matches(uScreen.xy);
+}
+
 vec4 tex(vec2 p) {
   vec2 uv = vec2(dot(uUvX.xy, p) + uUvX.z, dot(uUvY.xy, p) + uUvY.z);
   if (uFrost.w > 1.5) {
-    // The backdrop's own pixels, as the engine sized its texture.
-    uv = uv / uSize;
+    // The view's device px, then the texture's own.
+    uv = (uv - backdropOrigin()) / uSize;
   }
   if (uUvX.w > 0.5 && (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0)) {
     return vec4(0.0);
@@ -168,7 +188,28 @@ vec4 over(vec4 top, vec4 bottom) {
 void main() {
   vec2 fc = FlutterFragCoord().xy;
   bool filtered = uFilter.w > 0.5;
-  vec2 p = filtered ? vec2(dot(uFilter.xy, fc) + uFilter.z, dot(uFilterY.xy, fc) + uFilterY.z) : fc;
+  if (filtered && !backdropKnown()) {
+    // A backdrop of unknown origin, as inside an opacity layer: frost what's
+    // under each pixel and tint it; the layer's clip gives the shape.
+    vec2 texel = 1.0 / max(uSize, vec2(1.0));
+    float r = uFrost.x / max(uLightC.w, 0.0001);
+    vec2 uv = fc * texel;
+    vec4 sum = vec4(0.0);
+    for (int i = 0; i < 9; i++) {
+      vec2 o = vec2(float(i - (i / 3) * 3) - 1.0, float(i / 3) - 1.0) * r;
+      vec2 at = uv + o * texel;
+#ifdef IMPELLER_TARGET_OPENGLES
+      at.y = 1.0 - at.y;
+#endif
+      sum += texture(uTexture, at);
+    }
+    vec4 frosted = sum / 9.0;
+    frosted.rgb = clamp(saturateRgb(frosted.rgb, uFrost.y) * uFrost.z, 0.0, frosted.a);
+    fragColor = over(uTint, frosted);
+    return;
+  }
+  vec2 global = fc + backdropOrigin();
+  vec2 p = filtered ? vec2(dot(uFilter.xy, global) + uFilter.z, dot(uFilterY.xy, global) + uFilterY.z) : fc;
 
   // Where p falls on the lens's own shape, centred on its middle.
   vec2 mapSize = uShape.xy;

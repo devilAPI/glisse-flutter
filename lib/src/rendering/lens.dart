@@ -271,7 +271,17 @@ class LensDraw {
     this.textureSize = Size.zero,
     this.softensBend = false,
     this.magnification = 1,
+    this.outerBackdrop,
+    this.screenSize = Size.zero,
   });
+
+  /// For [LensTexture.backdrop]: the layer of the glass this glass sits in,
+  /// in the view's device px, which Impeller binds as the backdrop instead
+  /// of the view's.
+  final Rect? outerBackdrop;
+
+  /// For [LensTexture.backdrop]: the view's size in device px.
+  final Size screenSize;
 
   /// How much the lens magnifies what's under its middle; 1 for none.
   final double magnification;
@@ -426,6 +436,16 @@ class LensDraw {
     f(inverse[3]);
     f(inverse[4]);
     f(inverse[5]);
+    f(0);
+    // uOuter, uScreen
+    final outer = outerBackdrop;
+    f(outer?.left ?? 0);
+    f(outer?.top ?? 0);
+    f(outer?.width ?? 0);
+    f(outer?.height ?? 0);
+    f(screenSize.width);
+    f(screenSize.height);
+    f(0);
     f(0);
 
     if (image != null) shader.setImageSampler(0, image);
