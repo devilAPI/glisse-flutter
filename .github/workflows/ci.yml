@@ -74,7 +74,7 @@ jobs:
       - name: Tour the gallery on Linux
         if: matrix.target == 'linux'
         working-directory: example
-        run: xvfb-run -a flutter test integration_test -d linux
+        run: xvfb-run -a flutter test integration_test/gallery_test.dart -d linux
 
   pages:
     if: github.event_name == 'push'
