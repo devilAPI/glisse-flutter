@@ -278,7 +278,7 @@ class GlassShaders {
   static Object? _error;
 
   /// The compiled program, once loaded.
-  static ui.FragmentProgram? get program => _program;
+  static ui.FragmentProgram? get program => usable ? _program : null;
 
   /// Why loading failed, if it did.
   static Object? get error => _error;
@@ -340,7 +340,16 @@ class GlassShaders {
   /// `privacy.resistFingerprinting`, where CanvasKit fails inside
   /// `toImageSync` and breaks every draw after it. There, glass frosts with
   /// the browser's own blur, and controls lift without their lens.
-  static bool get canRecordImages => debugCanRecordImagesOverride ?? canReadPixelsBack;
+  static bool get canRecordImages => debugCanRecordImagesOverride ?? (usable && canReadPixelsBack);
+
+  /// Whether glass may use its shader at all. False only in a browser
+  /// without WebGL, where Flutter draws on the CPU and the shader would take
+  /// seconds a frame; glass paints as a plain tint and rim there.
+  static bool get usable => debugUsableOverride ?? hasGpu;
+
+  /// Overrides [usable], for tests.
+  @visibleForTesting
+  static bool? debugUsableOverride;
 
   /// Overrides [canRecordImages], for tests.
   @visibleForTesting
@@ -390,6 +399,7 @@ class GlassShaders {
   /// A new shader from the loaded program, or null while it is still loading
   /// (this starts the load).
   static ui.FragmentShader? create() {
+    if (!usable) return null;
     if (_program == null) {
       unawaited(load());
       return null;

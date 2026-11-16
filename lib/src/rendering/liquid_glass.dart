@@ -473,7 +473,11 @@ class RenderLiquidGlass extends RenderProxyBox {
     }
     final rect = offset & size;
     final rrect = _rrect(rect);
-    paintDropShadow(context.canvas, rrect, color: _style.drop, offset: const Offset(0, 1), blur: 3);
+    // Drawn on the CPU (a browser without WebGL), a blurred shadow per pane
+    // costs more than it's worth.
+    if (GlassShaders.usable) {
+      paintDropShadow(context.canvas, rrect, color: _style.drop, offset: const Offset(0, 1), blur: 3);
+    }
 
     final mode = _resolve();
     _lastMode = mode;
@@ -557,7 +561,7 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   void _paintFrosted(PaintingContext context, Offset offset) {
-    if (kIsWeb && _quality != GlassQuality.high) {
+    if (kIsWeb && (_quality != GlassQuality.high || !GlassShaders.usable)) {
       // In the browser, a backdrop blur per pane is ruinous: CanvasKit blurs
       // the page again for each one, and Firefox took a quarter of a second
       // a frame over the gallery. Below high quality, glass with no copy to

@@ -1,3 +1,10 @@
+## 0.5.2
+
+### Web
+
+* **No more "This page is slowing down" in browsers without WebGL.** LibreWolf ships with WebGL turned off, and without it Flutter draws every pixel on the CPU. There, glass's shader took 17 to 27 seconds a frame. Glass now checks for WebGL once (`GlassShaders.usable`). Without it, glass paints as a plain tint and rim, with no shader, no blurred shadow, no copies and no lenses, and menus don't blur the page behind them. The same page dropped to about 1.5 seconds a frame.
+* The gallery's wallpaper drew its glow with a 100-pixel blur, and without WebGL a single full-screen gradient takes 400 ms. Its blobs are now radial gradients. Without WebGL it draws a flat version and shows a banner explaining why the page is slow and how to turn WebGL on. The gallery now runs at about 400 ms a frame there. That's still slow, but nothing stalls for long.
+
 ## 0.5.1
 
 ### Web

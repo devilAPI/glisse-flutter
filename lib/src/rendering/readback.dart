@@ -8,3 +8,10 @@ import 'readback_native.dart' if (dart.library.js_interop) 'readback_web.dart' a
 /// not try.
 bool get canReadPixelsBack => _canReadPixelsBack ??= platform.canReadPixelsBack();
 bool? _canReadPixelsBack;
+
+/// Whether the browser draws with the GPU. Without WebGL (turned off in
+/// LibreWolf by default, say), Flutter draws every pixel on the CPU, and
+/// glass's shader there takes seconds a frame; glass then paints as a plain
+/// tint. Always true off the web.
+bool get hasGpu => _hasGpu ??= platform.hasGpu();
+bool? _hasGpu;

@@ -32,6 +32,27 @@ class _GalleryPageState extends State<GalleryPage> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    if (!GlassShaders.usable) {
+      // Without WebGL, Flutter draws on the CPU: say why it's slow and plain.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        showGlassBanner(
+          context: context,
+          duration: const Duration(seconds: 12),
+          leading: const Icon(Icons.speed),
+          title: const Text('WebGL is turned off'),
+          message: const Text(
+            'This browser draws Flutter on the CPU, so the gallery runs plain and slowly. '
+            'Turn WebGL on (webgl.disabled in about:config) for the glass.',
+          ),
+        );
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _scroll.dispose();
     _pageLens.dispose();

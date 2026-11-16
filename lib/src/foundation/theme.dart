@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 
+import '../rendering/lens.dart' show GlassShaders;
 import '../rendering/liquid_glass.dart' show GlassMode;
 
 /// How much work glass does to look its best.
@@ -259,7 +260,7 @@ class GlassThemeData {
   /// backdrop filter. Not on the web below [GlassQuality.high], where the
   /// browser blurs the page again for each one: they lean on their
   /// near-opaque [surface] there instead.
-  bool get blursBackdrops => !kIsWeb || effectiveQuality == GlassQuality.high;
+  bool get blursBackdrops => !kIsWeb || (effectiveQuality == GlassQuality.high && GlassShaders.usable);
 
   /// [quality], with [GlassQuality.auto] settled for this platform.
   GlassQuality get effectiveQuality => switch (quality) {

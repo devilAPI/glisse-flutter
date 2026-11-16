@@ -11,6 +11,16 @@ extension type _Canvas._(JSObject _) implements JSObject {
   external set width(int value);
   external set height(int value);
   external _Context2D? getContext(String id);
+  @JS('getContext')
+  external _WebGL? getWebGL(String id);
+}
+
+extension type _WebGL._(JSObject _) implements JSObject {
+  external _LoseContext? getExtension(String name);
+}
+
+extension type _LoseContext._(JSObject _) implements JSObject {
+  external void loseContext();
 }
 
 extension type _Context2D._(JSObject _) implements JSObject {
@@ -40,6 +50,20 @@ bool canReadPixelsBack() {
       ..fillRect(0, 0, 1, 1);
     final pixel = context.getImageData(0, 0, 1, 1).data.toDart;
     return pixel.length >= 4 && pixel[0] > 200 && pixel[1] < 60 && pixel[2] < 60 && pixel[3] > 200;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Whether a WebGL context can be made, as Flutter's renderer needs to draw
+/// on the GPU. The test context is let go at once, as browsers allow few.
+bool hasGpu() {
+  try {
+    final canvas = _document.createElement('canvas');
+    final gl = canvas.getWebGL('webgl2') ?? canvas.getWebGL('webgl');
+    if (gl == null) return false;
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return true;
   } catch (_) {
     return false;
   }

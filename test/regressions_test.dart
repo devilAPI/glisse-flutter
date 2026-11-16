@@ -735,4 +735,38 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('browsers without WebGL', () {
+    // LibreWolf can turn WebGL off; Flutter then draws on the CPU, where the
+    // glass shader took 17 to 27 seconds a frame.
+    testWidgets('glass paints without its shader, and nothing records', (tester) async {
+      await setUpGlass(tester, size: const Size(500, 400));
+      GlassShaders.debugUsableOverride = false;
+      addTearDown(() => GlassShaders.debugUsableOverride = null);
+      expect(GlassShaders.create(), isNull);
+      expect(GlassShaders.program, isNull);
+      expect(GlassShaders.canRecordImages, isFalse);
+      final before = debugImagesRecorded;
+      await tester.pumpWidget(
+        scene(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Glass(width: 200, height: 60, child: Text('Glass')),
+              SizedBox(width: 300, child: GlassSlider(value: 0.4, onChanged: (_) {})),
+              GlassButton(onPressed: () {}, child: const Text('Button')),
+            ],
+          ),
+        ),
+      );
+      await settle(tester);
+      final press = await tester.startGesture(tester.getCenter(find.byType(GlassSlider)));
+      await tester.pump(const Duration(milliseconds: 300));
+      await press.up();
+      await settle(tester);
+      expect(debugImagesRecorded, before);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Glass'), findsOneWidget);
+    });
+  });
 }
