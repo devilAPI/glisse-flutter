@@ -580,7 +580,9 @@ class _RangePainter extends CustomPainter {
     final lifts = [for (final spring in state._lift) spring.value];
     final lensing = [
       for (final knob in const [0, 1])
-        lifts[knob] > 0.01 && (state._shaders[knob * 2] ??= GlassShaders.create()) != null,
+        lifts[knob] > 0.01 &&
+            GlassShaders.canRecordImages &&
+            (state._shaders[knob * 2] ??= GlassShaders.create()) != null,
     ];
     Rect thumbOf(int knob) => _thumbAt(knob == 0 ? start : end);
     Rect lensOf(int knob) => scaleAbout(thumbOf(knob), _restScale + (1 - _restScale) * lifts[knob]);

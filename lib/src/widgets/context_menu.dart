@@ -404,7 +404,7 @@ class _ContextOverlayState extends State<_ContextOverlay> {
         final t = _unit(shown.value);
         final dim = (theme.isDark ? const Color(0x59000000) : const Color(0x26000000));
         Widget layer = ColoredBox(color: dim.withValues(alpha: dim.a * t));
-        if (t > 0.001) {
+        if (t > 0.001 && theme.blursBackdrops) {
           layer = BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 12 * t, sigmaY: 12 * t), child: layer);
         }
         return layer;
@@ -535,6 +535,7 @@ class _ContextOverlayState extends State<_ContextOverlay> {
           child: ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(_cardRadius)),
             child: BackdropFilter(
+              enabled: theme.blursBackdrops,
               filter: frostFilter(sigma: 22, saturation: 1.9),
               child: CustomPaint(painter: _CardFill(fill: theme.surface, edge: theme.surfaceEdge), child: content),
             ),

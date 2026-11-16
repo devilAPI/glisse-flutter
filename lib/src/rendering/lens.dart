@@ -7,6 +7,7 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import '../foundation/theme.dart' show GlassQuality;
+import 'readback.dart';
 
 /// How a lens bends what's under it, as Glisse's `LensOptions`.
 @immutable
@@ -286,8 +287,10 @@ class GlassShaders {
   /// the next call tries again.
   static Future<ui.FragmentProgram?> load() {
     if (_program != null) return Future<ui.FragmentProgram?>.value(_program);
-    return _loading ??= _fromAssets().then(
-      (program) {
+    return _loading ??= Future.wait<Object>([_fromAssets(), _decodeEmpty()]).then(
+      (loaded) {
+        final program = loaded[0] as ui.FragmentProgram;
+        _empty ??= loaded[1] as ui.Image;
         _program = program;
         _error = null;
         ready.value = true;
@@ -328,7 +331,28 @@ class GlassShaders {
   /// start. Optional: glass loads it on its own and frosts until then.
   static Future<void> precache() async {
     final program = await load();
-    if (program != null) _warmUp(program);
+    if (program != null && canRecordImages) _warmUp(program);
+  }
+
+  /// Whether glass may record pictures into images: for a backdrop's copy,
+  /// and for a control's lens over its own content. False only in a browser
+  /// that blocks reading canvases back, such as Firefox or LibreWolf with
+  /// `privacy.resistFingerprinting`, where CanvasKit fails inside
+  /// `toImageSync` and breaks every draw after it. There, glass frosts with
+  /// the browser's own blur, and controls lift without their lens.
+  static bool get canRecordImages => debugCanRecordImagesOverride ?? canReadPixelsBack;
+
+  /// Overrides [canRecordImages], for tests.
+  @visibleForTesting
+  static bool? debugCanRecordImagesOverride;
+
+  // The clear 1x1 image a draw that samples nothing binds, decoded from bytes
+  // rather than drawn, as reading a drawing back isn't possible everywhere.
+  static Future<ui.Image> _decodeEmpty() {
+    if (_empty != null) return Future<ui.Image>.value(_empty);
+    final done = Completer<ui.Image>();
+    ui.decodeImageFromPixels(Uint8List(4), 1, 1, ui.PixelFormat.rgba8888, done.complete);
+    return done.future;
   }
 
   // Draws the shader once off screen, in each texture mode, so its pipeline
@@ -661,6 +685,8 @@ class LensDraw {
 /// be bound).
 ui.Image get emptyImage =>
     _empty ??= () {
+      // Loaded with the shader, which is needed before any draw that binds
+      // this; drawing it is the fallback where a draw comes first.
       final recorder = ui.PictureRecorder();
       ui.Canvas(recorder);
       return recorder.endRecording().toImageSync(1, 1);

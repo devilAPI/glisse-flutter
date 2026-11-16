@@ -744,6 +744,7 @@ class _Surface extends StatelessWidget {
         child: ClipRRect(
           clipper: _SurfaceClip(t: t, from: from, trailing: trailing),
           child: BackdropFilter(
+            enabled: theme.blursBackdrops,
             filter: frostFilter(sigma: 22 * opacity, saturation: 1 + 0.9 * opacity),
             child: CustomPaint(
               size: Size.infinite,

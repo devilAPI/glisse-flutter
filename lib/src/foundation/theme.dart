@@ -255,6 +255,12 @@ class GlassThemeData {
   /// How much work glass does to look its best; see [GlassQuality].
   final GlassQuality quality;
 
+  /// Whether overlays such as menus may blur the page behind them with a
+  /// backdrop filter. Not on the web below [GlassQuality.high], where the
+  /// browser blurs the page again for each one: they lean on their
+  /// near-opaque [surface] there instead.
+  bool get blursBackdrops => !kIsWeb || effectiveQuality == GlassQuality.high;
+
   /// [quality], with [GlassQuality.auto] settled for this platform.
   GlassQuality get effectiveQuality => switch (quality) {
     GlassQuality.auto =>

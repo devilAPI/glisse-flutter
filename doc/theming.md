@@ -100,7 +100,7 @@ For a fully custom pane, build a `LiquidGlassBox` with a `GlassStyle`.
 | `medium` | two rings | yes | up to 2× |
 | `low` | one ring | no | 1× |
 
-`auto`, the default, is `medium` on the web and phones and `high` on desktops. Glass over a `GlassBackdrop` frosts from a blurred copy that the backdrop makes once per change, so there the frost costs one sample a pixel at any quality. The rings matter for glass over Impeller's live backdrop and for controls' lenses.
+`auto`, the default, is `medium` on the web and phones and `high` on desktops. On the web below `high`, glass that has no backdrop copy to bend lays its tint and rim over the page without blurring it, and menus don't blur the page behind them: the browser would blur the whole page again for each pane. Glass over a `GlassBackdrop` frosts from a blurred copy that the backdrop makes once per change, so there the frost costs one sample a pixel at any quality. The rings matter for glass over Impeller's live backdrop and for controls' lenses.
 
 ```dart
 GlassTheme(data: GlassThemeData.dark().copyWith(quality: GlassQuality.low), child: page)

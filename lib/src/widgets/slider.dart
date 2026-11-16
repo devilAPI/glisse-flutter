@@ -356,7 +356,9 @@ class _SliderPainter extends CustomPainter {
     final lens = scaleAbout(thumb, scale);
     final lensRRect = roundedRect(lens, double.infinity);
     final shader = state._shader ??= GlassShaders.create();
-    final lensing = lift > 0.01 && shader != null;
+    // Where pictures can't be read back into images, the thumb lifts
+    // without its lens.
+    final lensing = lift > 0.01 && shader != null && GlassShaders.canRecordImages;
 
     // The rail, and the fill ending under the middle of the thumb, rounded
     // rather than clipped by the rail.

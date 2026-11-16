@@ -767,7 +767,9 @@ class _SegmentsPainter<T> extends CustomPainter {
     if (rimUnder) paintRim();
 
     final lensShader = state._lensShader ??= GlassShaders.create();
-    final lensing = lift > 0.01 && lensShader != null && !hidden;
+    // Where pictures can't be read back into images, the selection lifts
+    // without its lens.
+    final lensing = lift > 0.01 && lensShader != null && !hidden && GlassShaders.canRecordImages;
 
     Color? realColor(int i) {
       // Over the selected tab, the selection draws its label (the tint at

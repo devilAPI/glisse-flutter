@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -556,6 +557,22 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   void _paintFrosted(PaintingContext context, Offset offset) {
+    if (kIsWeb && _quality != GlassQuality.high) {
+      // In the browser, a backdrop blur per pane is ruinous: CanvasKit blurs
+      // the page again for each one, and Firefox took a quarter of a second
+      // a frame over the gallery. Below high quality, glass with no copy to
+      // bend there lays its tint and lit rim over the page unblurred.
+      // Still clipped to its shape, as the other ways glass paints are.
+      _filterLayer.layer = null;
+      _clipLayer.layer = context.pushClipRRect(true, offset, Offset.zero & size, _rrect(Offset.zero & size), (
+        context,
+        offset,
+      ) {
+        _paintOverlay(context.canvas, offset);
+        super.paint(context, offset);
+      }, oldLayer: _clipLayer.layer);
+      return;
+    }
     final local = _rrect(Offset.zero & size);
     final filter = frostFilter(sigma: _style.blur, saturation: _style.saturation, brightness: _style.brightness);
     _clipLayer.layer = context.pushClipRRect(true, offset, Offset.zero & size, local, (context, offset) {

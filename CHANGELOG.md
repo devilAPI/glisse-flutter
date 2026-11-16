@@ -1,3 +1,11 @@
+## 0.5.0
+
+### Web
+
+* **Privacy-hardened browsers no longer get a blank page.** With `privacy.resistFingerprinting`, which LibreWolf turns on by default and Firefox offers, the browser blocks reading pictures back from a canvas. There, CanvasKit fails inside `Picture.toImageSync` and breaks every draw after it, text included. Glass now checks once, on a canvas of its own, whether read-back works (`GlassShaders.canRecordImages`). Where it doesn't, backdrops don't copy, glass frosts the page without a copy, and controls lift without their lens. The 1×1 image the shader binds when it samples nothing is now decoded from bytes rather than drawn, everywhere.
+* **No backdrop blur per pane on the web below high quality.** CanvasKit blurs the page again for each `BackdropFilter`. With one per glass pane, scrolling the gallery in frost mode in Firefox managed 83 frames in 20 seconds. Now glass with no copy to bend, on the web below `GlassQuality.high`, lays its tint and lit rim over the page unblurred, and the same scroll draws 1,239 frames. Menus and context menus skip their backdrop blur there too, leaning on their near-opaque surface (`GlassThemeData.blursBackdrops`).
+* On the web, a backdrop's shared frosted copy is made at as little as half size, so there are fewer pixels to read back each time the background changes.
+
 ## 0.4.0
 
 ### Performance

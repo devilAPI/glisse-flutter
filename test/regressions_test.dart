@@ -694,4 +694,45 @@ void main() {
       }
     });
   });
+
+  group('browsers that block reading pixels back', () {
+    // Firefox and LibreWolf with privacy.resistFingerprinting: CanvasKit
+    // fails inside toImageSync there and breaks every draw after it.
+    testWidgets('glass, backdrops and lifted controls record no image', (tester) async {
+      await setUpGlass(tester, size: const Size(500, 400));
+      GlassShaders.debugCanRecordImagesOverride = false;
+      addTearDown(() => GlassShaders.debugCanRecordImagesOverride = null);
+      final before = debugImagesRecorded;
+      await tester.pumpWidget(
+        scene(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Glass(width: 200, height: 60, child: Text('Glass')),
+              SizedBox(width: 300, child: GlassSlider(value: 0.4, onChanged: (_) {})),
+              GlassSwitch(value: true, onChanged: (_) {}),
+              GlassTabBar<int>(
+                items: const [GlassSegment(value: 0, label: 'One'), GlassSegment(value: 1, label: 'Two')],
+                value: 0,
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+        ),
+      );
+      await settle(tester);
+      final backdrop = GlassBackdrop.maybeOf(tester.element(find.byType(Glass)))!;
+      expect(backdrop.image, isNull, reason: 'no copy where it would break the page');
+      for (final target in [find.byType(GlassSlider), find.byType(GlassSwitch), find.byType(GlassTabBar<int>)]) {
+        final press = await tester.startGesture(tester.getCenter(target));
+        await tester.pump(const Duration(milliseconds: 300));
+        await press.moveBy(const Offset(6, 0));
+        await tester.pump(const Duration(milliseconds: 50));
+        await press.up();
+        await settle(tester);
+      }
+      expect(debugImagesRecorded, before);
+      expect(tester.takeException(), isNull);
+    });
+  });
 }

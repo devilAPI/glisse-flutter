@@ -1,10 +1,13 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/theme.dart';
+import 'lens.dart' show GlassShaders;
 
 /// Content that glass above it refracts, on every platform.
 ///
@@ -143,14 +146,25 @@ class GlassBackdropController extends ChangeNotifier {
     if (hit != null) return hit;
     if (_frosted.length >= 4) _clearFrosted();
     final deviation = key / 4 * _ratio;
+    // A blur needs few pixels, and on the web every pixel of the copy is read
+    // back from the GPU; there it's made at as little as half size. Glass
+    // samples it by its own proportions, but without smoothing between its
+    // pixels, so native platforms, where copies stay on the GPU, keep it whole.
+    final scale = kIsWeb ? (3 / deviation).clamp(0.5, 1.0) : 1.0;
+    final width = math.max(1, (image.width * scale).ceil());
+    final height = math.max(1, (image.height * scale).ceil());
     final recorder = ui.PictureRecorder();
-    Canvas(recorder).drawImage(
-      image,
-      Offset.zero,
-      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: deviation, sigmaY: deviation, tileMode: TileMode.clamp),
-    );
+    Canvas(recorder)
+      ..scale(width / image.width, height / image.height)
+      ..drawImage(
+        image,
+        Offset.zero,
+        Paint()
+          ..filterQuality = FilterQuality.low
+          ..imageFilter = ui.ImageFilter.blur(sigmaX: deviation, sigmaY: deviation, tileMode: TileMode.clamp),
+      );
     final picture = recorder.endRecording();
-    final frosted = picture.toImageSync(image.width, image.height);
+    final frosted = picture.toImageSync(width, height);
     picture.dispose();
     return _frosted[key] = frosted;
   }
@@ -284,6 +298,9 @@ class RenderGlassCapture extends RenderProxyBox {
   void _capture() {
     if (!attached || !_enabled || !hasSize || size.isEmpty) return;
     if (!_controller.hasUsers) return;
+    // Where the browser blocks reading pictures back, there's no copy, and
+    // glass frosts the live page instead.
+    if (!GlassShaders.canRecordImages) return;
     final layer = this.layer;
     if (layer is! OffsetLayer || !layer.attached) return;
     try {

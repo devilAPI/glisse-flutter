@@ -363,7 +363,9 @@ class _SwitchPainter extends CustomPainter {
     final lens = scaleAbout(thumb, scale);
     final lensRRect = roundedRect(lens, double.infinity);
     final shader = state._shader ??= GlassShaders.create();
-    final lensing = lift > 0.01 && shader != null;
+    // Where pictures can't be read back into images, the thumb lifts
+    // without its lens.
+    final lensing = lift > 0.01 && shader != null && GlassShaders.canRecordImages;
 
     if (lensing) {
       canvas.saveLayer(box.inflate(4), Paint());
