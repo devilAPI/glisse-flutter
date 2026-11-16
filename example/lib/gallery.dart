@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glisse/glisse.dart';
 
@@ -9,7 +10,9 @@ import 'wallpaper.dart';
 
 /// Every Glisse widget, over a wallpaper the glass bends.
 class GalleryPage extends StatefulWidget {
-  const GalleryPage({super.key, required this.dark, required this.onToggleTheme, this.animateWallpaper = true});
+  // On the web, copying an animating backdrop each frame reads it back from
+  // the GPU, so the wallpaper starts still there; the menu animates it.
+  const GalleryPage({super.key, required this.dark, required this.onToggleTheme, this.animateWallpaper = !kIsWeb});
 
   final bool dark;
   final VoidCallback onToggleTheme;
