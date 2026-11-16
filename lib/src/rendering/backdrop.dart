@@ -351,7 +351,7 @@ class RenderGlassCapture extends RenderProxyBox {
         FlutterErrorDetails(
           exception: error,
           stack: stack,
-          library: 'glisse',
+          library: 'glisse_flutter',
           context: ErrorDescription('while copying a GlassBackdrop'),
         ),
       );

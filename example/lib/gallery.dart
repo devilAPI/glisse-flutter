@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 import 'sections/controls_section.dart';
 import 'sections/extras_section.dart';

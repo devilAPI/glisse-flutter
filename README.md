@@ -52,7 +52,7 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 ## Install
 
 ```sh
-flutter pub add glisse
+flutter pub add glisse_flutter
 ```
 
 Glisse needs Flutter 3.29 or newer. No setup is needed: the shader ships with the package.
@@ -60,7 +60,7 @@ Glisse needs Flutter 3.29 or newer. No setup is needed: the shader ships with th
 ## Use
 
 ```dart
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 GlassBackdrop(
   background: Image.asset('wallpaper.jpg', fit: BoxFit.cover),

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// The small controls: checkboxes, radios, a stepper, chips, progress, page
 /// dots, badges and a button group.

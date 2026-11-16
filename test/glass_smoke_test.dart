@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 Widget stripes() => CustomPaint(painter: _Stripes(), size: Size.infinite);
 

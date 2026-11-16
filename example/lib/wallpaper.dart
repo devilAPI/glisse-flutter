@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// An original, colourful backdrop for the gallery: soft glowing blobs over
 /// a gradient, fine lines and large letters, so the glass has something to bend.

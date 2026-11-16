@@ -303,7 +303,7 @@ class GlassShaders {
           FlutterErrorDetails(
             exception: error,
             stack: stack,
-            library: 'glisse',
+            library: 'glisse_flutter',
             context: ErrorDescription('while loading the Liquid Glass shader'),
           ),
         );
@@ -312,12 +312,12 @@ class GlassShaders {
     );
   }
 
-  // An app finds the package's asset under packages/glisse; the package's
+  // An app finds the package's asset under packages/glisse_flutter; the package's
   // own tests find it at its plain path. If neither loads, the error is the
   // package path's, which is the one an app has.
   static Future<ui.FragmentProgram> _fromAssets() async {
     try {
-      return await ui.FragmentProgram.fromAsset('packages/glisse/shaders/glass.frag');
+      return await ui.FragmentProgram.fromAsset('packages/glisse_flutter/shaders/glass.frag');
     } catch (error, stack) {
       try {
         return await ui.FragmentProgram.fromAsset('shaders/glass.frag');

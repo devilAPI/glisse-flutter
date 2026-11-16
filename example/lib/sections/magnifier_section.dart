@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// A magnifying glass and a loupe: in this section, or floating over the
 /// whole page.

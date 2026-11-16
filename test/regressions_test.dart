@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glisse/glisse.dart';
-import 'package:glisse/src/rendering/content_lens.dart' show debugImagesRecorded;
+import 'package:glisse_flutter/glisse_flutter.dart';
+import 'package:glisse_flutter/src/rendering/content_lens.dart' show debugImagesRecorded;
 
 import 'helpers.dart';
 

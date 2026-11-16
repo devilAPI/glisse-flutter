@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// Picking values: a range slider, wheel pickers, a star rating and a
 /// one-time-code field, each with its live value.

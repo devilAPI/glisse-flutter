@@ -1,6 +1,6 @@
 # Glisse gallery
 
-Every widget in [`glisse`](https://pub.dev/packages/glisse) over an animated wallpaper. It includes a playground for the bend, dispersion, frost and rim light, a switch between the glass modes, and a magnifier and loupe that float over the whole page.
+Every widget in [`glisse_flutter`](https://pub.dev/packages/glisse_flutter) over an animated wallpaper. It includes a playground for the bend, dispersion, frost and rim light, a switch between the glass modes, and a magnifier and loupe that float over the whole page.
 
 ```sh
 flutter run -d chrome   # or linux, macos, windows, android, ios
@@ -12,7 +12,7 @@ The smallest app with glass looks like this:
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 void main() => runApp(const MaterialApp(home: Demo()));
 

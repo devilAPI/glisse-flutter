@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// The extras: slide to confirm, avatars, colour swatches, knobs and a calendar.
 class ExtrasSection extends StatefulWidget {

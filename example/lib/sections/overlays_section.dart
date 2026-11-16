@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// Buttons that open each of Glisse's overlays: an alert, a sheet, a toast,
 /// a popover and a tooltip.

@@ -85,13 +85,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  glisse:
+  glisse_flutter:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.5.1"
+    version: "0.5.2"
   integration_test:
     dependency: "direct dev"
     description: flutter

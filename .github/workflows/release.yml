@@ -163,7 +163,7 @@ jobs:
 
           ---
 
-          **Install:** \`flutter pub add glisse\` · **Gallery:** https://devilapi.github.io/glisse-flutter/ · **API reference:** https://devilapi.github.io/glisse-flutter/api/
+          **Install:** \`flutter pub add glisse_flutter\` · **Gallery:** https://devilapi.github.io/glisse-flutter/ · **API reference:** https://devilapi.github.io/glisse-flutter/api/
 
           The attached builds are the example gallery, unsigned: on macOS, open it with right-click > Open the first time.
           NOTES

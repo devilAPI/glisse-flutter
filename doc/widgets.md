@@ -1,6 +1,6 @@
 # Widget catalogue
 
-Every widget in `package:glisse`, with a minimal example. Each control:
+Every widget in `package:glisse_flutter`, with a minimal example. Each control:
 
 - takes a `semanticLabel`, a `focusNode` and `autofocus`;
 - answers the keyboard;

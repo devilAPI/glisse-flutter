@@ -2,7 +2,7 @@
 // paint and take a press without throwing.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 import 'helpers.dart';
 

@@ -1,3 +1,7 @@
+## 0.6.0
+
+* **The package is now `glisse_flutter`**, the name it is published under on pub.dev. Add it with `flutter pub add glisse_flutter` and import `package:glisse_flutter/glisse_flutter.dart`. Nothing else changed: every widget and parameter is the same as in 0.5.2.
+
 ## 0.5.2
 
 ### Web

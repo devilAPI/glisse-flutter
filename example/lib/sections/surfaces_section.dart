@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// Glass surfaces: an action sheet, a context menu, a notification banner,
 /// cards and disclosure sections.

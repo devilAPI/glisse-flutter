@@ -2,9 +2,9 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:glisse/glisse.dart';
-import 'package:glisse/src/rendering/content_lens.dart' show debugImagesRecorded;
-import 'package:glisse/src/widgets/thumb_frost.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
+import 'package:glisse_flutter/src/rendering/content_lens.dart' show debugImagesRecorded;
+import 'package:glisse_flutter/src/widgets/thumb_frost.dart';
 
 import 'helpers.dart';
 

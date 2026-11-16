@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glisse/glisse.dart';
+import 'package:glisse_flutter/glisse_flutter.dart';
 
 /// The navigation and container widgets: a floating navigation bar, a
 /// toolbar, an inset grouped list, a sidebar and a dock.
