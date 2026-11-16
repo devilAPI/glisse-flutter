@@ -9,6 +9,7 @@ import '../foundation/spring.dart';
 import '../foundation/theme.dart';
 import '../rendering/shadows.dart';
 import 'button.dart';
+import 'hairline.dart';
 
 /// One entry of a [GlassMenu]: a [GlassMenuItem] or a [GlassMenuSeparator].
 sealed class GlassMenuEntry {
@@ -589,7 +590,7 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
         case GlassMenuSeparator():
           children.add(Padding(
             padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 11),
-            child: SizedBox(height: 0.5, child: ColoredBox(color: theme.separator)),
+            child: SizedBox(height: hairline(context), child: ColoredBox(color: theme.separator)),
           ));
         case GlassMenuItem():
           children.add(_row(theme, i, item));

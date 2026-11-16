@@ -4,6 +4,7 @@ import '../foundation/theme.dart';
 import '../rendering/liquid_glass.dart';
 import 'button.dart';
 import 'control_utils.dart';
+import 'hairline.dart';
 
 /// Several buttons joined into one capsule of glass, as iOS 26's toolbars
 /// group them. Each [GlassButtonGroupItem] lights up on its own when pressed.
@@ -23,7 +24,7 @@ class GlassButtonGroup extends StatelessWidget {
     final row = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       if (i > 0 && separators) {
-        row.add(Container(width: 0.5, height: height * 0.5, color: theme.separator));
+        row.add(Container(width: hairline(context), height: height * 0.5, color: theme.separator));
       }
       row.add(children[i]);
     }

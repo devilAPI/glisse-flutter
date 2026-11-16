@@ -9,6 +9,7 @@ import '../rendering/liquid_glass.dart';
 import 'button.dart';
 import 'control_utils.dart';
 import 'input.dart' show GlassGlyph;
+import 'hairline.dart';
 
 /// An iOS stepper on glass: a capsule split into − and +, each lighting up
 /// under a finger. Held, a half repeats, faster the longer it's held.
@@ -154,7 +155,7 @@ class _GlassStepperState extends State<GlassStepper> {
           child: Row(
             children: [
               _half(theme, -1),
-              Container(width: 0.5, height: _height * 0.55, color: theme.separator),
+              Container(width: hairline(context), height: _height * 0.55, color: theme.separator),
               _half(theme, 1),
             ],
           ),

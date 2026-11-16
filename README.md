@@ -8,6 +8,9 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 | --- | --- |
 | ![Gallery, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light.png) | ![Gallery, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark.png) |
 | ![Controls, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light_scrolled.png) | ![Controls, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_scrolled.png) |
+| ![More controls, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light_controls.png) | ![Navigation, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_navigation.png) |
+
+**Try it in the browser: https://devilapi.github.io/glisse-flutter/**
 
 ## Widgets
 

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../foundation/theme.dart';
 import 'glass.dart';
 import 'input.dart';
+import 'hairline.dart';
 
 /// An inset grouped list on a card of glass, as iOS 26's settings: rows
 /// parted by hairlines that start where their text does, under a muted
@@ -39,7 +40,7 @@ class GlassListSection extends StatelessWidget {
         final inset = child is GlassListTile && child.leading != null ? 16.0 + 28 + 12 : 16.0;
         rows.add(Padding(
           padding: EdgeInsetsDirectional.only(start: inset),
-          child: Container(height: 0.5, color: theme.separator),
+          child: Container(height: hairline(context), color: theme.separator),
         ));
       }
     }
