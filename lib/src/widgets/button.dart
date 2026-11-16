@@ -122,6 +122,7 @@ class _GlassButtonState extends State<GlassButton> {
       tween: ColorTween(end: fill),
       // Lights up at once when pressed, as on iOS, and fades on release.
       duration: _pressed ? Duration.zero : const Duration(milliseconds: 200),
+      curve: Curves.ease,
       builder: (context, color, child) => LiquidGlassBox(
         radius: radius,
         style: GlassStyle(
@@ -150,14 +151,9 @@ class _GlassButtonState extends State<GlassButton> {
     );
 
     if (_focused) {
-      button = DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radius + 4),
-            side: BorderSide(color: theme.ring, width: 2, strokeAlign: BorderSide.strokeAlignOutside),
-          ),
-        ),
+      // A 2px ring 2px outside the edge, as CSS's outline-offset: 2px.
+      button = CustomPaint(
+        foregroundPainter: _FocusRingPainter(color: theme.ring, radius: radius),
         child: button,
       );
     }
@@ -253,4 +249,26 @@ class _GlowScopeState extends State<_GlowScope> {
       _state = PressState(pressed: pressed, position: Offset(local.dx / size.width, local.dy / size.height));
     });
   }
+}
+
+class _FocusRingPainter extends CustomPainter {
+  _FocusRingPainter({required this.color, required this.radius});
+
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).inflate(3);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(radius + 3)),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_FocusRingPainter oldDelegate) => oldDelegate.color != color || oldDelegate.radius != radius;
 }

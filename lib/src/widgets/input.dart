@@ -148,20 +148,17 @@ class _GlassInputState extends State<GlassInput> {
         Expanded(child: field),
         if (showClear) ...[
           const SizedBox(width: 10),
-          Transform.translate(
-            offset: const Offset(8, 0),
-            child: Semantics(
-              container: true,
-              button: true,
-              label: 'Clear',
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _clear,
-                child: SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: Center(child: GlassGlyph.clear(color: theme.muted, size: 14)),
-                ),
+          Semantics(
+            container: true,
+            button: true,
+            label: 'Clear',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _clear,
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Center(child: GlassGlyph.clear(color: theme.muted, size: 14)),
               ),
             ),
           ),
@@ -191,7 +188,8 @@ class _GlassInputState extends State<GlassInput> {
       ),
       child: SizedBox(
         height: widget.height,
-        child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: row),
+        // The clear button hangs 8px into the padding, as Glisse's margin-right: -8px.
+        child: Padding(padding: EdgeInsets.only(left: 14, right: showClear ? 6 : 14), child: row),
       ),
     );
 

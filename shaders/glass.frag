@@ -138,10 +138,14 @@ float noise(vec2 pixel) {
 
 // A frosted sample: a Gaussian of deviation s, as three rings of taps, the
 // rings turned by a different angle at each device pixel.
-vec4 frost(vec2 p, float s) {
-  if (s < 0.2) {
+vec4 frost(vec2 p, float sigma) {
+  if (sigma < 0.2) {
     return tex(p);
   }
+  // These rings and weights blur with a deviation of 0.770 of their radius
+  // scale (measured), so scale it up to give the deviation asked for, as
+  // CSS's blur() does.
+  float s = sigma / 0.770;
   float angle = 6.2831853 * noise(floor(p / max(uLightC.w, 0.0001)));
   float c = cos(angle);
   float n = sin(angle);
@@ -192,7 +196,8 @@ void main() {
     // A backdrop of unknown origin, as inside an opacity layer: frost what's
     // under each pixel and tint it; the layer's clip gives the shape.
     vec2 texel = 1.0 / max(uSize, vec2(1.0));
-    float r = uFrost.x / max(uLightC.w, 0.0001);
+    // A 3x3 box at this spacing has a deviation of 0.816 of it.
+    float r = uFrost.x / 0.816 / max(uLightC.w, 0.0001);
     vec2 uv = fc * texel;
     vec4 sum = vec4(0.0);
     for (int i = 0; i < 9; i++) {
@@ -293,7 +298,8 @@ void main() {
     if (bends > 0.0 && uBend.x > 0.0) {
       // Each colour's ray, pulled from further in as far as that colour bends.
       // The map stretches over the lens as placed; the pull is in local px.
-      vec2 pull = dir * amount * 0.5 * uBend.x;
+      // Glisse's maps hold each pull in a byte, which caps it at full strength.
+      vec2 pull = clamp(dir * amount, -1.0, 1.0) * 0.5 * uBend.x;
       float d = uBend.y;
       vec4 red = frost(q - pull * (1.0 + 0.2 * d), sigma);
       vec4 green = frost(q - pull * (1.0 + 0.1 * d), sigma);

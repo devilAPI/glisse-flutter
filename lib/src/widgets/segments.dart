@@ -545,8 +545,8 @@ class _SegmentsPainter<T> extends CustomPainter {
     final lens = Rect.fromCenter(center: selection.center, width: width * sx, height: height * sy);
     final lensRRect = roundedRect(lens, double.infinity);
 
-    // The lifted bar's glow, under the labels.
-    if (lifted > 0 && !segmented) {
+    // The lifted bar's glow, under the labels: a segmented control's too.
+    if (lifted > 0) {
       final center = Offset(state._glow.value * size.width, size.height / 2);
       final glow = const RadialGradient(
         colors: [Color.fromRGBO(255, 255, 255, 0.09), Color.fromRGBO(255, 255, 255, 0.045), Color(0x00FFFFFF)],
@@ -657,7 +657,10 @@ class _SegmentsPainter<T> extends CustomPainter {
       }
       // The lifted lens's rim: iOS's brighter one on a light page.
       final rimShader = state._rimShader ??= GlassShaders.create();
-      if (rimShader != null && lifted > 0.01) {
+      // As Glisse's data-refracting: at full strength from the press until
+      // the lens has settled.
+      final refracting = state._gesture != null || lift > 0.01;
+      if (rimShader != null && refracting) {
         LensDraw(
           rect: lens,
           shape: Size(width, height),
@@ -665,7 +668,6 @@ class _SegmentsPainter<T> extends CustomPainter {
           spec: segmented ? LensSpec.segment : LensSpec.tab,
           devicePixelRatio: devicePixelRatio,
           rim: light ? LensRim.brightSelection : LensRim.selection,
-          rimOpacity: lifted,
         ).apply(rimShader, image: emptyImage);
         canvas.drawRect(lens.inflate(1), Paint()..shader = rimShader);
       }

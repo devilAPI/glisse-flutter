@@ -110,12 +110,37 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
     widget.onChanged?.call(next);
   }
 
+  /// How far the thumb is lifted, for tests.
+  @visibleForTesting
+  double get debugLift => _lift.value;
+
+  // Where and when a press began, for telling a scroll from a hold.
+  Offset? _pressAt;
+  Duration _pressTime = Duration.zero;
+
   void _down(PointerDownEvent event) {
     if (!_enabled || event.buttons != kPrimaryButton) return;
+    _pressAt = event.position;
+    _pressTime = event.timeStamp;
     _lift.set(1);
   }
 
+  // As Glisse: a quick vertical swipe that starts on the switch is a scroll,
+  // and the thumb settles; a press held 150ms, or a drag, keeps the touch.
+  void _move(PointerMoveEvent event) {
+    final at = _pressAt;
+    if (at == null || _dragFrom != null) return;
+    final held = event.timeStamp - _pressTime >= const Duration(milliseconds: 150);
+    final dx = (event.position.dx - at.dx).abs();
+    final dy = (event.position.dy - at.dy).abs();
+    if (!held && dy > 10 && dy > dx + 4) {
+      _pressAt = null;
+      _lift.set(0);
+    }
+  }
+
   void _up(PointerEvent event) {
+    _pressAt = null;
     if (_dragFrom == null) {
       _lift.set(0);
     }
@@ -171,12 +196,15 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
     );
     result = Listener(
       onPointerDown: _down,
+      onPointerMove: _move,
       onPointerUp: _up,
       onPointerCancel: _up,
       behavior: HitTestBehavior.opaque,
       child: GestureDetector(
         // The Semantics below gives the switch its one tap action.
         excludeFromSemantics: true,
+        // A drag counts from where the finger came down, as Glisse's does.
+        dragStartBehavior: DragStartBehavior.down,
         behavior: HitTestBehavior.opaque,
         onTap: _enabled ? _toggle : null,
         onHorizontalDragStart: _enabled ? _dragStart : null,
@@ -186,6 +214,15 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
         child: result,
       ),
     );
+    // Glisse's switch follows a drag once it has moved 4px, where Flutter
+    // waits for a finger's usual slop.
+    final media = MediaQuery.maybeOf(context);
+    if (media != null) {
+      result = MediaQuery(
+        data: media.copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 4)),
+        child: result,
+      );
+    }
     // A touch target 44px tall, as Glisse's ::before gives it.
     result =
         HitPadding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: (44 - _height) / 2), child: result);
