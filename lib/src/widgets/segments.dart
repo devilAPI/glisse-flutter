@@ -132,6 +132,92 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
 
   bool get _segmented => widget.kind == SegmentsKind.segmented;
 
+  /// Whether the lifted lens has dropped under the labels, as Glisse's does
+  /// on a light page: a segmented control's from the press, a tab bar's
+  /// once it's half lifted.
+  bool get lensUnder {
+    final lift = _lift.value;
+    return _segmented ? (_gesture != null || lift > 0.01) : lift > _under;
+  }
+
+  // The lens as placed: the selection at the spring's x, grown with its lift.
+  Rect _lensRect() {
+    final m = _metrics;
+    final lift = _lift.value;
+    final width = m.tabWidth - 2 * m.thumbInset;
+    final height = m.tabHeight - 2 * m.thumbInset;
+    final selection = Rect.fromLTWH(m.inset + m.thumbInset + _x.value, m.inset + m.thumbInset, width, height);
+    return Rect.fromCenter(
+      center: selection.center,
+      width: width * (1 + m.growX / width * lift),
+      height: height * (1 + m.growY / height * lift),
+    );
+  }
+
+  // On a light page the lifted lens also bends what's behind it, the bar's
+  // glass and the page, as Glisse's does where the browser can: a segmented
+  // control's with a squircle bezel pushed outwards, at full strength from
+  // the press; a tab bar's with its label lens, unlit, growing once it has
+  // dropped under the labels.
+  Widget _backdropLens(GlassThemeData theme) {
+    return AnimatedBuilder(
+      animation: _repaint,
+      builder: (context, _) {
+        final hidden = _active < 0 && _gesture == null;
+        if (theme.lensShine >= 0 || hidden || !lensUnder) return const SizedBox.shrink();
+        final m = _metrics;
+        final rect = _lensRect();
+        final LensSpec spec;
+        final double bend;
+        final double amount;
+        final double blur;
+        if (_segmented) {
+          final base = math.min(m.tabWidth, m.tabHeight) - 2 * m.thumbInset;
+          final bezel = (base * 0.12).clamp(4.0, 10.0);
+          final thickness = (base * 0.2).clamp(8.0, 24.0);
+          spec = LensSpec(strength: 1, dispersion: 0.35, depth: bezel, bezel: true);
+          // Its rim pulls about 1.12 times the glass's thickness at the edge.
+          bend = 2 * 1.12 * thickness / bezel;
+          amount = 1;
+          blur = 0;
+        } else {
+          spec = LensSpec.tab;
+          bend = theme.tabBend ?? spec.strength;
+          amount = ((_lift.value - _under) / (1 - _under)).clamp(0.0, 1.0);
+          blur = spec.blur * amount;
+        }
+        if (amount <= 0) return const SizedBox.shrink();
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fromRect(
+              rect: rect,
+              child: IgnorePointer(
+                child: LiquidGlassBox(
+                  radius: double.infinity,
+                  style: GlassStyle(
+                    tint: const Color(0x00000000),
+                    edge: const Color(0x00000000),
+                    drop: const Color(0x00000000),
+                    rimShine: 0,
+                    blur: blur,
+                    saturation: 1,
+                    bend: bend,
+                    dispersion: _segmented ? 0.35 : (theme.tabDispersion ?? spec.dispersion),
+                    spec: spec,
+                    rim: LensRim.none,
+                    amount: amount,
+                    mode: widget.mode,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   bool get _icons => !_segmented && widget.items.any((item) => item.icon != null);
 
   _Metrics get _metrics => _segmented ? _Metrics.segmented : (_icons ? _Metrics.tabBarIcons : _Metrics.tabBar);
@@ -380,6 +466,8 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
         spec: LensSpec.glass,
         mode: widget.mode,
       ),
+      // In the bar's glass, so it bends the bar's glass as well as the page.
+      child: _backdropLens(theme),
     );
 
     final tabs = <Widget>[
@@ -585,6 +673,30 @@ class _SegmentsPainter<T> extends CustomPainter {
       }
     }
 
+    // The lifted lens's rim: iOS's brighter one on a light page.
+    void paintRim() {
+      final rimShader = state._rimShader ??= GlassShaders.create();
+      // As Glisse's data-refracting: at full strength from the press until
+      // the lens has settled.
+      final refracting = state._gesture != null || lift > 0.01;
+      if (rimShader == null || !refracting || hidden) return;
+      LensDraw(
+        rect: lens,
+        shape: Size(width, height),
+        radius: double.infinity,
+        spec: segmented ? LensSpec.segment : LensSpec.tab,
+        devicePixelRatio: devicePixelRatio,
+        rim: light ? LensRim.brightSelection : LensRim.selection,
+      ).apply(rimShader, image: emptyImage);
+      canvas.drawRect(lens.inflate(1), Paint()..shader = rimShader);
+    }
+
+    // On a light page the lifted lens drops under the labels, as Glisse's
+    // does: a segmented control's from the press, a tab bar's once it's
+    // half lifted. Its rim goes with it.
+    final rimUnder = light && state.lensUnder;
+    if (rimUnder) paintRim();
+
     final lensShader = state._lensShader ??= GlassShaders.create();
     final lensing = lift > 0.01 && lensShader != null && !hidden;
 
@@ -655,22 +767,7 @@ class _SegmentsPainter<T> extends CustomPainter {
         final pill = theme.selection;
         if (rest > 0) canvas.drawRRect(lensRRect, Paint()..color = pill.withValues(alpha: pill.a * rest));
       }
-      // The lifted lens's rim: iOS's brighter one on a light page.
-      final rimShader = state._rimShader ??= GlassShaders.create();
-      // As Glisse's data-refracting: at full strength from the press until
-      // the lens has settled.
-      final refracting = state._gesture != null || lift > 0.01;
-      if (rimShader != null && refracting) {
-        LensDraw(
-          rect: lens,
-          shape: Size(width, height),
-          radius: double.infinity,
-          spec: segmented ? LensSpec.segment : LensSpec.tab,
-          devicePixelRatio: devicePixelRatio,
-          rim: light ? LensRim.brightSelection : LensRim.selection,
-        ).apply(rimShader, image: emptyImage);
-        canvas.drawRect(lens.inflate(1), Paint()..shader = rimShader);
-      }
+      if (!rimUnder) paintRim();
     }
 
     if (focused) {
