@@ -232,7 +232,42 @@ class GlassShaders {
 
   /// Loads the shader before the first frame, so glass refracts from the
   /// start. Optional: glass loads it on its own and frosts until then.
-  static Future<void> precache() => load();
+  static Future<void> precache() async {
+    final program = await load();
+    if (program != null) _warmUp(program);
+  }
+
+  // Draws the shader once off screen, in each texture mode, so its pipeline
+  // is compiled before the first frame that shows glass rather than during it.
+  static void _warmUp(ui.FragmentProgram program) {
+    try {
+      final shader = program.fragmentShader();
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      for (final texture in [LensTexture.none, LensTexture.image]) {
+        LensDraw(
+          rect: const Rect.fromLTWH(0, 0, 8, 8),
+          shape: const Size(8, 8),
+          radius: 4,
+          spec: LensSpec.glass,
+          devicePixelRatio: 1,
+          reach: 2,
+          blur: 1,
+          texture: texture,
+          uv: const [1 / 8, 0, 0, 0, 1 / 8, 0],
+          rim: LensRim.glass,
+          rimShine: 0.3,
+        ).apply(shader, image: emptyImage);
+        canvas.drawRect(const Rect.fromLTWH(0, 0, 8, 8), Paint()..shader = shader);
+      }
+      final picture = recorder.endRecording();
+      picture.toImageSync(8, 8).dispose();
+      picture.dispose();
+      shader.dispose();
+    } catch (_) {
+      // Warming up is only an optimisation.
+    }
+  }
 
   static ui.FragmentShader? create() {
     if (_program == null) {
