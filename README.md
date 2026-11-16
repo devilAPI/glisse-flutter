@@ -121,6 +121,26 @@ GlassTheme(
 
 To load the shader before the first frame, call `await GlassShaders.precache();` in `main`. This is optional: glass loads the shader on its own and frosts until it's ready.
 
+### Content scrolling under a glass bar
+
+Put the content in the backdrop's `background` and the bar in its `child`. Touches that miss the bar reach the content. The glass sees the content move, so it bends whatever scrolls under it:
+
+```dart
+GlassBackdrop(
+  background: ListView.builder(itemCount: 100, itemBuilder: (context, i) => ListTile(title: Text('Row $i'))),
+  child: SafeArea(
+    child: Align(
+      alignment: Alignment.bottomCenter,
+      child: GlassTabBar<int>(
+        items: const [GlassSegment(value: 0, label: 'Home'), GlassSegment(value: 1, label: 'Search')],
+        value: tab,
+        onChanged: (v) => setState(() => tab = v),
+      ),
+    ),
+  ),
+)
+```
+
 ## How glass sees what's behind it
 
 Glass can only bend what it can read, so it reads it in one of three ways (`GlassMode`):

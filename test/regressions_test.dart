@@ -246,4 +246,45 @@ void main() {
     final clear = tester.getRect(find.bySemanticsLabel('Clear'));
     expect(clear.left - field.left, closeTo(6, 0.5));
   });
+
+  testWidgets('a list scrolls under a glass bar, and the glass sees it move', (tester) async {
+    await setUpGlass(tester, size: const Size(400, 600));
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    late GlassBackdropController backdrop;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: GlassBackdrop(
+          background: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (context, i) => SizedBox(
+              height: 60,
+              child: ColoredBox(color: Colors.primaries[i % 12], child: Text('Row $i')),
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Builder(builder: (context) {
+              backdrop = GlassBackdrop.maybeOf(context)!;
+              return GlassTabBar<int>(
+                items: const [GlassSegment(value: 0, label: 'One'), GlassSegment(value: 1, label: 'Two')],
+                value: 0,
+                onChanged: (_) {},
+              );
+            }),
+          ),
+        ),
+      ),
+    ));
+    await settle(tester);
+    final before = backdrop.image;
+    expect(before, isNotNull);
+    // A drag on the list, above the bar, reaches it through the backdrop.
+    await tester.drag(find.text('Row 2'), const Offset(0, -300));
+    await settle(tester);
+    expect(controller.offset, greaterThan(0));
+    // The list scrolled inside its own repaint boundary; the copy followed.
+    expect(identical(backdrop.image, before), isFalse);
+  });
 }
