@@ -6,8 +6,8 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 
 | Light | Dark |
 | --- | --- |
-| ![Gallery, light](doc/desktop_light.png) | ![Gallery, dark](doc/desktop_dark.png) |
-| ![Controls, light](doc/desktop_light_scrolled.png) | ![Controls, dark](doc/desktop_dark_scrolled.png) |
+| ![Gallery, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light.png) | ![Gallery, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark.png) |
+| ![Controls, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light_scrolled.png) | ![Controls, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_scrolled.png) |
 
 ## Widgets
 

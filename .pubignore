@@ -1,0 +1,17 @@
+# Large images that the README links to on GitHub.
+doc/
+test/goldens/
+test/failures/
+example/build/
+
+# .gitignore's rules too: a .pubignore replaces it for pub.
+.dart_tool/
+build/
+**/build/
+**/.dart_tool/
+**/ephemeral/
+*.iml
+.idea/
+*.log
+pubspec.lock
+example/pubspec.lock
