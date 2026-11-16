@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/spring.dart';
@@ -52,7 +53,8 @@ class GlassContextMenu extends StatefulWidget {
   /// The widest the menu grows to.
   final double menuWidth;
 
-  /// Called as the menu opens and closes.
+  /// Called as the menu opens and closes. Not called when the menu is
+  /// removed from the tree while open.
   final ValueChanged<bool>? onOpenChanged;
 
   @override
@@ -88,6 +90,8 @@ class _GlassContextMenuState extends State<GlassContextMenu> with SingleTickerPr
   void didUpdateWidget(GlassContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!widget.enabled && _open) _later(_close);
+    // A press can't finish once disabled; no setState, as this is a build.
+    if (!widget.enabled) _pressing = false;
     _rebuildEntry();
   }
 
@@ -112,7 +116,6 @@ class _GlassContextMenuState extends State<GlassContextMenu> with SingleTickerPr
     _entry = null;
     entry?.remove();
     entry?.dispose();
-    if (_open) widget.onOpenChanged?.call(false);
     _shown.dispose();
     super.dispose();
   }
@@ -136,8 +139,10 @@ class _GlassContextMenuState extends State<GlassContextMenu> with SingleTickerPr
       _entry = OverlayEntry(builder: (context) => carried.wrap(_ContextOverlay(key: _overlayKey, menu: this)));
       overlay.insert(_entry!);
     } else {
-      // Reopened on its way out: take it back up from where it is.
+      // Reopened on its way out: take it back up from where it is, and give
+      // the keyboard back to its rows.
       _entry!.markNeedsBuild();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _overlayKey.currentState?._focusFirst());
     }
     setState(() {
       _open = true;
@@ -174,7 +179,12 @@ class _GlassContextMenuState extends State<GlassContextMenu> with SingleTickerPr
   }
 
   void _press(bool pressing) {
-    if (_pressing != pressing && mounted) setState(() => _pressing = pressing);
+    if (_pressing == pressing || !mounted) return;
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      _pressing = pressing; // Mid-build: the build under way shows it.
+      return;
+    }
+    setState(() => _pressing = pressing);
   }
 
   @override
@@ -196,7 +206,9 @@ class _GlassContextMenuState extends State<GlassContextMenu> with SingleTickerPr
         excludeFromSemantics: true,
         behavior: HitTestBehavior.translucent,
         onLongPressDown: widget.enabled ? (_) => _press(true) : null,
-        onLongPressCancel: widget.enabled ? () => _press(false) : null,
+        // Always set: a recognizer dropped mid-press, as when disabled,
+        // cancels through the old callback during the build.
+        onLongPressCancel: () => _press(false),
         onLongPressStart: widget.enabled ? (_) => _openMenu() : null,
         onLongPressMoveUpdate:
             widget.enabled ? (details) => _overlayKey.currentState?._track(details.globalPosition) : null,
@@ -245,11 +257,13 @@ class _ContextOverlayState extends State<_ContextOverlay> {
   void initState() {
     super.initState();
     // The first row takes focus as the menu opens, so the keyboard starts there.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_menu._open) return;
-      final first = _enabledRows().firstOrNull;
-      (first == null ? _root : _focusNode(first)).requestFocus();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusFirst());
+  }
+
+  void _focusFirst() {
+    if (!mounted || !_menu._open) return;
+    final first = _enabledRows().firstOrNull;
+    (first == null ? _root : _focusNode(first)).requestFocus();
   }
 
   @override

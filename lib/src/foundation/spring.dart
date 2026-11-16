@@ -71,6 +71,11 @@ class GlassSpring extends ChangeNotifier implements ValueListenable<double> {
 
   /// Jumps to [value] and keeps moving at [velocity] towards the target.
   void jump(double value, {double velocity = 0}) {
+    // With reduced motion there's no bounce or fling: it rests where it's going.
+    if (reduceMotion) {
+      set(_target, instant: true);
+      return;
+    }
     _value = value;
     _velocity = velocity;
     notifyListeners();

@@ -137,11 +137,15 @@ class _GlassRatingState extends State<GlassRating> with TickerProviderStateMixin
     widget.onChanged!(value);
   }
 
-  void _nudge(double steps) {
-    // Off a fractional rating, a step lands on the step's own grid.
-    final grid = (widget.value / _step).round() * _step;
-    final from = (grid - widget.value).abs() < 1e-9 ? widget.value : grid;
-    _set(from + steps * _step);
+  void _nudge(double steps) => _set(_stepped(widget.value, steps > 0 ? 1 : -1));
+
+  /// The next point on the step grid above or below [value]: from 3.7, up is
+  /// 4 and down is 3.
+  double _stepped(double value, int direction) {
+    final next = direction > 0
+        ? ((value + 1e-9) / _step).floor() * _step + _step
+        : ((value - 1e-9) / _step).ceil() * _step - _step;
+    return next.clamp(0.0, widget.count.toDouble());
   }
 
   String _describe(double value) {
@@ -247,8 +251,8 @@ class _GlassRatingState extends State<GlassRating> with TickerProviderStateMixin
       readOnly: !_enabled,
       label: widget.semanticLabel,
       value: _describe(value),
-      increasedValue: canIncrease ? _describe(math.min(widget.count.toDouble(), value + _step)) : null,
-      decreasedValue: canDecrease ? _describe(math.max(0.0, value - _step)) : null,
+      increasedValue: canIncrease ? _describe(_stepped(value, 1)) : null,
+      decreasedValue: canDecrease ? _describe(_stepped(value, -1)) : null,
       onIncrease: canIncrease ? () => _nudge(1) : null,
       onDecrease: canDecrease ? () => _nudge(-1) : null,
       child: stars,

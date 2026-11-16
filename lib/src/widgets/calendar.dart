@@ -124,6 +124,11 @@ class _GlassCalendarState extends State<GlassCalendar> {
       // A date picked elsewhere brings its month into view.
       _slide = _monthOf(selected).isAfter(_month) ? 1 : -1;
       _month = _monthOf(selected);
+      final shown = _month;
+      // Not mid-build: the listener may well set state of its own.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _month == shown) widget.onMonthChanged?.call(shown);
+      });
     }
   }
 

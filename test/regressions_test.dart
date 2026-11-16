@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glisse/glisse.dart';
 
@@ -286,5 +287,135 @@ void main() {
     expect(controller.offset, greaterThan(0));
     // The list scrolled inside its own repaint boundary; the copy followed.
     expect(identical(backdrop.image, before), isFalse);
+  });
+
+  group('second review', () {
+    Widget menu({required bool show, required bool enabled, ValueChanged<bool>? onOpenChanged, List<String>? log}) {
+      return scene(StatefulBuilder(
+        builder: (context, setState) => show
+            ? GlassContextMenu(
+                enabled: enabled,
+                onOpenChanged: onOpenChanged,
+                items: [
+                  GlassMenuItem(label: const Text('Copy'), onSelected: () => log?.add('copy')),
+                  GlassMenuItem(label: const Text('Share'), onSelected: () => log?.add('share')),
+                ],
+                child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
+              )
+            : const SizedBox(),
+      ));
+    }
+
+    testWidgets('a context menu removed while open does not throw or leak', (tester) async {
+      await setUpGlass(tester, size: const Size(400, 600));
+      var open = false;
+      late StateSetter outer;
+      var show = true;
+      await tester.pumpWidget(scene(StatefulBuilder(builder: (context, setState) {
+        outer = setState;
+        return show
+            ? GlassContextMenu(
+                onOpenChanged: (v) => setState(() => open = v),
+                items: [GlassMenuItem(label: const Text('Copy'), onSelected: () {})],
+                child: const SizedBox(width: 120, height: 60, child: Center(child: Text('Photo'))),
+              )
+            : const SizedBox();
+      })));
+      await tester.tap(find.text('Photo'), buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+      await settle(tester);
+      expect(open, isTrue);
+      outer(() => show = false);
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Copy'), findsNothing);
+    });
+
+    testWidgets('disabling a held context menu or disclosure does not throw', (tester) async {
+      await setUpGlass(tester, size: const Size(400, 600));
+      await tester.pumpWidget(menu(show: true, enabled: true));
+      final press = await tester.startGesture(tester.getCenter(find.text('Photo')));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpWidget(menu(show: true, enabled: false));
+      await press.up();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+
+      Widget disclosure(bool enabled) => scene(SizedBox(
+            width: 300,
+            child: GlassDisclosure(enabled: enabled, title: const Text('More'), child: const Text('Body')),
+          ));
+      await tester.pumpWidget(disclosure(true));
+      final hold = await tester.startGesture(tester.getCenter(find.text('More')));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpWidget(disclosure(false));
+      await hold.up();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a context menu reopened while closing takes the keyboard again', (tester) async {
+      await setUpGlass(tester, size: const Size(400, 600));
+      final log = <String>[];
+      await tester.pumpWidget(menu(show: true, enabled: true, log: log));
+      await tester.tap(find.text('Photo'), buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+      await settle(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump(const Duration(milliseconds: 32));
+      await tester.tap(find.text('Photo').first, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
+      await settle(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await settle(tester);
+      expect(log, ['copy']);
+    });
+
+    testWidgets('rating steps from a fraction to the next grid point', (tester) async {
+      await setUpGlass(tester);
+      var value = 3.7;
+      final focus = FocusNode();
+      addTearDown(focus.dispose);
+      await tester.pumpWidget(scene(StatefulBuilder(
+        builder: (context, setState) =>
+            GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
+      )));
+      focus.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await settle(tester);
+      expect(value, 4);
+      value = 4.3;
+      await tester.pumpWidget(scene(StatefulBuilder(
+        builder: (context, setState) =>
+            GlassRating(value: value, focusNode: focus, onChanged: (v) => setState(() => value = v)),
+      )));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await settle(tester);
+      expect(value, 4);
+    });
+
+    testWidgets('a spring does not bounce under reduced motion', (tester) async {
+      final spring = GlassSpring(vsync: const TestVSync(), value: 0, stiffness: 400, damping: 20)..reduceMotion = true;
+      addTearDown(spring.dispose);
+      spring.jump(0, velocity: 4);
+      expect(spring.value, 0);
+      expect(spring.isMoving, isFalse);
+    });
+
+    testWidgets('calendar reports the month a new selection brings into view', (tester) async {
+      await setUpGlass(tester, size: const Size(400, 500));
+      final months = <DateTime>[];
+      Widget calendar(DateTime selected) => scene(SizedBox(
+            width: 340,
+            child: GlassCalendar(
+              selectedDate: selected,
+              initialMonth: DateTime(2026, 3),
+              onDateSelected: (_) {},
+              onMonthChanged: months.add,
+            ),
+          ));
+      await tester.pumpWidget(calendar(DateTime(2026, 3, 10)));
+      await tester.pumpWidget(calendar(DateTime(2026, 7, 4)));
+      await settle(tester);
+      expect(months, [DateTime(2026, 7)]);
+    });
   });
 }

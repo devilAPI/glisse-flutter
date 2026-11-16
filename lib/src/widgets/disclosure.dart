@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -100,6 +101,8 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
     // Handed from controlled to its own state, it carries on as it was.
     if (oldWidget.expanded != null && widget.expanded == null) _ownExpanded = oldWidget.expanded!;
     _open.set(_expanded ? 1 : 0);
+    // A press can't finish once disabled; no setState, as this is a build.
+    if (!widget.enabled) _pressed = false;
   }
 
   @override
@@ -124,7 +127,12 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
   }
 
   void _press(bool pressed) {
-    if (_pressed != pressed) setState(() => _pressed = pressed);
+    if (_pressed == pressed || !mounted) return;
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      _pressed = pressed; // Mid-build: the build under way shows it.
+      return;
+    }
+    setState(() => _pressed = pressed);
   }
 
   @override
@@ -218,7 +226,9 @@ class _GlassDisclosureState extends State<GlassDisclosure> with SingleTickerProv
           behavior: HitTestBehavior.opaque,
           onTapDown: enabled ? (_) => _press(true) : null,
           onTapUp: enabled ? (_) => _press(false) : null,
-          onTapCancel: enabled ? () => _press(false) : null,
+          // Always set: a recognizer dropped mid-press, as when disabled,
+          // cancels through the old callback during the build.
+          onTapCancel: () => _press(false),
           onTap: enabled ? _toggle : null,
           child: Opacity(opacity: enabled ? 1 : 0.38, child: header),
         ),
