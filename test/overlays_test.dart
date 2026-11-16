@@ -323,4 +323,32 @@ void main() {
       await settle(tester);
     });
   }
+
+  testWidgets('a dialog action returns its result', (tester) async {
+    await setUpGlass(tester);
+    bool? answer;
+    await tester.pumpWidget(scene(Builder(
+      builder: (context) => GlassButton(
+        onPressed: () async {
+          answer = await showGlassDialog<bool>(
+            context: context,
+            builder: (context) => const GlassAlertDialog(
+              title: Text('Sure?'),
+              actions: [
+                GlassDialogAction(result: false, child: Text('No')),
+                GlassDialogAction(result: true, isDefault: true, child: Text('Yes')),
+              ],
+            ),
+          );
+        },
+        child: const Text('Ask'),
+      ),
+    )));
+    await tester.tap(find.text('Ask'));
+    await settle(tester);
+    await tester.tap(find.text('Yes'));
+    await settle(tester);
+    expect(answer, isTrue);
+    expect(find.text('Ask'), findsOneWidget);
+  });
 }

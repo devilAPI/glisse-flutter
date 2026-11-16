@@ -99,9 +99,13 @@ class GlassDialogAction {
     this.isDefault = false,
     this.destructive = false,
     this.dismisses = true,
+    this.result,
   });
 
   final Widget child;
+
+  /// What `showGlassDialog` returns when this action dismisses the dialog.
+  final Object? result;
 
   /// Called when chosen, after the dialog is dismissed if [dismisses].
   final VoidCallback? onPressed;
@@ -140,7 +144,7 @@ class GlassAlertDialog extends StatelessWidget {
         variant: action.isDefault ? GlassButtonVariant.filled : GlassButtonVariant.glass,
         destructive: action.destructive,
         onPressed: () {
-          if (action.dismisses) Navigator.of(context).pop();
+          if (action.dismisses) Navigator.of(context).pop(action.result);
           action.onPressed?.call();
         },
         child: action.child,

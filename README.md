@@ -71,6 +71,37 @@ GlassBackdrop(
 )
 ```
 
+Overlays, controls and navigation work the same way:
+
+```dart
+// An alert
+final allowed = await showGlassDialog<bool>(
+  context: context,
+  builder: (context) => GlassAlertDialog(
+    title: const Text('Allow “Glisse” to use your location?'),
+    content: const Text('Your location is used to show nearby glass.'),
+    actions: [
+      GlassDialogAction(result: false, child: const Text('Don’t Allow')),
+      GlassDialogAction(result: true, isDefault: true, child: const Text('Allow')),
+    ],
+  ),
+);
+
+// A floating sheet you can drag away, and a toast
+showGlassSheet(context: context, builder: (context) => const Text('Share'));
+showGlassToast(context, message: const Text('Copied'), icon: const Icon(Icons.check_circle));
+
+// A grouped list, a toolbar and a magnifier
+GlassListSection(header: const Text('Network'), children: [
+  GlassListTile(leading: const Icon(Icons.wifi), title: const Text('Wi-Fi'), showChevron: true, onTap: () {}),
+]);
+GlassToolbar(children: [
+  GlassToolbarItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
+  GlassToolbarItem(icon: const Icon(Icons.redo), semanticLabel: 'Redo', onPressed: () {}),
+]);
+const GlassMagnifier(size: 140, magnification: 1.8);
+```
+
 Glisse widgets follow the ambient brightness. To set the colours or the tuning yourself, use `GlassTheme`:
 
 ```dart
