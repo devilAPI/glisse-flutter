@@ -275,7 +275,8 @@ void main() {
   float bends = clamp(min(min(amount * 20.0, -edge), 1.0), 0.0, 1.0);
 
   vec4 base = vec4(0.0);
-  if (mode > 0.5) {
+  // An opaque tint, as on a filled button, hides all the glass would show.
+  if (mode > 0.5 && uTint.a < 0.999) {
     // Softened glass, as iOS's tab bar lens, blurs only what its rim bends,
     // as far as it bends it; other glass frosts all it shows.
     bool soften = uLightC.z > 0.5;
