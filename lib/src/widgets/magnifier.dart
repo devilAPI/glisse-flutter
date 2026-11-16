@@ -120,6 +120,15 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
   }
 
   @override
+  void didUpdateWidget(GlassMagnifier oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A parent that places the lens has the last word on where a drag is.
+    if (_dragging != null && widget.position != null && widget.position != oldWidget.position) {
+      _dragging = widget.position;
+    }
+  }
+
+  @override
   void dispose() {
     _lift.dispose();
     super.dispose();

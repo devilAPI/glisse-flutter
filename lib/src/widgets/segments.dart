@@ -777,7 +777,7 @@ class _SegmentsPainter<T> extends CustomPainter {
 
     // As Glisse's focus-visible outline: 2px, inset 2px, round the focused
     // tab, which is the selected one.
-    if (focused) {
+    if (focused && state.widget.items.isNotEmpty) {
       final index = active < 0 ? 0 : active;
       final slot = Rect.fromLTWH(m.inset + index * m.tabWidth, m.inset, m.tabWidth, m.tabHeight);
       canvas.drawRRect(
