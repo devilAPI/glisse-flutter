@@ -11,18 +11,28 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 
 ## Widgets
 
+**Ported from Glisse**, with the same measurements, springs and lenses:
+
 | Widget | What it is |
 | --- | --- |
-| `Glass` | A pane of glass: bends its backdrop at the rim, frosts, tints and lights it. |
-| `GlassButton` | iOS 26 glass button: swells and stretches under a finger, springs back past its size. Glass or filled, tinted, destructive, icon-only. |
-| `GlassSwitch` | A white knob that, held, lifts into a lens bending the track under its rim. Drag it across. |
+| `Glass` | A pane of glass that bends its backdrop at the rim, frosts and tints it, and lights its edge. |
+| `GlassButton` | The iOS 26 glass button. It swells and stretches under a finger and springs back past its size. Glass or filled, tinted, destructive, or icon-only. |
+| `GlassSwitch` | A white knob that lifts into a lens while held, bending the track under its rim. It can be dragged across. |
 | `GlassSlider` | A slider whose thumb lifts into a magnifying lens over a thicker stand-in track. |
 | `GlassSegmentedControl` | A thumb on a glass track that lifts into a lens over the labels while held or dragged. |
-| `GlassTabBar` | A row of tabs on glass, with or without icons. The selection springs between tabs, follows a drag, and lifts into a chromatic lens. |
-| `GlassMenu` | A glass button that morphs into a frosted menu. Drag-to-choose, a sliding highlight plate, and rubber-band resistance. |
-| `GlassInput`, `GlassSearchField` | Text fields on glass, with a clear button for search. |
-| `GlassBackdrop` | Marks content for the glass above it to bend, on every platform (see below). |
-| `GlassPressable` | The press physics of `GlassButton`, for any widget. |
+| `GlassTabBar` | Tabs on glass, with or without icons. The selection springs between tabs, follows a drag, and lifts into a chromatic lens that smears labels at its rim. |
+| `GlassMenu` | A glass button that morphs into a frosted menu, with drag-to-choose, a sliding highlight plate and rubber-band resistance. |
+| `GlassInput`, `GlassSearchField` | Text fields on glass. The search field has a clear button. |
+
+**New for Flutter**, built from the same glass:
+
+| Group | Widgets |
+| --- | --- |
+| Overlays | `showGlassDialog` + `GlassAlertDialog`, `showGlassSheet` (a floating sheet you drag to dismiss), `showGlassToast`, `GlassPopover`, `GlassTooltip` |
+| Controls | `GlassCheckbox`, `GlassRadio`, `GlassStepper`, `GlassChip`, `GlassProgressBar`, `GlassProgressRing`, `GlassActivityIndicator`, `GlassPageIndicator`, `GlassBadge`, `GlassButtonGroup` |
+| Navigation | `GlassNavigationBar`, `GlassBackButton`, `GlassToolbar`, `GlassListSection` + `GlassListTile`, `GlassSidebar`, `GlassDock` (macOS-style magnifying dock) |
+| Lenses | `GlassMagnifier` (a draggable magnifying lens), `GlassLoupeRegion` (a loupe on long-press) |
+| Building blocks | `GlassBackdrop`, `GlassTheme`, `GlassPressable`, `GlassSpring`, `LiquidGlassBox` |
 
 ## Install
 
