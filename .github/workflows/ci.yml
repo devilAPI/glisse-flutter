@@ -39,7 +39,7 @@ jobs:
           - target: linux
             os: ubuntu-latest
           - target: windows
-            os: windows-latest
+            os: windows-2022
           - target: macos
             os: macos-latest
           - target: ios
