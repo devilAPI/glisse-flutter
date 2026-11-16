@@ -1,3 +1,14 @@
+## 0.5.1
+
+### Web
+
+* **The page no longer grinds to a halt after a while.** On the web, every copy of a `GlassBackdrop`'s background is read back from the GPU, and in Firefox that took about half a second for a screenful. A background that kept changing was copied every frame, and the page slowed to two frames a second. Examples are an animated wallpaper, or the gallery's whole-page lenses over a spinner. Now:
+  * On the web, a backdrop waits four times as long as its last copy took before copying again, so copying never takes more than about a fifth of the time.
+  * On the web below high quality, copies are made at half the display's resolution, a quarter of the pixels.
+  * On the web, glass blurs the copy itself on the GPU, instead of reading back a second, frosted copy.
+
+  In Firefox, clicking through the whole gallery for two and a half minutes went from stalls of half a second to two seconds to none longer than about 180 ms.
+
 ## 0.5.0
 
 ### Web

@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -72,14 +72,20 @@ class _GlassBackdropState extends State<GlassBackdrop> {
   Widget build(BuildContext context) {
     // The copy's resolution follows the theme's quality: glass frosts it,
     // so fewer pixels than the display's are rarely seen, and every pixel is
-    // copied (and on the web read back from the GPU) each time it changes.
+    // copied each time it changes. On the web each is also read back from the
+    // GPU, which stalls the page (in Firefox, about half a microsecond a
+    // pixel), so below high quality the web copies at half the display's.
     final display = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
-    final most = switch (GlassTheme.of(context).effectiveQuality) {
-      GlassQuality.low => 1.0,
-      GlassQuality.medium => 2.0,
-      GlassQuality.high || GlassQuality.auto => 3.0,
-    };
-    final ratio = widget.pixelRatio ?? display.clamp(1.0, most);
+    final quality = GlassTheme.of(context).effectiveQuality;
+    final ratio =
+        widget.pixelRatio ??
+        (kIsWeb
+            ? (quality == GlassQuality.high ? display.clamp(1.0, 2.0) : (display * 0.5).clamp(0.5, 1.0))
+            : display.clamp(1.0, switch (quality) {
+              GlassQuality.low => 1.0,
+              GlassQuality.medium => 2.0,
+              GlassQuality.high || GlassQuality.auto => 3.0,
+            }));
     _controller._enabled = widget.enabled;
     return _GlassBackdropScope(
       controller: widget.enabled ? _controller : null,
@@ -120,6 +126,8 @@ class GlassBackdropController extends ChangeNotifier {
   double _ratio = 1;
   // Frosted versions of the copy, by their blur in quarter logical px.
   final Map<int, ui.Image> _frosted = {};
+  // How long frosting the latest copy took, which counts towards its cost.
+  Duration _frostCost = Duration.zero;
   RenderGlassCapture? _render;
   bool _enabled = true;
   int _users = 0;
@@ -140,32 +148,30 @@ class GlassBackdropController extends ChangeNotifier {
   /// pixel rather than blurring the copy itself, which costs it dozens.
   ui.Image? frosted(double sigma) {
     final image = this.image;
-    if (image == null || sigma < 0.25) return image;
+    // On the web every copy is read back from the GPU, which stalls the page
+    // (in Firefox, about half a second for a screenful). Glass blurs the copy
+    // itself there, on the GPU, rather than wait for a frosted one.
+    if (image == null || sigma < 0.25 || kIsWeb) return image;
     final key = (sigma * 4).round();
     final hit = _frosted[key];
     if (hit != null) return hit;
     if (_frosted.length >= 4) _clearFrosted();
+    final watch = Stopwatch()..start();
     final deviation = key / 4 * _ratio;
-    // A blur needs few pixels, and on the web every pixel of the copy is read
-    // back from the GPU; there it's made at as little as half size. Glass
-    // samples it by its own proportions, but without smoothing between its
-    // pixels, so native platforms, where copies stay on the GPU, keep it whole.
-    final scale = kIsWeb ? (3 / deviation).clamp(0.5, 1.0) : 1.0;
-    final width = math.max(1, (image.width * scale).ceil());
-    final height = math.max(1, (image.height * scale).ceil());
+    final width = image.width;
+    final height = image.height;
     final recorder = ui.PictureRecorder();
-    Canvas(recorder)
-      ..scale(width / image.width, height / image.height)
-      ..drawImage(
-        image,
-        Offset.zero,
-        Paint()
-          ..filterQuality = FilterQuality.low
-          ..imageFilter = ui.ImageFilter.blur(sigmaX: deviation, sigmaY: deviation, tileMode: TileMode.clamp),
-      );
+    Canvas(recorder).drawImage(
+      image,
+      Offset.zero,
+      Paint()
+        ..filterQuality = FilterQuality.low
+        ..imageFilter = ui.ImageFilter.blur(sigmaX: deviation, sigmaY: deviation, tileMode: TileMode.clamp),
+    );
     final picture = recorder.endRecording();
     final frosted = picture.toImageSync(width, height);
     picture.dispose();
+    _frostCost += watch.elapsed;
     return _frosted[key] = frosted;
   }
 
@@ -196,6 +202,7 @@ class GlassBackdropController extends ChangeNotifier {
     final old = _image;
     _image = image;
     _ratio = ratio;
+    _frostCost = Duration.zero;
     _clearFrosted();
     notifyListeners();
     // A picture already recorded with the old copy keeps its own reference.
@@ -285,8 +292,34 @@ class RenderGlassCapture extends RenderProxyBox {
     return layer;
   }
 
+  // On the web a copy waits for the GPU to hand its pixels back, which can
+  // take a large part of a second in Firefox. A background that changes
+  // every frame, as one with a spinner in it does, would then copy every
+  // frame and bring the page to a crawl. So there the next copy waits four
+  // times as long as the last one took: copying takes at most a fifth of
+  // the time, and the glass shows a copy a little behind meanwhile. Native
+  // copies stay on the GPU and don't wait.
+  Duration _lastCost = Duration.zero;
+  final Stopwatch _sinceCopy = Stopwatch();
+  Timer? _rest;
+
+  Duration get _waitLeft {
+    if (!kIsWeb || !_sinceCopy.isRunning) return Duration.zero;
+    final cost = _lastCost + _controller._frostCost;
+    if (cost < const Duration(milliseconds: 4)) return Duration.zero;
+    return cost * 4 - _sinceCopy.elapsed;
+  }
+
   void _requestCapture() {
     if (_capturing || _scheduled || !attached || !_enabled) return;
+    final wait = _waitLeft;
+    if (wait > Duration.zero) {
+      _rest ??= Timer(wait, () {
+        _rest = null;
+        _requestCapture();
+      });
+      return;
+    }
     _scheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _scheduled = false;
@@ -305,7 +338,12 @@ class RenderGlassCapture extends RenderProxyBox {
     if (layer is! OffsetLayer || !layer.attached) return;
     try {
       _capturing = true;
+      final watch = Stopwatch()..start();
       final image = layer.toImageSync(Offset.zero & size, pixelRatio: _pixelRatio);
+      _lastCost = watch.elapsed;
+      _sinceCopy
+        ..reset()
+        ..start();
       _capturing = false;
       _controller._setImage(image, _pixelRatio);
     } catch (error, stack) {
@@ -325,6 +363,8 @@ class RenderGlassCapture extends RenderProxyBox {
   @override
   void detach() {
     _scheduled = false;
+    _rest?.cancel();
+    _rest = null;
     super.detach();
   }
 

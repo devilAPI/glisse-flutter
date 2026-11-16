@@ -100,6 +100,8 @@ For a fully custom pane, build a `LiquidGlassBox` with a `GlassStyle`.
 | `medium` | two rings | yes | up to 2× |
 | `low` | one ring | no | 1× |
 
+On the web, where every copy is read back from the GPU and stalls the page, copies are made at half the display's resolution below `high`, and at most every few frames when the background keeps changing. Glass there blurs the copy itself instead of using a shared frosted copy.
+
 `auto`, the default, is `medium` on the web and phones and `high` on desktops. On the web below `high`, glass that has no backdrop copy to bend lays its tint and rim over the page without blurring it, and menus don't blur the page behind them: the browser would blur the whole page again for each pane. Glass over a `GlassBackdrop` frosts from a blurred copy that the backdrop makes once per change, so there the frost costs one sample a pixel at any quality. The rings matter for glass over Impeller's live backdrop and for controls' lenses.
 
 ```dart
