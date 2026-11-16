@@ -770,9 +770,13 @@ class _SegmentsPainter<T> extends CustomPainter {
       if (!rimUnder) paintRim();
     }
 
+    // As Glisse's focus-visible outline: 2px, inset 2px, round the focused
+    // tab, which is the selected one.
     if (focused) {
+      final index = active < 0 ? 0 : active;
+      final slot = Rect.fromLTWH(m.inset + index * m.tabWidth, m.inset, m.tabWidth, m.tabHeight);
       canvas.drawRRect(
-        barRRect.inflate(3),
+        roundedRect(slot, m.tabHeight / 2).deflate(1),
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2

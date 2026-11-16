@@ -600,18 +600,27 @@ class _MenuOverlayState extends State<_MenuOverlay> with TickerProviderStateMixi
       child: Stack(
         key: _plateHost,
         children: [
-          AnimatedPositioned.fromRect(
-            rect: _plate,
-            duration: _plateInstant || _menu._reduceMotion ? Duration.zero : const Duration(milliseconds: 100),
-            curve: const Cubic(0.2, 0.8, 0.2, 1),
-            child: AnimatedOpacity(
-              opacity: _plateShown ? 1 : 0,
-              duration: _plateInstant && _plateShown ? Duration.zero : const Duration(milliseconds: 80),
-              curve: Curves.easeOut,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: theme.highlight,
-                  borderRadius: const BorderRadius.all(Radius.circular(14)),
+          // As Glisse's plate: it slides to each row, taking the row's size
+          // at once.
+          Positioned(
+            left: 0,
+            top: 0,
+            width: _plate.width,
+            height: _plate.height,
+            child: TweenAnimationBuilder<Offset>(
+              tween: Tween<Offset>(end: _plate.topLeft),
+              duration: _plateInstant || _menu._reduceMotion ? Duration.zero : const Duration(milliseconds: 100),
+              curve: const Cubic(0.2, 0.8, 0.2, 1),
+              builder: (context, at, child) => Transform.translate(offset: at, child: child),
+              child: AnimatedOpacity(
+                opacity: _plateShown ? 1 : 0,
+                duration: _plateInstant && _plateShown ? Duration.zero : const Duration(milliseconds: 80),
+                curve: Curves.easeOut,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.highlight,
+                    borderRadius: const BorderRadius.all(Radius.circular(14)),
+                  ),
                 ),
               ),
             ),
