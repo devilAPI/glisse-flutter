@@ -269,7 +269,12 @@ class LensDraw {
     this.rimOpacity = 1,
     this.filterInverse,
     this.textureSize = Size.zero,
+    this.softensBend = false,
   });
+
+  /// Blurs only what the rim bends, as far as it bends it, rather than all
+  /// the glass shows: iOS's tab bar lens.
+  final bool softensBend;
 
   /// The lens as placed, in local px.
   final Rect rect;
@@ -391,7 +396,7 @@ class LensDraw {
     // uLightC
     f(light.edgePower);
     f(!spec.ink || inkPage == null ? 0.0 : (inkPage == Brightness.light ? 1.0 : 2.0));
-    f(0);
+    f(softensBend ? 1 : 0);
     f(1 / devicePixelRatio);
     // uTint
     f(_premul(tint, tint.r));

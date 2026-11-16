@@ -32,7 +32,7 @@ uniform vec4 uUvY;      // v = d x + e y + f.
 uniform vec4 uFrost;    // blur sigma (local px), saturation, brightness, texture mode.
 uniform vec4 uLightA;   // shine, cos(angle), sin(angle), glow.
 uniform vec4 uLightB;   // spread, glow power, edge, edge width.
-uniform vec4 uLightC;   // edge power, ink (0 none, 1 light page, 2 dark page), stand-in, local px per device px.
+uniform vec4 uLightC;   // edge power, ink (0 none, 1 light page, 2 dark page), soften (1: blur only what the rim bends), local px per device px.
 uniform vec4 uTint;     // A colour laid over, premultiplied.
 uniform vec4 uEdge;     // The edge line's colour, premultiplied.
 uniform vec4 uRim;      // rim mode (0 none, 1 glass, 2 selection, 3 bright selection), shine, opacity, unused.
@@ -110,9 +110,8 @@ vec4 tex(vec2 p) {
   return texture(uTexture, uv);
 }
 
-// A frosted sample: a Gaussian of deviation uFrost.x, as three rings of taps.
-vec4 frost(vec2 p) {
-  float s = uFrost.x;
+// A frosted sample: a Gaussian of deviation s, as three rings of taps.
+vec4 frost(vec2 p, float s) {
   if (s < 0.2) {
     return tex(p);
   }
@@ -225,16 +224,20 @@ void main() {
 
   vec4 base = vec4(0.0);
   if (mode > 0.5) {
-    vec4 plain = frost(p);
+    // Softened glass, as iOS's tab bar lens, blurs only what its rim bends,
+    // as far as it bends it; other glass frosts all it shows.
+    bool soften = uLightC.z > 0.5;
+    vec4 plain = frost(p, soften ? 0.0 : uFrost.x);
+    float sigma = soften ? uFrost.x * amount : uFrost.x;
     base = plain;
     if (bends > 0.0 && uBend.x > 0.0) {
       // Each colour's ray, pulled from further in as far as that colour bends.
       // The map stretches over the lens as placed; the pull is in local px.
       vec2 pull = dir * amount * 0.5 * uBend.x;
       float d = uBend.y;
-      vec4 red = frost(p - pull * (1.0 + 0.2 * d));
-      vec4 green = frost(p - pull * (1.0 + 0.1 * d));
-      vec4 blue = frost(p - pull);
+      vec4 red = frost(p - pull * (1.0 + 0.2 * d), sigma);
+      vec4 green = frost(p - pull * (1.0 + 0.1 * d), sigma);
+      vec4 blue = frost(p - pull, sigma);
       vec4 bent;
       if (uLightC.y > 0.5) {
         // Ink: the alpha of whichever colour covers most, and each colour's

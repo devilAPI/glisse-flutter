@@ -56,6 +56,7 @@ void paintContentLens(
     rim: draw.rim,
     rimShine: draw.rimShine,
     rimOpacity: draw.rimOpacity,
+    softensBend: draw.softensBend,
   ).apply(shader, image: image);
   canvas.drawRect(draw.rect.inflate(1), Paint()..shader = shader);
 }

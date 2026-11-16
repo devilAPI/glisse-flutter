@@ -602,9 +602,9 @@ class _SegmentsPainter<T> extends CustomPainter {
           devicePixelRatio: devicePixelRatio,
           reach: reach,
           dispersion: segmented ? null : theme.tabDispersion,
-          // The shader's frost blurs the whole lens, where Glisse softens
-          // only what the rim bends; the labels stay sharp instead.
-          blur: 0,
+          // Softens only what the rim bends, growing as the lens lifts.
+          blur: spec.blur * lifted,
+          softensBend: true,
           shine: theme.lensShine,
           light: light ? LensLight.light : LensLight.dark,
           inkPage: light ? Brightness.light : Brightness.dark,
