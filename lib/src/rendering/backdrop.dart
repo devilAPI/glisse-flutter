@@ -110,7 +110,11 @@ class GlassBackdropController extends ChangeNotifier {
   bool _disposed = false;
 
   /// The latest copy, covering the background's whole box.
-  ui.Image? get image => _enabled ? _image : null;
+  ui.Image? get image => _enabled && !_disposed ? _image : null;
+
+  /// Whether the backdrop that made this is still around. Overlays can
+  /// outlive the page whose backdrop they carry.
+  bool get isActive => !_disposed;
 
   /// The background's render box, for mapping glass into it.
   RenderBox? get renderBox => _render;

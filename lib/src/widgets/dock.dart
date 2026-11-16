@@ -65,19 +65,21 @@ class _GlassDockState extends State<GlassDock> with TickerProviderStateMixin {
     if (oldWidget.items.length != widget.items.length) _sync();
   }
 
+  bool _reduce = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    _reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     for (final s in [..._scales, ..._bounces]) {
-      s.reduceMotion = reduce;
+      s.reduceMotion = _reduce;
     }
   }
 
   void _sync() {
     while (_scales.length < widget.items.length) {
-      _scales.add(GlassSpring(vsync: this, value: 1, stiffness: 900, damping: 52));
-      _bounces.add(GlassSpring(vsync: this, stiffness: 260, damping: 11));
+      _scales.add(GlassSpring(vsync: this, value: 1, stiffness: 900, damping: 52)..reduceMotion = _reduce);
+      _bounces.add(GlassSpring(vsync: this, stiffness: 260, damping: 11)..reduceMotion = _reduce);
     }
     while (_scales.length > widget.items.length) {
       _scales.removeLast().dispose();

@@ -197,14 +197,22 @@ class RenderLiquidGlass extends RenderProxyBox {
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
   final LayerHandle<BackdropFilterLayer> _filterLayer = LayerHandle<BackdropFilterLayer>();
 
+  GlassBackdropController? _listening;
+
   void _listen() {
-    _backdrop?.addListener(markNeedsPaint);
-    _backdrop?.addUser();
+    final backdrop = _backdrop;
+    if (backdrop == null || !backdrop.isActive) return;
+    backdrop.addListener(markNeedsPaint);
+    backdrop.addUser();
+    _listening = backdrop;
   }
 
   void _unlisten() {
-    _backdrop?.removeListener(markNeedsPaint);
-    _backdrop?.removeUser();
+    final backdrop = _listening;
+    _listening = null;
+    if (backdrop == null || !backdrop.isActive) return;
+    backdrop.removeListener(markNeedsPaint);
+    backdrop.removeUser();
   }
 
   void _onShaderReady() => markNeedsPaint();
@@ -418,7 +426,13 @@ class RenderLiquidGlass extends RenderProxyBox {
     final s = forward.storage;
     final a = s[0], b = s[4], c = s[12], d = s[1], e = s[5], f = s[13];
     final det = a * e - b * d;
-    if (det.abs() < 1e-9) return;
+    if (det.abs() < 1e-9) {
+      // Squashed flat: nothing to bend, but the child still paints.
+      _clipLayer.layer = null;
+      _filterLayer.layer = null;
+      super.paint(context, offset);
+      return;
+    }
     final inverse = <double>[e / det, -b / det, (b * f - e * c) / det, -d / det, a / det, (d * c - a * f) / det];
     _draw(
       rect: Offset.zero & size,
