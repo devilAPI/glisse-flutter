@@ -187,32 +187,37 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
           blur = spec.blur * amount;
         }
         if (amount <= 0) return const SizedBox.shrink();
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fromRect(
-              rect: rect,
-              child: IgnorePointer(
-                child: LiquidGlassBox(
-                  radius: double.infinity,
-                  style: GlassStyle(
-                    tint: const Color(0x00000000),
-                    edge: const Color(0x00000000),
-                    drop: const Color(0x00000000),
-                    rimShine: 0,
-                    blur: blur,
-                    saturation: 1,
-                    bend: bend,
-                    dispersion: _segmented ? 0.35 : (theme.tabDispersion ?? spec.dispersion),
-                    spec: spec,
-                    rim: LensRim.none,
-                    amount: amount,
-                    mode: widget.mode,
+        // Kept to the bar, whose glass it bends, in every mode: the rim and
+        // fill the painter draws still reach past it as the lens grows.
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(m.tabHeight / 2 + m.inset),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fromRect(
+                rect: rect,
+                child: IgnorePointer(
+                  child: LiquidGlassBox(
+                    radius: double.infinity,
+                    style: GlassStyle(
+                      tint: const Color(0x00000000),
+                      edge: const Color(0x00000000),
+                      drop: const Color(0x00000000),
+                      rimShine: 0,
+                      blur: blur,
+                      saturation: 1,
+                      bend: bend,
+                      dispersion: _segmented ? 0.35 : (theme.tabDispersion ?? spec.dispersion),
+                      spec: spec,
+                      rim: LensRim.none,
+                      amount: amount,
+                      mode: widget.mode,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

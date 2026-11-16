@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -118,11 +119,17 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
   // Where and when a press began, for telling a scroll from a hold.
   Offset? _pressAt;
   Duration _pressTime = Duration.zero;
+  // A sideways move under Flutter's drag slop, which lands where it's let
+  // go, as Glisse's drags do, rather than counting as a tap.
+  double? _preview;
+  bool _ignoreTap = false;
 
   void _down(PointerDownEvent event) {
     if (!_enabled || event.buttons != kPrimaryButton) return;
     _pressAt = event.position;
     _pressTime = event.timeStamp;
+    _preview = null;
+    _ignoreTap = false;
     _lift.set(1);
   }
 
@@ -137,23 +144,53 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
     if (!held && dy > 10 && dy > dx + 4) {
       _pressAt = null;
       _lift.set(0);
+      _sync();
+      return;
+    }
+    // Glisse's thumb follows a finger from 4px across. Flutter's drag waits
+    // for its usual slop before winning (so scrolls and taps still work);
+    // until then a clearly sideways move already moves the thumb.
+    final sideways = event.position.dx - at.dx;
+    if (dx >= 4 && dx > 2 * dy) {
+      final from = widget.value ? 1.0 : 0.0;
+      final value = from + sideways / _travel;
+      _preview = value;
+      _position.set(value.clamp(0.0, 1.0));
+      _color.set(value > 0.5 ? 1 : 0);
     }
   }
 
   void _up(PointerEvent event) {
     _pressAt = null;
+    final preview = _preview;
+    _preview = null;
+    if (_dragFrom == null && preview != null && event is PointerUpEvent) {
+      // Moved, but not far enough for the drag: it lands where it's let go.
+      _ignoreTap = true;
+      // The tap, if any, comes in this same event; after it, taps count again.
+      SchedulerBinding.instance.addPostFrameCallback((_) => _ignoreTap = false);
+      SchedulerBinding.instance.ensureVisualUpdate();
+      _settle(preview > 0.5);
+      return;
+    }
     if (_dragFrom == null) {
       _lift.set(0);
+      _sync();
     }
   }
 
   void _toggle() {
+    if (_ignoreTap) {
+      _ignoreTap = false;
+      return;
+    }
     if (!_enabled) return;
     _settle(!widget.value);
   }
 
   void _dragStart(DragStartDetails details) {
     if (!_enabled) return;
+    _preview = null;
     _dragFrom = widget.value ? 1 : 0;
     _dragDx = 0;
     _lift.set(1);
@@ -240,15 +277,6 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
         child: result,
       ),
     );
-    // Glisse's switch follows a drag once it has moved 4px, where Flutter
-    // waits for a finger's usual slop.
-    final media = MediaQuery.maybeOf(context);
-    if (media != null) {
-      result = MediaQuery(
-        data: media.copyWith(gestureSettings: const DeviceGestureSettings(touchSlop: 4)),
-        child: result,
-      );
-    }
     // A touch target 44px tall, as Glisse's ::before gives it.
     result =
         HitPadding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: (44 - _height) / 2), child: result);

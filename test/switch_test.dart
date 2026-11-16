@@ -65,6 +65,70 @@ void main() {
     await settle(tester);
   });
 
+  testWidgets('a scroll that starts on the switch, a little sideways, scrolls', (tester) async {
+    await setUpGlass(tester);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    var value = false;
+    await tester.pumpWidget(scene(StatefulBuilder(
+      builder: (context, setState) => ListView(controller: controller, children: [
+        const SizedBox(height: 100),
+        Center(child: GlassSwitch(value: value, onChanged: (v) => setState(() => value = v))),
+        const SizedBox(height: 2000),
+      ]),
+    )));
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(GlassSwitch)));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(3, -8));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await gesture.up();
+    await settle(tester);
+    expect(controller.offset, greaterThan(0));
+    expect(value, isFalse);
+  });
+
+  testWidgets('a tap with a little drift still toggles', (tester) async {
+    await setUpGlass(tester);
+    var value = false;
+    await tester.pumpWidget(scene(StatefulBuilder(
+      builder: (context, setState) => GlassSwitch(value: value, onChanged: (v) => setState(() => value = v)),
+    )));
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(GlassSwitch)));
+    await gesture.moveBy(const Offset(0, 3));
+    await gesture.moveBy(const Offset(0, 3));
+    await gesture.up();
+    await settle(tester);
+    expect(value, isTrue);
+  });
+
+  testWidgets('a short sideways move lands where it is let go', (tester) async {
+    await setUpGlass(tester);
+    var value = false;
+    var changes = 0;
+    await tester.pumpWidget(scene(StatefulBuilder(
+      builder: (context, setState) => GlassSwitch(
+        value: value,
+        onChanged: (v) => setState(() {
+          value = v;
+          changes++;
+        }),
+      ),
+    )));
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(GlassSwitch)));
+    await gesture.moveBy(const Offset(6, 0));
+    await tester.pump(const Duration(milliseconds: 16));
+    await gesture.up();
+    await settle(tester);
+    // 6px of a 21.7px travel is short of halfway: no change, and no tap.
+    expect(value, isFalse);
+    expect(changes, 0);
+    // And a tap afterwards still toggles.
+    await tester.tap(find.byType(GlassSwitch));
+    await settle(tester);
+    expect(value, isTrue);
+  });
+
   testWidgets('disabled ignores taps', (tester) async {
     await setUpGlass(tester);
     await tester.pumpWidget(scene(const GlassSwitch(value: false, onChanged: null)));

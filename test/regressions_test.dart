@@ -232,4 +232,18 @@ void main() {
     // The dock is laid out left to right, as it magnifies.
     expect(shown, ['Zero'], reason: pressed.join());
   });
+
+  testWidgets('RTL input: the clear button hangs into the padding at the end', (tester) async {
+    await setUpGlass(tester);
+    final controller = TextEditingController(text: 'glass');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(scene(Directionality(
+      textDirection: TextDirection.rtl,
+      child: SizedBox(width: 300, child: GlassSearchField(controller: controller)),
+    )));
+    await settle(tester);
+    final field = tester.getRect(find.byType(GlassSearchField));
+    final clear = tester.getRect(find.bySemanticsLabel('Clear'));
+    expect(clear.left - field.left, closeTo(6, 0.5));
+  });
 }

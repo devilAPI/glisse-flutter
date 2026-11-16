@@ -189,7 +189,7 @@ class _GlassInputState extends State<GlassInput> {
       child: SizedBox(
         height: widget.height,
         // The clear button hangs 8px into the padding, as Glisse's margin-right: -8px.
-        child: Padding(padding: EdgeInsets.only(left: 14, right: showClear ? 6 : 14), child: row),
+        child: Padding(padding: EdgeInsetsDirectional.only(start: 14, end: showClear ? 6 : 14), child: row),
       ),
     );
 
