@@ -34,6 +34,9 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 | Overlays | `showGlassDialog` + `GlassAlertDialog`, `showGlassSheet` (a floating sheet you drag to dismiss), `showGlassToast`, `GlassPopover`, `GlassTooltip` |
 | Controls | `GlassCheckbox`, `GlassRadio`, `GlassStepper`, `GlassChip`, `GlassProgressBar`, `GlassProgressRing`, `GlassActivityIndicator`, `GlassPageIndicator`, `GlassBadge`, `GlassButtonGroup` |
 | Navigation | `GlassNavigationBar`, `GlassBackButton`, `GlassToolbar`, `GlassListSection` + `GlassListTile`, `GlassSidebar`, `GlassDock` (macOS-style magnifying dock) |
+| Pickers | `GlassRangeSlider`, `GlassPicker` (a wheel), `GlassDatePicker`, `GlassTimePicker`, `GlassCalendar`, `GlassColorSwatches`, `GlassKnob` (a rotary dial), `GlassRating`, `GlassPinField` (a one-time code) |
+| Surfaces | `showGlassActionSheet`, `GlassContextMenu` (long-press or right-click, with a lifted preview), `showGlassBanner` (a notification that drops in from the top), `GlassCard`, `GlassDisclosure` (an expanding section) |
+| Extras | `GlassSlideToConfirm`, `GlassAvatar`, `GlassAvatarGroup` |
 | Lenses | `GlassMagnifier` (a draggable magnifying lens), `GlassLoupeRegion` (a loupe on long-press) |
 | Building blocks | `GlassBackdrop`, `GlassTheme`, `GlassPressable`, `GlassSpring`, `LiquidGlassBox` |
 

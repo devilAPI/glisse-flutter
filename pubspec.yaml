@@ -3,7 +3,7 @@ description: >-
   Apple's Liquid Glass for Flutter, on every platform: refracting glass,
   buttons, switches, sliders, segmented controls, tab bars, menus and more.
   A port of the Glisse web library.
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/devilAPI/glisse-flutter
 repository: https://github.com/devilAPI/glisse-flutter
 issue_tracker: https://github.com/devilAPI/glisse-flutter/issues

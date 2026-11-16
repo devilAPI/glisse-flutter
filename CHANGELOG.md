@@ -1,3 +1,16 @@
+## 0.2.0
+
+### New widgets
+
+* Pickers: `GlassRangeSlider`, `GlassPicker`, `GlassDatePicker`, `GlassTimePicker`, `GlassCalendar`, `GlassColorSwatches`, `GlassKnob`, `GlassRating`, `GlassPinField`.
+* Surfaces: `showGlassActionSheet` with `GlassActionSheet`, `GlassContextMenu`, `showGlassBanner`, `GlassCard`, `GlassDisclosure`.
+* Extras: `GlassSlideToConfirm`, `GlassAvatar`, `GlassAvatarGroup`.
+
+### Fixes
+
+* `GlassListSection` indents the hairline under a `GlassDisclosure` row with a leading icon, as it does under a `GlassListTile`.
+* The gallery no longer throws when its window starts out narrow.
+
 ## 0.1.0
 
 First release: a Flutter port of [Glisse](https://github.com/0kzh/glisse)'s Liquid Glass.

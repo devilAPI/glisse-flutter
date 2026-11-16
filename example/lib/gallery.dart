@@ -1,11 +1,16 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glisse/glisse.dart';
 
 import 'sections/controls_section.dart';
+import 'sections/extras_section.dart';
 import 'sections/magnifier_section.dart';
 import 'sections/navigation_section.dart';
 import 'sections/overlays_section.dart';
+import 'sections/pickers_section.dart';
+import 'sections/surfaces_section.dart';
 import 'wallpaper.dart';
 
 /// Every Glisse widget, over a wallpaper the glass bends.
@@ -306,6 +311,9 @@ class _GalleryPageState extends State<GalleryPage> {
         const _Section(title: 'Controls', children: [ControlsSection()]),
         const _Section(title: 'Overlays', children: [OverlaysSection()]),
         const _Section(title: 'Navigation', children: [NavigationSection()]),
+        const _Section(title: 'Pickers', children: [PickersSection()]),
+        const _Section(title: 'Surfaces', children: [SurfacesSection()]),
+        const _Section(title: 'Extras', children: [ExtrasSection()]),
         const _Section(title: 'Magnifier', children: [MagnifierSection()]),
         _Section(
           title: 'Playground',
@@ -338,7 +346,7 @@ class _GalleryPageState extends State<GalleryPage> {
       height: 260,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final max = Offset(constraints.maxWidth - 200, constraints.maxHeight - 120);
+          final max = Offset(math.max(0.0, constraints.maxWidth - 200), math.max(0.0, constraints.maxHeight - 120));
           final at = Offset(_lens.dx.clamp(0, max.dx), _lens.dy.clamp(0, max.dy));
           return Stack(
             children: [

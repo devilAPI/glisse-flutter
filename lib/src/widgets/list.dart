@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../foundation/theme.dart';
+import 'disclosure.dart';
 import 'glass.dart';
 import 'input.dart';
 import 'hairline.dart';
@@ -37,7 +38,12 @@ class GlassListSection extends StatelessWidget {
       rows.add(children[i]);
       if (i < children.length - 1) {
         final child = children[i];
-        final inset = child is GlassListTile && child.leading != null ? 16.0 + 28 + 12 : 16.0;
+        final leading = switch (child) {
+          GlassListTile() => child.leading != null,
+          GlassDisclosure() => !child.inset && child.leading != null,
+          _ => false,
+        };
+        final inset = leading ? 16.0 + 28 + 12 : 16.0;
         rows.add(Padding(
           padding: EdgeInsetsDirectional.only(start: inset),
           child: Container(height: hairline(context), color: theme.separator),

@@ -77,6 +77,45 @@ List<Widget> everything() => [
       const SizedBox(width: 200, height: 140, child: GlassMagnifier(size: 80)),
       GlassPopover(popoverBuilder: (_) => const Text('Popover'), child: const Text('Anchor')),
       const GlassTooltip(message: 'Tip', child: Text('Hover me')),
+      GlassContextMenu(items: [GlassMenuItem(label: const Text('Copy'), onSelected: () {})], child: const Text('Hold')),
+      const SizedBox(
+        width: 260,
+        child: GlassCard(leading: Icon(Icons.cloud), title: Text('Card'), subtitle: Text('Sub'), child: Text('Body')),
+      ),
+      const SizedBox(
+          width: 260, child: GlassDisclosure(title: Text('More'), initiallyExpanded: true, child: Text('Body'))),
+      const SizedBox(width: 260, child: GlassActionSheet(actions: [GlassActionSheetAction(child: Text('Share'))])),
+      SizedBox(width: 260, child: GlassSlideToConfirm(onConfirmed: () {})),
+      const GlassAvatar(initials: 'Ada Lovelace', status: GlassAvatarStatus.online),
+      const GlassAvatarGroup(max: 2, children: [
+        GlassAvatar(initials: 'A'),
+        GlassAvatar(initials: 'B'),
+        GlassAvatar(initials: 'C'),
+      ]),
+      GlassColorSwatches(
+        colors: const [Color(0xFFFF3B30), Color(0xFF34C759), Color(0xFF0088FF)],
+        value: const Color(0xFF34C759),
+        onChanged: (_) {},
+      ),
+      GlassKnob(value: 0.6, onChanged: (_) {}, semanticLabel: 'Gain'),
+      SizedBox(
+        width: 240,
+        child: GlassRangeSlider(values: const GlassRange(0.2, 0.7), onChanged: (_) {}, semanticLabel: 'Price'),
+      ),
+      SizedBox(width: 160, child: GlassPicker(items: const ['One', 'Two', 'Three'], onSelectedItemChanged: (_) {})),
+      SizedBox(width: 300, child: GlassDatePicker(initialDate: DateTime(2026, 2, 28), onDateTimeChanged: (_) {})),
+      SizedBox(width: 220, child: GlassTimePicker(initialTime: DateTime(2026, 1, 1, 9, 41), onDateTimeChanged: (_) {})),
+      GlassRating(value: 3.5, allowHalf: true, onChanged: (_) {}),
+      const GlassPinField(length: 4),
+      SizedBox(
+        width: 320,
+        child: GlassCalendar(
+          selectedDate: DateTime(2026, 3, 15),
+          currentDate: DateTime(2026, 3, 10),
+          initialMonth: DateTime(2026, 3),
+          onDateSelected: (_) {},
+        ),
+      ),
     ];
 
 void main() {
