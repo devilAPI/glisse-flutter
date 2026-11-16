@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../foundation/theme.dart';
 import 'backdrop.dart';
 import 'lens.dart';
 import 'shadows.dart';
@@ -347,10 +348,32 @@ class LiquidGlassBox extends SingleChildRenderObjectWidget {
   final double radius;
   final GlassStyle style;
 
+  // Glass that leaves its mode to the page takes the theme's.
+  GlassStyle _style(BuildContext context) {
+    if (style.mode != GlassMode.auto) return style;
+    final mode = GlassTheme.of(context).mode;
+    if (mode == GlassMode.auto) return style;
+    return GlassStyle(
+      tint: style.tint,
+      edge: style.edge,
+      drop: style.drop,
+      rimShine: style.rimShine,
+      blur: style.blur,
+      saturation: style.saturation,
+      brightness: style.brightness,
+      bend: style.bend,
+      dispersion: style.dispersion,
+      spec: style.spec,
+      rim: style.rim,
+      amount: style.amount,
+      mode: mode,
+    );
+  }
+
   @override
   RenderLiquidGlass createRenderObject(BuildContext context) => RenderLiquidGlass(
         radius: radius,
-        style: style,
+        style: _style(context),
         devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
         backdrop: GlassBackdrop.maybeOf(context),
       );
@@ -359,7 +382,7 @@ class LiquidGlassBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderLiquidGlass renderObject) {
     renderObject
       ..radius = radius
-      ..style = style
+      ..style = _style(context)
       ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1
       ..backdrop = GlassBackdrop.maybeOf(context);
   }

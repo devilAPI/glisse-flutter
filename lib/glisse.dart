@@ -11,3 +11,8 @@ export 'src/widgets/switch.dart';
 export 'src/rendering/hit_padding.dart';
 export 'src/widgets/button.dart';
 export 'src/widgets/pressable.dart';
+export 'src/widgets/input.dart';
+export 'src/widgets/slider.dart';
+export 'src/widgets/segmented_control.dart';
+export 'src/widgets/tab_bar.dart';
+export 'src/widgets/menu.dart';

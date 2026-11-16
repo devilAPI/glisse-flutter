@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../rendering/liquid_glass.dart' show GlassMode;
+
 /// The colours and tuning every Glisse widget reads, as Glisse's CSS custom
 /// properties (`--lg-*`) set them for a light and a dark page.
 @immutable
@@ -42,6 +44,7 @@ class GlassThemeData {
     this.tabBend,
     this.tabDispersion,
     this.textStyle = const TextStyle(fontSize: 14, height: 1.2, letterSpacing: -0.1),
+    this.mode = GlassMode.auto,
   });
 
   /// Glisse on a light page.
@@ -213,6 +216,9 @@ class GlassThemeData {
   /// The base text style of labels on glass.
   final TextStyle textStyle;
 
+  /// How glass reads what's behind it, for glass that doesn't say.
+  final GlassMode mode;
+
   bool get isDark => brightness == Brightness.dark;
 
   GlassThemeData copyWith({
@@ -253,6 +259,7 @@ class GlassThemeData {
     double? tabBend,
     double? tabDispersion,
     TextStyle? textStyle,
+    GlassMode? mode,
   }) {
     return GlassThemeData(
       brightness: brightness ?? this.brightness,
@@ -292,6 +299,7 @@ class GlassThemeData {
       tabBend: tabBend ?? this.tabBend,
       tabDispersion: tabDispersion ?? this.tabDispersion,
       textStyle: textStyle ?? this.textStyle,
+      mode: mode ?? this.mode,
     );
   }
 
@@ -334,7 +342,8 @@ class GlassThemeData {
         other.segmentBend == segmentBend &&
         other.tabBend == tabBend &&
         other.tabDispersion == tabDispersion &&
-        other.textStyle == textStyle;
+        other.textStyle == textStyle &&
+        other.mode == mode;
   }
 
   @override
@@ -343,6 +352,7 @@ class GlassThemeData {
         segmentTrack, segmentThumb, segmentLabel, segmentLens, surface, surfaceEdge, shadow, highlight,
         separator, destructive, track, rail, on, fill, ring, lensShine, rimShine, blur, saturation,
         glassBend, glassDispersion, switchBend, sliderBend, segmentBend, tabBend, tabDispersion, textStyle,
+        mode,
       ]);
 }
 
