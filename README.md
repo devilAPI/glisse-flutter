@@ -132,7 +132,11 @@ Controls that bend their *own* content need no backdrop at all: the switch's tra
 
 ## Platform notes
 
+- **Where it's been checked**: CI builds the gallery for Android, iOS, macOS, Windows, Linux and the web on every push. It was also run on Linux under both Skia and Impeller (OpenGL), on an Android phone under Skia, and in Chromium.
 - **Skia and the web** refract inside a `GlassBackdrop`, and frost outside one.
+- **Glass in glass**: in a `GlassBackdrop`, inner glass takes on the outer glass's frost and tint, so it looks as it would through it. On Impeller's live backdrop, inner glass reads the outer glass's layer directly. Glass inside an opacity layer (a fading route, a disabled control) can't place its backdrop, so for that moment it frosts instead.
+- **Moving glass**: glass that moves without repainting (in a scrolling list, or during a route transition) checks its position after each frame and repaints, so its refraction can trail by one frame.
+- **On the web**, CanvasKit reads the copied backdrop back from the GPU, which costs more than on native platforms. The gallery starts with its wallpaper still on the web for that reason.
 - **Impeller with OpenGL ES**: render targets are upside down there, and the shader corrects for it. One old Android device running Mesa's freedreno GLES driver drew no backdrop filters at all, Flutter's own blur included, while Skia on the same device rendered everything. If Impeller misbehaves on a device, try `--no-enable-impeller`.
 - **Performance**: a `GlassBackdrop` copies its background only after frames in which it changed, at the display's pixel ratio (`pixelRatio` lowers it). Glass over a background that changes every frame copies it every frame.
 - **Reduced motion**: when the platform asks for it (`MediaQuery.disableAnimations`), every spring lands at once.
