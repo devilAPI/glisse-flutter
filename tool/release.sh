@@ -34,10 +34,12 @@ flutter pub get > /dev/null
 dart format --output=none --set-exit-if-changed --line-length 120 lib test example/lib example/integration_test
 flutter analyze
 flutter test
-flutter pub publish --dry-run
 
-git add pubspec.yaml
+# pub warns about uncommitted files, so commit the version before the dry run.
+(cd example && flutter pub get > /dev/null)
+git add pubspec.yaml example/pubspec.lock
 git diff --cached --quiet || git commit -m "Release $version"
-git tag -a "v$version" -m "glisse $version"
+flutter pub publish --dry-run
+git tag -a "v$version" -m "glisse_flutter $version"
 git push origin HEAD "v$version"
 echo "Pushed v$version. Follow the release under the repository's Actions tab."
