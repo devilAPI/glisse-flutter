@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart' show CupertinoTheme;
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
 import '../rendering/liquid_glass.dart' show GlassMode;
@@ -358,8 +360,9 @@ class GlassThemeData {
 
 /// Sets the [GlassThemeData] for the widgets below it.
 ///
-/// Without one, Glisse widgets follow the ambient brightness: the nearest
-/// `Theme`'s, or else the platform's.
+/// Without one, Glisse widgets follow the ambient brightness: a
+/// [GlassBrightness]'s, else the app's Material `Theme`'s, else its
+/// `CupertinoTheme`'s, else the platform's.
 class GlassTheme extends InheritedWidget {
   const GlassTheme({super.key, required this.data, required super.child});
 
@@ -376,9 +379,16 @@ class GlassTheme extends InheritedWidget {
   static final GlassThemeData _light = GlassThemeData.light();
   static final GlassThemeData _dark = GlassThemeData.dark();
 
+  // The page's brightness: a GlassBrightness's, else the app's Material
+  // theme's, else its Cupertino theme's, else the platform's.
   static Brightness _ambientBrightness(BuildContext context) {
     final inherited = context.dependOnInheritedWidgetOfExactType<_GlassBrightness>();
     if (inherited != null) return inherited.brightness;
+    if (context.findAncestorWidgetOfExactType<Theme>() != null) return Theme.of(context).brightness;
+    final cupertino = context.findAncestorWidgetOfExactType<CupertinoTheme>() != null
+        ? CupertinoTheme.maybeBrightnessOf(context)
+        : null;
+    if (cupertino != null) return cupertino;
     return MediaQuery.maybePlatformBrightnessOf(context) ?? Brightness.light;
   }
 
