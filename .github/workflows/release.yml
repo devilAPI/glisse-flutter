@@ -4,7 +4,9 @@
 #    has a section for it, then analyzes and tests;
 # 2. builds the gallery for the web, Android, Linux, Windows and macOS;
 # 3. creates the GitHub release, with that CHANGELOG section as its notes and
-#    the builds attached;
+#    the builds attached. GitHub's macOS runners are sometimes short, so a
+#    macOS build that fails or never starts doesn't hold the release back:
+#    run the workflow by hand for the tag later to attach it;
 # 4. publishes the package to pub.dev, once that's turned on (below).
 #
 # Publishing to pub.dev is off until the repository variable PUB_DEV_PUBLISH
@@ -144,6 +146,8 @@ jobs:
 
   github-release:
     needs: [verify, build]
+    # Runs even if a build failed or was cancelled; the check below decides.
+    if: always() && needs.verify.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -155,6 +159,13 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Every build but macOS is there
+        run: |
+          ls -la dist
+          for suffix in web.zip android.apk linux-x64.tar.gz windows-x64.zip; do
+            [ -f "dist/glisse-gallery-$TAG-$suffix" ] || { echo "::error::The $suffix build is missing"; exit 1; }
+          done
+          [ -f "dist/glisse-gallery-$TAG-macos.zip" ] || echo "::warning::No macOS build; run this workflow by hand for $TAG to attach it later"
       - name: Notes from CHANGELOG.md
         run: |
           version='${{ needs.verify.outputs.version }}'
@@ -180,7 +191,7 @@ jobs:
 
   pub-dev:
     needs: [verify, github-release]
-    if: github.event_name == 'push' && vars.PUB_DEV_PUBLISH == 'true'
+    if: always() && needs.github-release.result == 'success' && github.event_name == 'push' && vars.PUB_DEV_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pub.dev
     permissions:
