@@ -122,6 +122,19 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Next month'), warnIfMissed: false);
     await frames(tester);
 
+    // The lenses over the whole page: drag the magnifier far, and a loupe
+    // over the wallpaper beside the content.
+    final pageLens = find.byWidgetPredicate((w) => w is GlassSwitch && w.semanticLabel == 'Lenses over the whole page');
+    await reveal(tester, pageLens);
+    await tester.tap(pageLens);
+    await frames(tester);
+    await tester.drag(find.byType(GlassMagnifier).last, const Offset(-300, -200));
+    await frames(tester);
+    await tester.longPressAt(const Offset(60, 400));
+    await frames(tester);
+    await tester.tap(pageLens);
+    await frames(tester);
+
     // The menu.
     // The top bar's menu, not the navigation section's own "More" button.
     final menus = find.byType(GlassMenu).evaluate().toList();

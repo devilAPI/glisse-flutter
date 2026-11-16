@@ -27,6 +27,10 @@ class GlassBackdrop extends StatefulWidget {
   final Widget background;
 
   /// The glass, and anything else over the background.
+  ///
+  /// The backdrop takes this child's size, so give it one that fills the
+  /// space (a [Stack] of positioned children, a [Center], a
+  /// `SizedBox.expand()`), or the background shrinks with it.
   final Widget child;
 
   /// The copy's resolution, in device pixels per logical pixel. Defaults to

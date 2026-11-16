@@ -1,5 +1,10 @@
-# Large images that the README links to on GitHub.
-doc/
+# The README's images load from GitHub; only the screenshots pub.dev
+# shows ship with the package. The guides in doc/ ship too.
+doc/*.png
+!doc/desktop_dark.png
+!doc/desktop_dark_pickers.png
+!doc/desktop_dark_extras.png
+!doc/desktop_light_controls.png
 test/goldens/
 test/failures/
 example/build/

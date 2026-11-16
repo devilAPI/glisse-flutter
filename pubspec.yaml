@@ -1,9 +1,9 @@
 name: glisse
 description: >-
-  Apple's Liquid Glass for Flutter, on every platform: refracting glass,
-  buttons, switches, sliders, segmented controls, tab bars, menus and more.
-  A port of the Glisse web library.
-version: 0.2.0
+  Apple's Liquid Glass for Flutter on every platform: refracting glass and
+  50+ widgets, from buttons, switches and sliders to pickers, menus and
+  sheets. A port of Glisse.
+version: 0.3.0
 homepage: https://github.com/devilAPI/glisse-flutter
 repository: https://github.com/devilAPI/glisse-flutter
 issue_tracker: https://github.com/devilAPI/glisse-flutter/issues
@@ -17,7 +17,7 @@ topics:
 
 environment:
   sdk: ^3.7.0
-  flutter: ">=3.27.0"
+  flutter: ">=3.29.0"
 
 dependencies:
   flutter:
@@ -27,7 +27,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
+
+screenshots:
+  - description: The gallery on a dark page, with glass buttons and switches over a wallpaper.
+    path: doc/desktop_dark.png
+  - description: Range slider, wheel pickers and the date and time pickers.
+    path: doc/desktop_dark_pickers.png
+  - description: Avatars, colour swatches, knobs and the calendar.
+    path: doc/desktop_dark_extras.png
+  - description: Glass controls on a light page.
+    path: doc/desktop_light_controls.png
 
 flutter:
   shaders:

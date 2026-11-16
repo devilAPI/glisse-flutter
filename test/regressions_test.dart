@@ -499,4 +499,87 @@ void main() {
       expect(controller().hasUsers, isFalse);
     });
   });
+
+  group('pressing and lenses', () {
+    // The scale of the glass around [finder]: the pressable's transform.
+    double scaleAround(WidgetTester tester, Finder finder) {
+      final pressable = find.ancestor(of: finder, matching: find.byType(GlassPressable)).first;
+      final transform = tester.widget<Transform>(
+        find.descendant(of: pressable, matching: find.byType(Transform)).first,
+      );
+      return transform.transform.getMaxScaleOnAxis();
+    }
+
+    testWidgets('pressing an item swells the whole group, as a button swells', (tester) async {
+      await setUpGlass(tester, size: const Size(500, 400));
+      await tester.pumpWidget(
+        scene(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlassToolbar(
+                children: [
+                  GlassToolbarItem(icon: const Icon(Icons.undo), semanticLabel: 'Undo', onPressed: () {}),
+                  GlassToolbarItem(icon: const Icon(Icons.redo), semanticLabel: 'Redo', onPressed: () {}),
+                ],
+              ),
+              GlassButtonGroup(
+                children: [
+                  GlassButtonGroupItem(icon: const Icon(Icons.format_bold), semanticLabel: 'Bold', onPressed: () {}),
+                  GlassButtonGroupItem(
+                    icon: const Icon(Icons.format_italic),
+                    semanticLabel: 'Italic',
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              GlassStepper(value: 2, onChanged: (_) {}, semanticLabel: 'Guests'),
+            ],
+          ),
+        ),
+      );
+      final increment = find.byWidgetPredicate((w) => w is Semantics && w.properties.label == 'Increment');
+      for (final target in [find.byIcon(Icons.undo), find.byIcon(Icons.format_bold), increment]) {
+        // The pressable nearest the item holds the group's glass: the glass,
+        // not just the item, is what grows.
+        final pressable = find.ancestor(of: target, matching: find.byType(GlassPressable)).first;
+        expect(find.descendant(of: pressable, matching: find.byType(LiquidGlassBox)), findsOneWidget);
+        final press = await tester.startGesture(tester.getCenter(target), kind: PointerDeviceKind.touch);
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(scaleAround(tester, target), greaterThan(1.005));
+        await press.up();
+        await settle(tester);
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the loupe follows the finger out of its region', (tester) async {
+      await setUpGlass(tester, size: const Size(400, 400));
+      const clip = Key('card');
+      // In a card that clips, as a section of a page does.
+      await tester.pumpWidget(
+        scene(
+          const ClipRect(
+            key: clip,
+            child: SizedBox(width: 120, height: 60, child: GlassLoupeRegion(child: SizedBox.expand())),
+          ),
+        ),
+      );
+      final press = await tester.startGesture(tester.getCenter(find.byType(GlassLoupeRegion)));
+      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
+      await press.moveTo(const Offset(60, 380));
+      await settle(tester);
+      final loupe = find.byType(LiquidGlassBox);
+      expect(loupe, findsOneWidget);
+      // It floats above the card, so the card's clip doesn't cut it off.
+      expect(find.descendant(of: find.byKey(clip), matching: loupe), findsNothing);
+      final centre = tester.getCenter(loupe);
+      expect(centre.dx, closeTo(60, 1));
+      expect(centre.dy, closeTo(380 - 72, 1));
+      await press.up();
+      await settle(tester);
+      expect(find.byType(LiquidGlassBox), findsNothing);
+    });
+  });
 }

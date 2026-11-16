@@ -9,6 +9,7 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 | ![Gallery, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light.png) | ![Gallery, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark.png) |
 | ![Controls, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light_scrolled.png) | ![Controls, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_scrolled.png) |
 | ![More controls, light](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_light_controls.png) | ![Navigation, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_navigation.png) |
+| ![Pickers, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_pickers.png) | ![Surfaces, dark](https://raw.githubusercontent.com/devilAPI/glisse-flutter/main/doc/desktop_dark_surfaces.png) |
 
 **Try it in the browser: https://devilapi.github.io/glisse-flutter/**
 
@@ -50,13 +51,11 @@ This is a port of [Glisse](https://glisse.kelvinzhang.ca) ([source](https://gith
 
 ## Install
 
-```yaml
-dependencies:
-  glisse:
-    git:
-      url: https://github.com/devilAPI/glisse-flutter
-      ref: v0.2.0
+```sh
+flutter pub add glisse
 ```
+
+Glisse needs Flutter 3.29 or newer. No setup is needed: the shader ships with the package.
 
 ## Use
 

@@ -35,6 +35,7 @@ class _GalleryPageState extends State<GalleryPage> {
   @override
   void dispose() {
     _scroll.dispose();
+    _pageLens.dispose();
     super.dispose();
   }
 
@@ -46,6 +47,9 @@ class _GalleryPageState extends State<GalleryPage> {
   // --dart-define=MODE=captured|backdropFilter|frost starts in that mode.
   GlassMode _mode = GlassMode.values.asNameMap()[const String.fromEnvironment('MODE')] ?? GlassMode.auto;
   late bool _animate = widget.animateWallpaper;
+
+  // Whether the magnifier and the loupe float over the whole page.
+  final ValueNotifier<bool> _pageLens = ValueNotifier<bool>(const bool.fromEnvironment('PAGE_LENS'));
 
   bool _wifi = true;
   bool _bluetooth = false;
@@ -72,46 +76,57 @@ class _GalleryPageState extends State<GalleryPage> {
       data: theme,
       child: Scaffold(
         backgroundColor: Colors.black,
+        // The outer backdrop copies the whole page, glass and all, for the
+        // lenses that float over it; it copies only while they're shown.
         body: GlassBackdrop(
-          background: Wallpaper(dark: widget.dark, animate: _animate),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: SafeArea(
-                  bottom: false,
-                  child: ListView(
-                    controller: _scroll,
-                    padding: const EdgeInsets.fromLTRB(16, 72, 16, 140),
-                    children: [
-                      Center(
-                        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 560), child: _content(theme)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(top: 0, left: 0, right: 0, child: SafeArea(child: _topBar(theme))),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 24,
-                child: SafeArea(
-                  top: false,
-                  child: Center(
-                    child: GlassTabBar<String>(
-                      items: const [
-                        GlassSegment(value: 'home', label: 'Home'),
-                        GlassSegment(value: 'browse', label: 'Browse'),
-                        GlassSegment(value: 'radio', label: 'Radio'),
-                        GlassSegment(value: 'library', label: 'Library'),
+          background: GlassBackdrop(
+            background: Wallpaper(dark: widget.dark, animate: _animate),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: SafeArea(
+                    bottom: false,
+                    child: ListView(
+                      controller: _scroll,
+                      padding: const EdgeInsets.fromLTRB(16, 72, 16, 140),
+                      children: [
+                        Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 560),
+                            child: _content(theme),
+                          ),
+                        ),
                       ],
-                      value: _tab,
-                      onChanged: (v) => setState(() => _tab = v),
                     ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(top: 0, left: 0, right: 0, child: SafeArea(child: _topBar(theme))),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 24,
+                  child: SafeArea(
+                    top: false,
+                    child: Center(
+                      child: GlassTabBar<String>(
+                        items: const [
+                          GlassSegment(value: 'home', label: 'Home'),
+                          GlassSegment(value: 'browse', label: 'Browse'),
+                          GlassSegment(value: 'radio', label: 'Radio'),
+                          GlassSegment(value: 'library', label: 'Library'),
+                        ],
+                        value: _tab,
+                        onChanged: (v) => setState(() => _tab = v),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _pageLens,
+            builder: (context, on, _) => on ? const _PageLenses() : const SizedBox.expand(),
           ),
         ),
       ),
@@ -316,7 +331,7 @@ class _GalleryPageState extends State<GalleryPage> {
         const _Section(title: 'Pickers', children: [PickersSection()]),
         const _Section(title: 'Surfaces', children: [SurfacesSection()]),
         const _Section(title: 'Extras', children: [ExtrasSection()]),
-        const _Section(title: 'Magnifier', children: [MagnifierSection()]),
+        _Section(title: 'Magnifier', children: [MagnifierSection(pageLens: _pageLens)]),
         _Section(
           title: 'Playground',
           children: [
@@ -428,6 +443,23 @@ class _Section extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A magnifier to drag anywhere over the page, and a loupe under a long
+/// press anywhere on it. Both magnify the whole page, glass and all.
+class _PageLenses extends StatelessWidget {
+  const _PageLenses();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Stack(
+      children: [
+        // Translucent: taps and scrolls still reach the page beneath.
+        Positioned.fill(child: GlassLoupeRegion(child: SizedBox.expand())),
+        Positioned.fill(child: SafeArea(child: GlassMagnifier(size: 150, magnification: 1.8))),
+      ],
     );
   }
 }

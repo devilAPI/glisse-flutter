@@ -5,7 +5,8 @@ import 'glass.dart';
 import 'pressable.dart';
 
 /// One icon in a [GlassToolbar] or [GlassButtonGroup]: a 44px circle with no
-/// glass of its own, lit while pressed, filled while [selected].
+/// glass of its own, lit while pressed, filled while [selected]. The glass
+/// around it swells and stretches under the finger, as one piece.
 class GlassToolbarItem extends StatefulWidget {
   /// Creates a toolbar item that shows [icon].
   const GlassToolbarItem({
@@ -77,11 +78,12 @@ class _GlassToolbarItemState extends State<GlassToolbarItem> {
       alignment: Alignment.center,
       child: IconTheme.merge(data: IconThemeData(color: ink, size: 22), child: widget.icon),
     );
-    item = GlassPressable(
-      enabled: _enabled,
-      onPressChanged: (state) {
-        if (state.pressed != _pressed) setState(() => _pressed = state.pressed);
+    item = Listener(
+      onPointerDown: (_) {
+        if (_enabled) setState(() => _pressed = true);
       },
+      onPointerUp: (_) => setState(() => _pressed = false),
+      onPointerCancel: (_) => setState(() => _pressed = false),
       child: item,
     );
     return Semantics(
@@ -125,7 +127,8 @@ class GlassToolbarSpacer extends StatelessWidget {
 }
 
 /// A floating capsule of glass holding tools, as iOS 26's bottom toolbars:
-/// [GlassToolbarItem]s inset 4px from its rim.
+/// [GlassToolbarItem]s inset 4px from its rim. Pressed anywhere, the whole
+/// capsule swells and stretches towards the finger, as a [GlassButton] does.
 ///
 /// Given a bounded width, a `Spacer` among the children pushes them apart.
 class GlassToolbar extends StatelessWidget {
@@ -158,10 +161,12 @@ class GlassToolbar extends StatelessWidget {
       if (i > 0 && spacing > 0) list.add(SizedBox.square(dimension: spacing));
       list.add(children[i]);
     }
-    return Glass(
-      borderRadius: double.infinity,
-      padding: EdgeInsets.all(padding),
-      child: Flex(direction: direction, mainAxisSize: grows ? MainAxisSize.max : MainAxisSize.min, children: list),
+    return GlassPressable(
+      child: Glass(
+        borderRadius: double.infinity,
+        padding: EdgeInsets.all(padding),
+        child: Flex(direction: direction, mainAxisSize: grows ? MainAxisSize.max : MainAxisSize.min, children: list),
+      ),
     );
   }
 }

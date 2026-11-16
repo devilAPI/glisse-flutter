@@ -302,9 +302,9 @@ class _GlassCalendarState extends State<GlassCalendar> {
       builder: (context, constraints) {
         final width = constraints.hasBoundedWidth ? math.min(constraints.maxWidth, widget.maxWidth) : 320.0;
         const padding = 12.0;
-        final cell = (width - 2 * padding) / 7;
+        final cell = math.max(0.0, (width - 2 * padding) / 7);
         final rowHeight = math.min(cell, 44.0);
-        final circle = math.min(36.0, rowHeight - 4);
+        final circle = math.max(0.0, math.min(36.0, rowHeight - 4));
 
         final leading = (DateTime(_month.year, _month.month).weekday - widget.firstDayOfWeek + 7) % 7;
         final focused = _ring ? _cursor : null;

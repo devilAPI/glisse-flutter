@@ -1,3 +1,27 @@
+## 0.3.0
+
+The first release on pub.dev.
+
+### Pressing
+
+* Glass presses the same way everywhere: the whole bubble swells and stretches towards a finger. `GlassToolbar`, `GlassButtonGroup` and `GlassStepper` now press as one capsule, as a `GlassButton` does, while the item under the finger lights up. Before, a toolbar item moved inside a still capsule, and button groups and steppers didn't move at all. Rows on a surface, such as list tiles, sidebar items and menu rows, light up as before.
+
+### Lenses
+
+* `GlassLoupeRegion`'s loupe floats in the app's overlay. It follows the finger anywhere on screen, and the region's ancestors no longer clip it.
+* In the gallery, a switch floats the magnifier and the loupe over the whole page. They magnify everything on it, glass included, through a second `GlassBackdrop` that copies the page only while they're shown.
+
+### Fixes
+
+* `GlassCalendar` no longer fails an assertion when it gets almost no width, as when a window opens.
+* A new test squeezes every widget to zero and near-zero sizes, and fails on anything worse than an overflow.
+
+### Package
+
+* Needs Flutter 3.29 (Dart 3.7) or newer: `ImageFilter.shader` arrived in 3.29.
+* Screenshots and the guides ship with the package. The example has a README with a minimal app, and `flutter_lints` is on 6.0.
+* A GitHub Actions workflow publishes to pub.dev when a version tag is pushed.
+
 ## 0.2.0
 
 ### New widgets

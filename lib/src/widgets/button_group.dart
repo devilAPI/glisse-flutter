@@ -5,9 +5,11 @@ import '../rendering/liquid_glass.dart';
 import 'button.dart';
 import 'control_utils.dart';
 import 'hairline.dart';
+import 'pressable.dart';
 
 /// Several buttons joined into one capsule of glass, as iOS 26's toolbars
-/// group them. Each [GlassButtonGroupItem] lights up on its own when pressed.
+/// group them. Each [GlassButtonGroupItem] lights up on its own when pressed,
+/// and the capsule swells and stretches under the finger as one piece.
 class GlassButtonGroup extends StatelessWidget {
   /// Creates a group of buttons in one capsule.
   const GlassButtonGroup({super.key, required this.children, this.separators = false, this.height = 40});
@@ -33,14 +35,16 @@ class GlassButtonGroup extends StatelessWidget {
     }
     return _GroupScope(
       height: height,
-      child: LiquidGlassBox(
-        radius: height / 2,
-        style: themedGlass(theme),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(height / 2),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Row(mainAxisSize: MainAxisSize.min, children: row),
+      child: GlassPressable(
+        child: LiquidGlassBox(
+          radius: height / 2,
+          style: themedGlass(theme),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(height / 2),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Row(mainAxisSize: MainAxisSize.min, children: row),
+            ),
           ),
         ),
       ),

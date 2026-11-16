@@ -4,6 +4,7 @@ import '../foundation/spring.dart';
 import '../foundation/theme.dart';
 import '../rendering/lens.dart';
 import '../rendering/liquid_glass.dart';
+import 'overlay_scope.dart';
 
 /// The glass of a magnifying lens: clear, unfrosted, with a lit rim that
 /// bends the edge of what it magnifies.
@@ -200,6 +201,9 @@ class _GlassMagnifierState extends State<GlassMagnifier> with SingleTickerProvid
 /// text loupe: a glass capsule a little above the finger, magnifying what's
 /// under the finger.
 ///
+/// The press must start in the region, but the loupe then floats in the
+/// app's overlay and follows the finger anywhere on screen.
+///
 /// Like [GlassMagnifier], it magnifies a [GlassBackdrop]'s background, or
 /// on Impeller the live backdrop, which includes [child].
 class GlassLoupeRegion extends StatefulWidget {
@@ -229,8 +233,12 @@ class GlassLoupeRegion extends StatefulWidget {
 }
 
 class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerProviderStateMixin {
+  // Where the finger is, in the overlay's coordinates when the loupe floats
+  // in one, else in the region's.
   Offset? _at;
-  late final GlassSpring _shown = GlassSpring(vsync: this, stiffness: 520, damping: 34);
+  OverlayEntry? _entry;
+  GlassOverlayContext? _carried;
+  late final GlassSpring _shown = GlassSpring(vsync: this, stiffness: 520, damping: 34)..addListener(_onShown);
 
   @override
   void didChangeDependencies() {
@@ -240,16 +248,83 @@ class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerPr
 
   @override
   void dispose() {
+    _removeEntry();
     _shown.dispose();
     super.dispose();
   }
 
-  void _show(Offset local) {
-    setState(() => _at = local);
+  void _onShown() {
+    if (_shown.value <= 0.001 && !_shown.isMoving && _shown.target == 0) _removeEntry();
+  }
+
+  void _removeEntry() {
+    final entry = _entry;
+    _entry = null;
+    entry?.remove();
+    entry?.dispose();
+  }
+
+  // The finger in the overlay's coordinates, or null without an overlay.
+  Offset? _inOverlay(Offset global) {
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final box = overlay?.context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return null;
+    return box.globalToLocal(global);
+  }
+
+  void _show(LongPressStartDetails details) {
+    final floating = _inOverlay(details.globalPosition);
+    if (floating != null && _entry == null) {
+      // The loupe floats over everything, so the region's bounds and its
+      // ancestors' clips don't hold it in.
+      _carried = GlassOverlayContext.of(context);
+      _entry = OverlayEntry(builder: (context) => _carried!.wrap(_floatingLoupe()));
+      Overlay.of(context, rootOverlay: true).insert(_entry!);
+    }
+    setState(() => _at = floating ?? details.localPosition);
+    _entry?.markNeedsBuild();
     _shown.set(1);
   }
 
+  void _move(LongPressMoveUpdateDetails details) {
+    setState(() => _at = _entry != null ? (_inOverlay(details.globalPosition) ?? _at) : details.localPosition);
+    _entry?.markNeedsBuild();
+  }
+
   void _hide() => _shown.set(0);
+
+  Widget _loupe() => _LensGlass(
+    size: widget.size,
+    radius: double.infinity,
+    magnification: widget.magnification,
+    // Held above the finger, it shows what's under the finger.
+    focus: Offset(0, widget.lift),
+  );
+
+  // The loupe at [_at], rising and fading in with [_shown].
+  Widget _placed() {
+    return AnimatedBuilder(
+      animation: _shown,
+      builder: (context, child) {
+        final t = _shown.value;
+        final at = _at;
+        if (t <= 0.001 || at == null) return const SizedBox.shrink();
+        return Positioned(
+          left: at.dx - widget.size.width / 2,
+          top: at.dy - widget.lift - widget.size.height / 2,
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: t.clamp(0.0, 1.0),
+              child: Transform.scale(scale: 0.6 + 0.4 * t, alignment: Alignment.bottomCenter, child: child),
+            ),
+          ),
+        );
+      },
+      child: _loupe(),
+    );
+  }
+
+  Widget _floatingLoupe() => Stack(children: [_placed()]);
 
   @override
   Widget build(BuildContext context) {
@@ -257,40 +332,16 @@ class _GlassLoupeRegionState extends State<GlassLoupeRegion> with SingleTickerPr
       // Long presses anywhere in the region count, over the child's content
       // or not, and still reach the child.
       behavior: HitTestBehavior.translucent,
-      onLongPressStart: (d) => _show(d.localPosition),
-      onLongPressMoveUpdate: (d) => setState(() => _at = d.localPosition),
+      onLongPressStart: _show,
+      onLongPressMoveUpdate: _move,
       onLongPressEnd: (_) => _hide(),
       onLongPressCancel: _hide,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           widget.child,
-          if (_at != null)
-            AnimatedBuilder(
-              animation: _shown,
-              builder: (context, child) {
-                final t = _shown.value;
-                if (t <= 0.001) return const SizedBox.shrink();
-                final at = _at!;
-                return Positioned(
-                  left: at.dx - widget.size.width / 2,
-                  top: at.dy - widget.lift - widget.size.height / 2,
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: t.clamp(0.0, 1.0),
-                      child: Transform.scale(scale: 0.6 + 0.4 * t, alignment: Alignment.bottomCenter, child: child),
-                    ),
-                  ),
-                );
-              },
-              child: _LensGlass(
-                size: widget.size,
-                radius: double.infinity,
-                magnification: widget.magnification,
-                // Held above the finger, it shows what's under the finger.
-                focus: Offset(0, widget.lift),
-              ),
-            ),
+          // Without an overlay to float in, the loupe stays in the region.
+          if (_entry == null && _at != null) _placed(),
         ],
       ),
     );

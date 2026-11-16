@@ -333,7 +333,7 @@ GlassNavigationBar(
 
 ### `GlassToolbar`
 
-A floating row (or column) of icon buttons.
+A floating row (or column) of icon buttons. Pressed anywhere, the whole capsule swells and stretches towards the finger, as a button does; `GlassButtonGroup` and `GlassStepper` press the same way.
 
 ```dart
 GlassToolbar(children: [
@@ -517,7 +517,7 @@ const GlassMagnifier(size: 140, magnification: 1.8, child: Text('Small print'))
 
 ### `GlassLoupeRegion`
 
-A loupe that rises above the finger on a long press, as iOS shows over text.
+A loupe that rises above the finger on a long press, as iOS shows over text. The press starts in the region, then the loupe floats over everything and follows the finger anywhere.
 
 ```dart
 const GlassLoupeRegion(child: Text('Press and hold to look closer'))

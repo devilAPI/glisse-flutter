@@ -167,6 +167,42 @@ void main() {
     }
   }
 
+  testWidgets('every widget squeezed to nothing lays out without failing an assertion', (tester) async {
+    await setUpGlass(tester, size: const Size(400, 400));
+    final failures = <String>[];
+    for (final size in const [Size(0, 0), Size(6, 6), Size(30, double.infinity), Size(double.infinity, 6)]) {
+      final count = everything().length;
+      for (var i = 0; i < count; i++) {
+        final widget = everything()[i];
+        final previous = FlutterError.onError;
+        // Overflow is fair when a control is given no room; anything else,
+        // such as negative sizes or a throw, isn't.
+        FlutterError.onError = (details) {
+          final text = details.exceptionAsString();
+          if (!text.contains('overflowed')) failures.add('${widget.runtimeType} at $size: ${text.split('\n').first}');
+        };
+        try {
+          await tester.pumpWidget(
+            scene(
+              UnconstrainedBox(
+                child: SizedBox(
+                  width: size.width.isFinite ? size.width : null,
+                  height: size.height.isFinite ? size.height : null,
+                  child: widget,
+                ),
+              ),
+            ),
+          );
+          await tester.pump(const Duration(milliseconds: 16));
+        } finally {
+          FlutterError.onError = previous;
+        }
+      }
+    }
+    await tester.pumpWidget(const SizedBox());
+    expect(failures, isEmpty);
+  });
+
   testWidgets('tiny and zero sizes do not throw', (tester) async {
     await setUpGlass(tester, size: const Size(400, 400), ratio: 3);
     await tester.pumpWidget(

@@ -10,6 +10,7 @@ import 'button.dart';
 import 'control_utils.dart';
 import 'input.dart' show GlassGlyph;
 import 'hairline.dart';
+import 'pressable.dart';
 
 /// An iOS stepper on glass: a capsule split into − and +, each lighting up
 /// under a finger. Held, a half repeats, faster the longer it's held.
@@ -159,20 +160,24 @@ class _GlassStepperState extends State<GlassStepper> {
   @override
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
-    final stepper = LiquidGlassBox(
-      radius: _height / 2,
-      style: themedGlass(theme),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(_height / 2),
-        child: SizedBox(
-          width: _width,
-          height: _height,
-          child: Row(
-            children: [
-              _half(theme, -1),
-              Container(width: hairline(context), height: _height * 0.55, color: theme.separator),
-              _half(theme, 1),
-            ],
+    // The capsule presses as one piece; the half under the finger lights up.
+    final stepper = GlassPressable(
+      enabled: _enabled,
+      child: LiquidGlassBox(
+        radius: _height / 2,
+        style: themedGlass(theme),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_height / 2),
+          child: SizedBox(
+            width: _width,
+            height: _height,
+            child: Row(
+              children: [
+                _half(theme, -1),
+                Container(width: hairline(context), height: _height * 0.55, color: theme.separator),
+                _half(theme, 1),
+              ],
+            ),
           ),
         ),
       ),
