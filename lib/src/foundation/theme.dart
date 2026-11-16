@@ -2,7 +2,27 @@ import 'package:flutter/cupertino.dart' show CupertinoTheme;
 import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
+
 import '../rendering/liquid_glass.dart' show GlassMode;
+
+/// How much work glass does to look its best.
+enum GlassQuality {
+  /// [medium] on the web and on phones, where every frame of glass costs
+  /// more, and [high] on desktops.
+  auto,
+
+  /// The fewest samples: a one-ring frost, no colour split at the rim, and
+  /// backdrop copies at one pixel per logical pixel.
+  low,
+
+  /// A two-ring frost and copies at no more than two pixels per logical pixel.
+  medium,
+
+  /// Glisse's full look: a three-ring frost, and copies at the display's
+  /// resolution, up to three.
+  high,
+}
 
 /// The colours and tuning every Glisse widget reads, as Glisse's CSS custom
 /// properties (`--lg-*`) set them for a light and a dark page.
@@ -48,6 +68,7 @@ class GlassThemeData {
     this.tabDispersion,
     this.textStyle = const TextStyle(fontSize: 14, height: 1.2, letterSpacing: -0.1),
     this.mode = GlassMode.auto,
+    this.quality = GlassQuality.auto,
   });
 
   /// Glisse on a light page.
@@ -231,6 +252,18 @@ class GlassThemeData {
   /// How glass reads what's behind it, for glass that doesn't say.
   final GlassMode mode;
 
+  /// How much work glass does to look its best; see [GlassQuality].
+  final GlassQuality quality;
+
+  /// [quality], with [GlassQuality.auto] settled for this platform.
+  GlassQuality get effectiveQuality => switch (quality) {
+    GlassQuality.auto =>
+      kIsWeb || defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS
+          ? GlassQuality.medium
+          : GlassQuality.high,
+    final other => other,
+  };
+
   /// Whether [brightness] is dark.
   bool get isDark => brightness == Brightness.dark;
 
@@ -274,6 +307,7 @@ class GlassThemeData {
     double? tabDispersion,
     TextStyle? textStyle,
     GlassMode? mode,
+    GlassQuality? quality,
   }) {
     return GlassThemeData(
       brightness: brightness ?? this.brightness,
@@ -314,6 +348,7 @@ class GlassThemeData {
       tabDispersion: tabDispersion ?? this.tabDispersion,
       textStyle: textStyle ?? this.textStyle,
       mode: mode ?? this.mode,
+      quality: quality ?? this.quality,
     );
   }
 
@@ -357,7 +392,8 @@ class GlassThemeData {
         other.tabBend == tabBend &&
         other.tabDispersion == tabDispersion &&
         other.textStyle == textStyle &&
-        other.mode == mode;
+        other.mode == mode &&
+        other.quality == quality;
   }
 
   @override
@@ -366,7 +402,7 @@ class GlassThemeData {
     segmentTrack, segmentThumb, segmentLabel, segmentLens, surface, surfaceEdge, shadow, highlight,
     separator, destructive, track, rail, on, fill, ring, lensShine, rimShine, blur, saturation,
     glassBend, glassDispersion, switchBend, sliderBend, segmentBend, tabBend, tabDispersion, textStyle,
-    mode,
+    mode, quality,
   ]);
 }
 

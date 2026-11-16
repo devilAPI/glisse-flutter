@@ -1,3 +1,19 @@
+## 0.4.0
+
+### Performance
+
+* **Frost from a shared blurred copy.** Glass over a `GlassBackdrop` used to blur the backdrop itself, with 23 texture samples a pixel, and up to 92 near the rim where the colours split. The backdrop now makes one blurred copy per change, shared by every glass that frosts as much (`GlassBackdropController.frosted`), and glass samples it once a pixel, or up to four times at the rim.
+* **Glass repaints without its content.** Glass that moves over its backdrop, as in a scrolling list, has to repaint to aim its refraction. Its content now sits behind a repaint boundary of its own and isn't re-recorded. Scrolling the gallery in Firefox spent about 20% less time building frames.
+* **Less shader work.** The shader skips the unbent sample where the rim bends fully, and takes one sample instead of three where colours don't split.
+* **`GlassQuality`.** `GlassThemeData.quality` is `low`, `medium`, `high` or `auto` (medium on the web and phones, high on desktops). It sets the frost's rings, the colour split, and the resolution of backdrop copies. The gallery's playground has a picker for it.
+* The gallery's wallpaper starts still on every platform; an animated background has to be copied every frame.
+* On Linux, scrolling the gallery over its animated wallpaper went from 6.7 ms to 6.1 ms raster on average (12.6 to 10.9 ms at the 90th percentile, 20.8 to 17.5 ms at the 99th).
+
+### Controls
+
+* `GlassRangeSlider`'s knobs lift into lenses that magnify the track, as `GlassSlider`'s thumb does.
+* `GlassTabBar` and `GlassSegmentedControl` swell and stretch towards the finger as a whole bar, as buttons and toolbars do.
+
 ## 0.3.0
 
 The first release on pub.dev.

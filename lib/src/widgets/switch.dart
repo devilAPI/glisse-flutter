@@ -407,6 +407,7 @@ class _SwitchPainter extends CustomPainter {
         image: image,
         imageRect: imageRect,
         draw: LensDraw(
+          quality: theme.effectiveQuality,
           rect: lens,
           shape: shape,
           radius: double.infinity,

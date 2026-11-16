@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:glisse/glisse.dart';
 
@@ -17,7 +16,7 @@ import 'wallpaper.dart';
 class GalleryPage extends StatefulWidget {
   // On the web, copying an animating backdrop each frame reads it back from
   // the GPU, so the wallpaper starts still there; the menu animates it.
-  const GalleryPage({super.key, required this.dark, required this.onToggleTheme, this.animateWallpaper = !kIsWeb});
+  const GalleryPage({super.key, required this.dark, required this.onToggleTheme, this.animateWallpaper = false});
 
   final bool dark;
   final VoidCallback onToggleTheme;
@@ -46,6 +45,7 @@ class _GalleryPageState extends State<GalleryPage> {
   double _rim = 0.3;
   // --dart-define=MODE=captured|backdropFilter|frost starts in that mode.
   GlassMode _mode = GlassMode.values.asNameMap()[const String.fromEnvironment('MODE')] ?? GlassMode.auto;
+  GlassQuality _quality = GlassQuality.values.asNameMap()[const String.fromEnvironment('QUALITY')] ?? GlassQuality.auto;
   late bool _animate = widget.animateWallpaper;
 
   // Whether the magnifier and the loupe float over the whole page.
@@ -71,6 +71,7 @@ class _GalleryPageState extends State<GalleryPage> {
       blur: _blur,
       rimShine: widget.dark ? _rim * 0.43 : _rim,
       mode: _mode,
+      quality: _quality,
     );
     return GlassTheme(
       data: theme,
@@ -335,6 +336,24 @@ class _GalleryPageState extends State<GalleryPage> {
         _Section(
           title: 'Playground',
           children: [
+            Text('Quality', style: label),
+            const SizedBox(height: 8),
+            Center(
+              child: GlassSegmentedControl<GlassQuality>(
+                semanticLabel: 'Quality',
+                segments: const [
+                  GlassSegment(value: GlassQuality.auto, label: 'Auto'),
+                  GlassSegment(value: GlassQuality.low, label: 'Low'),
+                  GlassSegment(value: GlassQuality.medium, label: 'Medium'),
+                  GlassSegment(value: GlassQuality.high, label: 'High'),
+                ],
+                value: _quality,
+                onChanged: (v) => setState(() => _quality = v),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('How glass reads the page', style: label),
+            const SizedBox(height: 8),
             Center(
               child: GlassSegmentedControl<GlassMode>(
                 segments: const [

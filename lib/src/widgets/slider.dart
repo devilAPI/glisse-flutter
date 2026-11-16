@@ -417,6 +417,7 @@ class _SliderPainter extends CustomPainter {
       final shape = thumb.size;
       final reach = spec.reachOf(shape, strengthOverride: theme.sliderBend, dark: theme.isDark) * scale;
       final draw = LensDraw(
+        quality: theme.effectiveQuality,
         rect: lens,
         shape: shape,
         radius: double.infinity,

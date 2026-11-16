@@ -19,7 +19,7 @@ Glisse draws its glass with SVG displacement maps. Flutter has no SVG filters, s
 
 - **Refraction.** Every pixel within the bezel is displaced along the normal to the rim. The amount comes from Glisse's bezel profile, refracted by Snell's law with Glisse's normaliser. Dome lenses, such as the switch and slider thumbs, add Glisse's dome arc and splay. The sample is taken at `p − clamp(dir·amount, −1, 1)·0.5·reach`, as in Glisse's `refraction.ts`.
 - **Dispersion.** The red, green and blue channels are displaced by 1 + 0.2d, 1 + 0.1d and 1 times the amount, so colours split at the rim.
-- **Frost.** The frost takes three rings of taps, rotated per pixel by interleaved gradient noise. Their radius is scaled by σ / 0.770, so a frost of σ matches CSS `blur(σ)`. A saturation matrix and the tint follow.
+- **Frost.** Over a `GlassBackdrop`, glass samples a blurred copy that the backdrop makes once per change and shares between all glass that frosts as much (`GlassBackdropController.frosted`), so the frost costs one sample a pixel. Elsewhere, the frost takes up to three rings of taps (fewer at lower `GlassQuality`), rotated per pixel by interleaved gradient noise. Their radius is scaled by σ / 0.770, so a frost of σ matches CSS `blur(σ)`. A saturation matrix and the tint follow.
 - **Light.** Glisse's rim light is used, with its glow, its rim and its facing term. A shine above zero adds light and one below zero multiplies.
 - **Painted rim.** The edge line and the selection rims are drawn here, with Glisse's widths.
 - **Magnification.** It is used by the slider, the magnifier and the loupe.

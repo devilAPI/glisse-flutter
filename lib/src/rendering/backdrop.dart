@@ -4,6 +4,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../foundation/theme.dart';
+
 /// Content that glass above it refracts, on every platform.
 ///
 /// Glass can bend only what it can read. Impeller (iOS, Android, macOS) lets
@@ -65,7 +67,16 @@ class _GlassBackdropState extends State<GlassBackdrop> {
 
   @override
   Widget build(BuildContext context) {
-    final ratio = widget.pixelRatio ?? (MediaQuery.maybeDevicePixelRatioOf(context) ?? 1).clamp(1.0, 3.0);
+    // The copy's resolution follows the theme's quality: glass frosts it,
+    // so fewer pixels than the display's are rarely seen, and every pixel is
+    // copied (and on the web read back from the GPU) each time it changes.
+    final display = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
+    final most = switch (GlassTheme.of(context).effectiveQuality) {
+      GlassQuality.low => 1.0,
+      GlassQuality.medium => 2.0,
+      GlassQuality.high || GlassQuality.auto => 3.0,
+    };
+    final ratio = widget.pixelRatio ?? display.clamp(1.0, most);
     _controller._enabled = widget.enabled;
     return _GlassBackdropScope(
       controller: widget.enabled ? _controller : null,
@@ -103,6 +114,9 @@ class GlassBackdropController extends ChangeNotifier {
   GlassBackdropController._();
 
   ui.Image? _image;
+  double _ratio = 1;
+  // Frosted versions of the copy, by their blur in quarter logical px.
+  final Map<int, ui.Image> _frosted = {};
   RenderGlassCapture? _render;
   bool _enabled = true;
   int _users = 0;
@@ -118,6 +132,36 @@ class GlassBackdropController extends ChangeNotifier {
   /// The background's render box, for mapping glass into it.
   RenderBox? get renderBox => _render;
 
+  /// The copy, blurred by [sigma] logical px, made once per copy and shared
+  /// by every glass that frosts by that much. Glass samples it once per
+  /// pixel rather than blurring the copy itself, which costs it dozens.
+  ui.Image? frosted(double sigma) {
+    final image = this.image;
+    if (image == null || sigma < 0.25) return image;
+    final key = (sigma * 4).round();
+    final hit = _frosted[key];
+    if (hit != null) return hit;
+    if (_frosted.length >= 4) _clearFrosted();
+    final deviation = key / 4 * _ratio;
+    final recorder = ui.PictureRecorder();
+    Canvas(recorder).drawImage(
+      image,
+      Offset.zero,
+      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: deviation, sigmaY: deviation, tileMode: TileMode.clamp),
+    );
+    final picture = recorder.endRecording();
+    final frosted = picture.toImageSync(image.width, image.height);
+    picture.dispose();
+    return _frosted[key] = frosted;
+  }
+
+  void _clearFrosted() {
+    for (final image in _frosted.values) {
+      image.dispose();
+    }
+    _frosted.clear();
+  }
+
   /// Glass reading the copy registers, so no copy is taken while none is.
   void addUser() {
     _users++;
@@ -130,13 +174,15 @@ class GlassBackdropController extends ChangeNotifier {
   /// Whether any glass is reading the copy.
   bool get hasUsers => _users > 0;
 
-  void _setImage(ui.Image image) {
+  void _setImage(ui.Image image, double ratio) {
     if (_disposed) {
       image.dispose();
       return;
     }
     final old = _image;
     _image = image;
+    _ratio = ratio;
+    _clearFrosted();
     notifyListeners();
     // A picture already recorded with the old copy keeps its own reference.
     old?.dispose();
@@ -144,6 +190,7 @@ class GlassBackdropController extends ChangeNotifier {
 
   void _dispose() {
     _disposed = true;
+    _clearFrosted();
     _image?.dispose();
     _image = null;
     dispose();
@@ -243,7 +290,7 @@ class RenderGlassCapture extends RenderProxyBox {
       _capturing = true;
       final image = layer.toImageSync(Offset.zero & size, pixelRatio: _pixelRatio);
       _capturing = false;
-      _controller._setImage(image);
+      _controller._setImage(image, _pixelRatio);
     } catch (error, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(

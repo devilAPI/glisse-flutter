@@ -72,6 +72,7 @@ GlassTheme(
 | `switchBend`, `sliderBend`, `segmentBend`, `tabBend`, `tabDispersion` | Per-widget overrides, as Glisse's `--lg-*-bend` | Glisse's |
 | `textStyle` | The base style of labels on glass | 14px |
 | `mode` | How glass reads what's behind it, for glass that doesn't say (see the README) | `GlassMode.auto` |
+| `quality` | How much work glass does: `low`, `medium`, `high`, or `auto` (medium on the web and phones, high on desktops). See below | `GlassQuality.auto` |
 
 ## One pane at a time
 
@@ -88,3 +89,20 @@ Glass(
 ```
 
 For a fully custom pane, build a `LiquidGlassBox` with a `GlassStyle`.
+
+## Quality
+
+`GlassThemeData.quality` trades a little of the look for speed:
+
+| | Frost | Colour split at the rim | Backdrop copy |
+| --- | --- | --- | --- |
+| `high` | three rings of taps | yes | at the display's resolution, up to 3× |
+| `medium` | two rings | yes | up to 2× |
+| `low` | one ring | no | 1× |
+
+`auto`, the default, is `medium` on the web and phones and `high` on desktops. Glass over a `GlassBackdrop` frosts from a blurred copy that the backdrop makes once per change, so there the frost costs one sample a pixel at any quality. The rings matter for glass over Impeller's live backdrop and for controls' lenses.
+
+```dart
+GlassTheme(data: GlassThemeData.dark().copyWith(quality: GlassQuality.low), child: page)
+```
+

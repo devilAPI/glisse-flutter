@@ -1,7 +1,10 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glisse/glisse.dart';
+import 'package:glisse/src/rendering/content_lens.dart' show debugImagesRecorded;
+import 'package:glisse/src/widgets/thumb_frost.dart';
 
 import 'helpers.dart';
 
@@ -277,6 +280,131 @@ void main() {
       expect(start, containsSemantics(hasIncreaseAction: false, hasDecreaseAction: true));
       handle.dispose();
     });
+
+    testWidgets('a held knob lifts into a lens, and settles when let go', (tester) async {
+      await setUpGlass(tester);
+      var values = const GlassRange(0.2, 0.6);
+      await tester.pumpWidget(scene(_range(() => values, (v) => values = v)));
+      expect(find.byType(ThumbFrost), findsNothing);
+      final before = debugImagesRecorded;
+      final press = await tester.startGesture(_at(tester, 0.6));
+      await settle(tester);
+      // Only the held knob lifts, frosting the page under its lens, which
+      // shows the track it records.
+      final frost = tester.widget<ThumbFrost>(find.byType(ThumbFrost));
+      expect(frost.lift, closeTo(1, 0.01));
+      expect(
+        frost.rect.center.dx,
+        closeTo(_at(tester, 0.6).dx - tester.getTopLeft(find.byType(GlassRangeSlider)).dx, 1),
+      );
+      expect(frost.rect.size, const Size(60, 40));
+      expect(debugImagesRecorded - before, inInclusiveRange(1, 2));
+      await press.up();
+      await settle(tester);
+      expect(find.byType(ThumbFrost), findsNothing);
+      expect(values, const GlassRange(0.2, 0.6));
+    });
+
+    testWidgets('reduced motion lifts a knob at once', (tester) async {
+      await setUpGlass(tester);
+      var values = const GlassRange(0.2, 0.6);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: scene(_range(() => values, (v) => values = v)),
+        ),
+      );
+      final press = await tester.startGesture(_at(tester, 0.2));
+      await tester.pump();
+      expect(tester.widget<ThumbFrost>(find.byType(ThumbFrost)).lift, 1);
+      await press.up();
+      await tester.pump();
+      expect(find.byType(ThumbFrost), findsNothing);
+    });
+
+    // On the web each recording reads the GPU back synchronously, so a knob
+    // dragged slowly must not record its lens's content every frame.
+    testWidgets('dragging a knob slowly records nothing new', (tester) async {
+      await setUpGlass(tester, size: const Size(500, 300));
+      var values = const GlassRange(0.2, 0.6);
+      await tester.pumpWidget(scene(_range(() => values, (v) => values = v)));
+      for (final (knob, from, step) in [('end', 0.6, 0.5), ('start', 0.2, -0.5)]) {
+        final drag = await tester.startGesture(_at(tester, from), kind: PointerDeviceKind.touch);
+        await tester.pump(const Duration(milliseconds: 100));
+        // Lifting may record, once the lens is up.
+        await drag.moveBy(Offset(step * 24, 0));
+        await settle(tester);
+        final before = debugImagesRecorded;
+        for (var i = 0; i < 60; i++) {
+          await drag.moveBy(Offset(step, 0));
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        expect(debugImagesRecorded - before, lessThanOrEqualTo(2), reason: 'recorded while dragging the $knob knob');
+        await drag.up();
+        await settle(tester);
+      }
+      expect(values.start, closeTo(0.2 - 42 / 200, 0.01));
+      expect(values.end, closeTo(0.6 + 42 / 200, 0.01));
+    });
+
+    for (final dark in [false, true]) {
+      testWidgets('looks right held ${dark ? 'dark' : 'light'}', (tester) async {
+        await setUpGlass(tester, size: const Size(300, 220), ratio: 3);
+        var held = const GlassRange(0.2, 0.45);
+        var met = const GlassRange(0.5, 0.5);
+        await tester.pumpWidget(
+          scene(
+            dark: dark,
+            SizedBox(
+              width: 240,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GlassRangeSlider(values: const GlassRange(0, 0.6), onChanged: (_) {}),
+                  const SizedBox(height: 8),
+                  StatefulBuilder(
+                    builder:
+                        (context, setState) => GlassRangeSlider(
+                          key: const Key('held'),
+                          values: held,
+                          onChanged: (v) => setState(() => held = v),
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  StatefulBuilder(
+                    builder:
+                        (context, setState) => GlassRangeSlider(
+                          key: const Key('met'),
+                          values: met,
+                          onChanged: (v) => setState(() => met = v),
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  const GlassRangeSlider(values: GlassRange(0.3, 0.8), onChanged: null),
+                ],
+              ),
+            ),
+          ),
+        );
+        await settle(tester);
+        final box = tester.getRect(find.byKey(const Key('held')));
+        final gesture = await tester.startGesture(Offset(box.left + 18 + (box.width - 36) * 0.45, box.center.dy));
+        await gesture.moveBy(const Offset(20, 0));
+        await gesture.moveBy(const Offset(10, 0));
+        // Knobs that met, parted a little: the lifted one's lens over the other.
+        final together = await tester.startGesture(tester.getCenter(find.byKey(const Key('met'))));
+        await together.moveBy(const Offset(20, 0));
+        await together.moveBy(const Offset(-8, 0));
+        await settle(tester);
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('goldens/range_slider_${dark ? 'dark' : 'light'}.png'),
+        );
+        await gesture.up();
+        await together.up();
+        await settle(tester);
+      });
+    }
   });
 
   group('GlassPicker', () {

@@ -141,7 +141,7 @@ void main() {
     final top = menus.firstWhere((e) => (e.renderObject! as RenderBox).localToGlobal(Offset.zero).dy < 80);
     await tester.tap(find.byElementPredicate((e) => e == top));
     await frames(tester);
-    await tester.tap(find.text('Pause wallpaper'));
+    await tester.tap(find.text('Animate wallpaper'));
     await frames(tester);
 
     // The theme toggle, and back.

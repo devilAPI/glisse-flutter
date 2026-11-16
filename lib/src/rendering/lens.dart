@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import '../foundation/theme.dart' show GlassQuality;
+
 /// How a lens bends what's under it, as Glisse's `LensOptions`.
 @immutable
 class LensSpec {
@@ -404,7 +406,12 @@ class LensDraw {
     this.outerBackdrop,
     this.screenSize = Size.zero,
     this.magnifyOffset = Offset.zero,
+    this.quality = GlassQuality.high,
   });
+
+  /// How much work the draw does: the frost's rings, and at
+  /// [GlassQuality.low] no colour split.
+  final GlassQuality quality;
 
   /// Where the magnified spot lies from the lens's middle, in local px: a
   /// loupe held above a finger shows what's under the finger.
@@ -524,6 +531,7 @@ class LensDraw {
     softensBend: softensBend,
     magnification: magnification,
     magnifyOffset: magnifyOffset,
+    quality: quality,
   );
 
   static double _premul(Color c, double channel) => channel * c.a;
@@ -555,7 +563,7 @@ class LensDraw {
     f(depth);
     // uBend
     f(reach);
-    f(dispersion ?? spec.dispersion);
+    f(quality == GlassQuality.low ? 0 : (dispersion ?? spec.dispersion));
     f(spec.bezel ? 1 : 0);
     f(spec.splay);
     // uDome
@@ -583,7 +591,11 @@ class LensDraw {
     f(m[3]);
     f(m[4]);
     f(m[5]);
-    f(0);
+    f(switch (quality) {
+      GlassQuality.low => 1,
+      GlassQuality.medium => 2,
+      GlassQuality.high || GlassQuality.auto => 3,
+    });
     // uFrost
     f(blur);
     f(saturation);

@@ -182,12 +182,14 @@ class RenderLiquidGlass extends RenderProxyBox {
     required double devicePixelRatio,
     GlassBackdropController? backdrop,
     bool dark = false,
+    GlassQuality quality = GlassQuality.high,
     RenderBox? child,
   }) : _radius = radius,
        _style = style,
        _devicePixelRatio = devicePixelRatio,
        _backdrop = backdrop,
        _dark = dark,
+       _quality = quality,
        super(child);
 
   double _radius;
@@ -214,6 +216,15 @@ class RenderLiquidGlass extends RenderProxyBox {
   }
 
   bool _dark;
+
+  GlassQuality _quality;
+
+  /// How much work the glass does; see [GlassQuality].
+  set quality(GlassQuality value) {
+    if (value == _quality) return;
+    _quality = value;
+    markNeedsPaint();
+  }
 
   /// Whether the glass is on a dark page, where its lens may bend by its
   /// spec's [LensSpec.darkStrength].
@@ -410,12 +421,13 @@ class RenderLiquidGlass extends RenderProxyBox {
     List<double>? uv,
     List<double>? inverse,
     Rect? outerBackdrop,
+    bool preFrosted = false,
   }) {
     final s = _style;
     final spec = s.spec;
-    // Over a copy, glass in other glass sees through that glass's frost too.
     final outer = texture == LensTexture.image ? _outer : null;
-    final blur = outer == null ? s.blur : math.sqrt(s.blur * s.blur + outer.blur * outer.blur);
+    // A copy already frosted needs no more.
+    final blur = preFrosted ? 0.0 : _frostOver(texture);
     final tint = outer == null ? s.tint : Color.alphaBlend(s.tint, outer.tint);
     final saturation = outer == null ? s.saturation : s.saturation * outer.saturation;
     return LensDraw(
@@ -440,7 +452,16 @@ class RenderLiquidGlass extends RenderProxyBox {
       magnifyOffset: s.magnifyOffset,
       outerBackdrop: outerBackdrop,
       screenSize: texture == LensTexture.backdrop ? _screenSize : Size.zero,
+      quality: _quality,
     );
+  }
+
+  // How much the glass frosts what it shows. Over a copy, glass in other
+  // glass sees through that glass's frost too.
+  double _frostOver(LensTexture texture) {
+    final s = _style;
+    final outer = texture == LensTexture.image ? _outer : null;
+    return outer == null ? s.blur : math.sqrt(s.blur * s.blur + outer.blur * outer.blur);
   }
 
   @override
@@ -480,7 +501,15 @@ class RenderLiquidGlass extends RenderProxyBox {
     _paintedTransform = transform;
     _watch();
     final uv = uvFor(imageRect: Offset.zero & box.size, transform: transform, localOffset: offset);
-    _draw(rect: offset & size, texture: LensTexture.image, uv: uv).apply(shader, image: image);
+    // The backdrop's frosted copy, shared by all glass that frosts as much:
+    // one sample a pixel here instead of dozens.
+    final frosted = backdrop.frosted(_frostOver(LensTexture.image));
+    _draw(
+      rect: offset & size,
+      texture: LensTexture.image,
+      uv: uv,
+      preFrosted: frosted != null && !identical(frosted, image),
+    ).apply(shader, image: frosted ?? image);
     canvas.drawRect(offset & size, Paint()..shader = shader);
   }
 
@@ -585,7 +614,12 @@ class LiquidGlassBox extends StatelessWidget {
     return _LiquidGlassRender(
       radius: radius,
       style: resolved,
-      child: _GlassAncestor(style: resolved, child: child ?? const SizedBox.shrink()),
+      // Glass paints again whenever it moves over its backdrop, as in a
+      // scrolling list; its content, behind a boundary of its own, doesn't.
+      child: _GlassAncestor(
+        style: resolved,
+        child: child == null ? const SizedBox.shrink() : RepaintBoundary(child: child),
+      ),
     );
   }
 }
@@ -620,6 +654,7 @@ class _LiquidGlassRender extends SingleChildRenderObjectWidget {
     devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1,
     backdrop: GlassBackdrop.maybeOf(context),
     dark: GlassTheme.of(context).isDark,
+    quality: GlassTheme.of(context).effectiveQuality,
   )..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
 
   @override
@@ -630,6 +665,7 @@ class _LiquidGlassRender extends SingleChildRenderObjectWidget {
       ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1
       ..backdrop = GlassBackdrop.maybeOf(context)
       ..dark = GlassTheme.of(context).isDark
+      ..quality = GlassTheme.of(context).effectiveQuality
       ..outer = context.dependOnInheritedWidgetOfExactType<_GlassAncestor>()?.style;
   }
 }

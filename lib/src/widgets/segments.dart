@@ -17,6 +17,7 @@ import '../rendering/content_lens.dart';
 import '../rendering/lens.dart';
 import '../rendering/liquid_glass.dart';
 import '../rendering/shadows.dart';
+import 'pressable.dart';
 
 /// One choice: a tab bar's tab, which may have an icon, or a segment.
 @immutable
@@ -575,6 +576,10 @@ class _SegmentsViewState<T> extends State<SegmentsView<T>> with TickerProviderSt
       ),
     );
 
+    // The whole bar swells and stretches under a finger, as a button does,
+    // while the selection follows the finger across it.
+    bar = GlassPressable(enabled: _enabled, child: bar);
+
     bar = Listener(
       behavior: HitTestBehavior.opaque,
       onPointerDown: _down,
@@ -744,6 +749,7 @@ class _SegmentsPainter<T> extends CustomPainter {
       final refracting = state._gesture != null || lift > 0.01;
       if (rimShader == null || !refracting || hidden) return;
       LensDraw(
+        quality: theme.effectiveQuality,
         rect: lens,
         shape: Size(width, height),
         radius: double.infinity,
@@ -805,6 +811,7 @@ class _SegmentsPainter<T> extends CustomPainter {
         image: image,
         imageRect: room,
         draw: LensDraw(
+          quality: theme.effectiveQuality,
           rect: lens,
           shape: shape,
           radius: double.infinity,

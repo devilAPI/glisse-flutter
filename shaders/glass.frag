@@ -28,7 +28,7 @@ uniform vec4 uShape;    // The lens's own shape: width, height, corner radius, b
 uniform vec4 uBend;     // reach (local px), dispersion, profile (0 dome, 1 bezel), splay.
 uniform vec4 uDome;     // Dome arcs: radius across, scale across, radius down, scale down.
 uniform vec4 uUvX;      // u = a x + b y + c; w: 1 when outside the image is clear.
-uniform vec4 uUvY;      // v = d x + e y + f.
+uniform vec4 uUvY;      // v = d x + e y + f; w: the frost's rings of taps, 1 to 3 (quality).
 uniform vec4 uFrost;    // blur sigma (local px), saturation, brightness, texture mode.
 uniform vec4 uLightA;   // shine, cos(angle), sin(angle), glow.
 uniform vec4 uLightB;   // spread, glow power, edge, edge width.
@@ -162,7 +162,9 @@ vec4 frostOf(vec2 p, float sigma, bool raw) {
   // These rings and weights blur with a deviation of 0.770 of their radius
   // scale (measured), so scale it up to give the deviation asked for, as
   // CSS's blur() does.
-  float s = sigma / 0.770;
+  // Fewer rings, for lower quality, are scaled to the same deviation.
+  float rings = clamp(floor(uUvY.w + 0.5), 1.0, 3.0);
+  float s = sigma / (rings > 2.5 ? 0.770 : (rings > 1.5 ? 0.660 : 0.419));
   float pixel = raw ? 1.0 : max(uLightC.w, 0.0001);
   float angle = 6.2831853 * noise(floor(p / pixel));
   float c = cos(angle);
@@ -178,6 +180,9 @@ vec4 frostOf(vec2 p, float sigma, bool raw) {
                sampleAt(p + turn * vec2(0.5 * r1, -0.866 * r1), raw) +
                sampleAt(p + turn * vec2(-0.5 * r1, -0.866 * r1), raw));
   total += 6.0 * w1;
+  if (rings < 1.5) {
+    return sum / total;
+  }
   float r2 = 1.35 * s;
   float w2 = 0.4020;  // exp(-1.35^2 / 2)
   float a2 = 0.7071 * r2;
@@ -186,6 +191,9 @@ vec4 frostOf(vec2 p, float sigma, bool raw) {
                sampleAt(p + turn * vec2(a2, a2), raw) + sampleAt(p + turn * vec2(-a2, a2), raw) +
                sampleAt(p + turn * vec2(a2, -a2), raw) + sampleAt(p + turn * vec2(-a2, -a2), raw));
   total += 8.0 * w2;
+  if (rings < 2.5) {
+    return sum / total;
+  }
   float r3 = 2.1 * s;
   float w3 = 0.1103;  // exp(-2.1^2 / 2)
   float c3 = 0.9239 * r3;
@@ -304,8 +312,9 @@ void main() {
       vec2 centre = uRect.xy + uRect.zw * 0.5;
       q = centre + uScreen.zw + (p - centre) / zoom;
     }
-    vec4 plain = frost(q, soften ? 0.0 : uFrost.x);
     float sigma = soften ? uFrost.x * amount : uFrost.x;
+    // Where the rim bends fully, the unbent sample isn't seen.
+    vec4 plain = bends < 1.0 || uBend.x <= 0.0 ? frost(q, soften ? 0.0 : uFrost.x) : vec4(0.0);
     base = plain;
     if (bends > 0.0 && uBend.x > 0.0) {
       // Each colour's ray, pulled from further in as far as that colour bends.
@@ -313,9 +322,14 @@ void main() {
       // Glisse's maps hold each pull in a byte, which caps it at full strength.
       vec2 pull = clamp(dir * amount, -1.0, 1.0) * 0.5 * uBend.x;
       float d = uBend.y;
-      vec4 red = frost(q - pull * (1.0 + 0.2 * d), sigma);
-      vec4 green = frost(q - pull * (1.0 + 0.1 * d), sigma);
       vec4 blue = frost(q - pull, sigma);
+      // Without dispersion, one ray serves all three colours.
+      vec4 red = blue;
+      vec4 green = blue;
+      if (d > 0.0) {
+        red = frost(q - pull * (1.0 + 0.2 * d), sigma);
+        green = frost(q - pull * (1.0 + 0.1 * d), sigma);
+      }
       vec4 bent;
       if (uLightC.y > 0.5) {
         // Ink: the alpha of whichever colour covers most, and each colour's

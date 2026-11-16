@@ -1,6 +1,7 @@
 // Bugs found in review, kept fixed.
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -632,6 +633,64 @@ void main() {
         expect(debugImagesRecorded - before, lessThanOrEqualTo(2), reason: 'recorded while dragging $target');
         await drag.up();
         await settle(tester);
+      }
+    });
+  });
+
+  group('performance', () {
+    test('auto quality is medium on phones and the web, high on desktops', () {
+      final theme = GlassThemeData.light();
+      expect(theme.quality, GlassQuality.auto);
+      for (final (platform, expected) in [
+        (TargetPlatform.android, GlassQuality.medium),
+        (TargetPlatform.iOS, GlassQuality.medium),
+        (TargetPlatform.linux, GlassQuality.high),
+        (TargetPlatform.macOS, GlassQuality.high),
+      ]) {
+        debugDefaultTargetPlatformOverride = platform;
+        expect(theme.effectiveQuality, expected, reason: '$platform');
+      }
+      debugDefaultTargetPlatformOverride = null;
+      expect(theme.copyWith(quality: GlassQuality.low).effectiveQuality, GlassQuality.low);
+    });
+
+    Widget page(GlassQuality quality, {Color color = const Color(0xFF3366FF)}) => MaterialApp(
+      home: GlassTheme(
+        data: GlassThemeData.light().copyWith(quality: quality),
+        child: GlassBackdrop(
+          background: ColoredBox(color: color),
+          child: const Center(child: Glass(width: 120, height: 60)),
+        ),
+      ),
+    );
+
+    GlassBackdropController backdropOf(WidgetTester tester) =>
+        GlassBackdrop.maybeOf(tester.element(find.byType(Glass)))!;
+
+    testWidgets('glass shares one frosted copy of the backdrop, made again when it changes', (tester) async {
+      await setUpGlass(tester, size: const Size(300, 200));
+      await tester.pumpWidget(page(GlassQuality.high));
+      await tester.pump();
+      await tester.pump();
+      final backdrop = backdropOf(tester);
+      final first = backdrop.frosted(3);
+      expect(first, isNotNull);
+      expect(identical(first, backdrop.image), isFalse);
+      expect(identical(backdrop.frosted(3), first), isTrue, reason: 'made once per copy');
+      expect(identical(backdrop.frosted(0), backdrop.image), isTrue, reason: 'no frost, no copy');
+      await tester.pumpWidget(page(GlassQuality.high, color: const Color(0xFFFF3366)));
+      await tester.pump();
+      await tester.pump();
+      expect(identical(backdrop.frosted(3), first), isFalse, reason: 'a new copy, a new frost');
+    });
+
+    testWidgets('the copy is as fine as the quality asks', (tester) async {
+      await setUpGlass(tester, size: const Size(300, 200), ratio: 3);
+      for (final (quality, ratio) in [(GlassQuality.low, 1), (GlassQuality.medium, 2), (GlassQuality.high, 3)]) {
+        await tester.pumpWidget(page(quality));
+        await tester.pump();
+        await tester.pump();
+        expect(backdropOf(tester).image!.width, 300 * ratio, reason: '$quality');
       }
     });
   });

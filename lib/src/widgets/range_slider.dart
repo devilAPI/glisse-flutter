@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +8,10 @@ import 'package:flutter/widgets.dart';
 import '../foundation/spring.dart';
 import '../foundation/theme.dart';
 import '../rendering/content_lens.dart';
+import '../rendering/hit_padding.dart';
+import '../rendering/lens.dart';
 import '../rendering/shadows.dart';
+import 'thumb_frost.dart';
 
 // Sizes from GlassSlider.
 const double _height = 40;
@@ -16,9 +20,8 @@ const double _trackHeight = 6;
 const double _thumbWidth = 60;
 const double _thumbHeight = 40;
 const double _inset = 18;
-// A knob rests at 60% of the slider's thumb and grows a little when held.
+// A knob rests at 60% of the slider's thumb and, held, grows to its full size.
 const double _restScale = 0.6;
-const double _pressScale = 0.72;
 
 /// A range of values, from [start] to [end].
 @immutable
@@ -47,6 +50,7 @@ class GlassRange {
 
 /// A slider with two knobs, picking a range: white knobs on GlassSlider's
 /// rail, the accent filling between them. The knobs can meet but not cross.
+/// A held knob lifts into a glass lens, as GlassSlider's does.
 class GlassRangeSlider extends StatefulWidget {
   /// Creates a range slider showing [values] between [min] and [max].
   const GlassRangeSlider({
@@ -111,11 +115,21 @@ class GlassRangeSlider extends StatefulWidget {
 }
 
 class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProviderStateMixin {
-  late final List<GlassSpring> _press = [
-    GlassSpring(vsync: this, stiffness: 700, damping: 34),
-    GlassSpring(vsync: this, stiffness: 700, damping: 34),
+  // How far each knob is lifted into a lens; only the held one lifts.
+  late final List<GlassSpring> _lift = [
+    GlassSpring(vsync: this, stiffness: 2000, damping: 80),
+    GlassSpring(vsync: this, stiffness: 2000, damping: 80),
   ];
-  late final Listenable _motion = Listenable.merge(_press);
+  late final Listenable _repaint = Listenable.merge([..._lift, GlassShaders.ready]);
+
+  // Each knob's lens draws twice, the fill and the bare rail, each with its
+  // own shader: knob * 2 + pass.
+  final List<ui.FragmentShader?> _shaders = List<ui.FragmentShader?>.filled(4, null);
+  // What a lifted knob shows, recorded once: the track bare, and with its
+  // fill all the way along. Dragging only moves where one gives way to the
+  // other. Both knobs show the same track, so share them.
+  final ContentImageCache _railBed = ContentImageCache();
+  final ContentImageCache _fillBed = ContentImageCache();
 
   FocusNode? _ownStartFocus;
   FocusNode? _ownEndFocus;
@@ -154,10 +168,16 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   }
 
   @override
+  void initState() {
+    super.initState();
+    GlassShaders.load();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    for (final spring in _press) {
+    for (final spring in _lift) {
       spring.reduceMotion = reduce;
     }
   }
@@ -176,17 +196,20 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
     if (!_enabled) {
       _active = null;
       _dragging = false;
-      for (final spring in _press) {
-        spring.set(0);
-      }
+      _settle();
     }
   }
 
   @override
   void dispose() {
-    for (final spring in _press) {
+    for (final spring in _lift) {
       spring.dispose();
     }
+    for (final shader in _shaders) {
+      shader?.dispose();
+    }
+    _railBed.dispose();
+    _fillBed.dispose();
     _ownStartFocus?.dispose();
     _ownEndFocus?.dispose();
     super.dispose();
@@ -214,8 +237,22 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   void _grab(int knob) {
     _active = knob;
     if (_top != knob) setState(() => _top = knob);
-    _press[knob].set(1);
-    _press[1 - knob].set(0);
+    final other = _lift[1 - knob];
+    // Knobs held together lift as one until a move picks one; the picked one
+    // takes over the lens where it stands, so it doesn't drop and lift again.
+    if (other.target > 0 && (_xOf(_startProgress) - _xOf(_endProgress)).abs() < 0.5) {
+      _lift[knob].jump(other.value, velocity: other.velocity);
+      other.set(0, instant: true);
+    } else {
+      other.set(0);
+    }
+    _lift[knob].set(1);
+  }
+
+  /// Lets both knobs down.
+  void _settle() {
+    _lift[0].set(0);
+    _lift[1].set(0);
   }
 
   /// Picks the knob nearer [x]; with the two together, the side [x] is on,
@@ -237,11 +274,11 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   void _down(PointerDownEvent event) {
     if (!_enabled || event.buttons != kPrimaryButton) return;
     final knob = _pick(event.localPosition.dx);
-    // Held on two knobs at once, both swell until a move picks one.
+    // Held on two knobs at once, the top one lifts until a move picks one.
     if (knob == null) {
       _active = null;
-      _press[0].set(1);
-      _press[1].set(1);
+      _lift[_top].set(1);
+      _lift[1 - _top].set(0);
     } else {
       _grab(knob);
     }
@@ -250,8 +287,7 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   // Runs before a tap's callback, so leaves the knob picked for it.
   void _up(PointerEvent event) {
     if (_dragging) return;
-    _press[0].set(0);
-    _press[1].set(0);
+    _settle();
   }
 
   /// The knob to move to [x], settling a tie by which way [x] lies.
@@ -284,8 +320,7 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
       widget.onChangeEnd?.call(next);
     }
     _active = null;
-    _press[0].set(0);
-    _press[1].set(0);
+    _settle();
   }
 
   void _dragStart(DragStartDetails details) {
@@ -310,8 +345,7 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
     if (!_dragging) return;
     _dragging = false;
     _active = null;
-    _press[0].set(0);
-    _press[1].set(0);
+    _settle();
     widget.onChangeEnd?.call(widget.values);
   }
 
@@ -421,6 +455,7 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
   @override
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
+    final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
     _rtl = Directionality.maybeOf(context) == TextDirection.rtl;
     Widget result = LayoutBuilder(
       builder: (context, constraints) {
@@ -428,24 +463,44 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
         _width = width;
         final start = _xOf(_startProgress);
         final end = _xOf(_endProgress);
+        final order = _top == 0 ? const [1, 0] : const [0, 1];
         return Stack(
           clipBehavior: Clip.none,
           children: [
+            // The page under a lifted knob, frosted, under its lens.
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _repaint,
+                builder: (context, _) {
+                  final frosts = <Widget>[
+                    for (final knob in order)
+                      if (_lift[knob].value > 0.01)
+                        ThumbFrost(
+                          rect: scaleAbout(_thumbAt(knob == 0 ? start : end), 0.6 + 0.4 * _lift[knob].value),
+                          lift: _lift[knob].value,
+                        ),
+                  ];
+                  if (frosts.isEmpty) return const SizedBox.shrink();
+                  return Stack(clipBehavior: Clip.none, children: frosts);
+                },
+              ),
+            ),
             CustomPaint(
               size: Size(width, _height),
               painter: _RangePainter(
+                state: this,
                 theme: theme,
                 start: start,
                 end: end,
                 top: _top,
                 focused: _focused,
-                press: _press,
                 activeColor: widget.activeColor ?? theme.fill,
-                repaint: _motion,
+                devicePixelRatio: dpr,
+                repaint: _repaint,
               ),
             ),
             // Draw order follows the knobs, so the top one is read last.
-            for (final knob in _top == 0 ? const [1, 0] : const [0, 1]) _knob(knob),
+            for (final knob in order) _knob(knob),
           ],
         );
       },
@@ -468,6 +523,8 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
         child: MouseRegion(cursor: _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic, child: result),
       ),
     );
+    // A lifted knob hangs 12px past either end of the track.
+    result = HitPadding(padding: const EdgeInsets.symmetric(horizontal: 12), child: result);
     return Semantics(
       container: true,
       explicitChildNodes: true,
@@ -476,6 +533,9 @@ class _GlassRangeSliderState extends State<GlassRangeSlider> with TickerProvider
     );
   }
 }
+
+/// The thumb of a knob whose middle is at [x], at its full, lifted size.
+Rect _thumbAt(double x) => Rect.fromCenter(center: Offset(x, _height / 2), width: _thumbWidth, height: _thumbHeight);
 
 class _NudgeIntent extends Intent {
   const _NudgeIntent(this.steps);
@@ -491,54 +551,189 @@ class _JumpIntent extends Intent {
 
 class _RangePainter extends CustomPainter {
   _RangePainter({
+    required this.state,
     required this.theme,
     required this.start,
     required this.end,
     required this.top,
     required this.focused,
-    required this.press,
     required this.activeColor,
+    required this.devicePixelRatio,
     required Listenable repaint,
   }) : super(repaint: repaint);
 
+  final _GlassRangeSliderState state;
   final GlassThemeData theme;
   final double start;
   final double end;
   final int top;
   final int? focused;
-  final List<GlassSpring> press;
   final Color activeColor;
+  final double devicePixelRatio;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rail = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, _trackTop, size.width, _trackHeight),
-      const Radius.circular(_trackHeight / 2),
-    );
-    canvas.drawRRect(rail, Paint()..color = theme.rail);
+    final width = size.width;
     final left = math.min(start, end);
     final right = math.max(start, end);
-    // The fill runs between the knobs' middles, rounded at both ends.
-    final fill = Rect.fromLTRB(left - _trackHeight / 2, _trackTop, right + _trackHeight / 2, _trackTop + _trackHeight);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(fill, const Radius.circular(_trackHeight / 2)),
-      Paint()..color = activeColor,
-    );
+    final order = top == 0 ? const [1, 0] : const [0, 1];
+    final lifts = [for (final spring in state._lift) spring.value];
+    final lensing = [
+      for (final knob in const [0, 1])
+        lifts[knob] > 0.01 && (state._shaders[knob * 2] ??= GlassShaders.create()) != null,
+    ];
+    Rect thumbOf(int knob) => _thumbAt(knob == 0 ? start : end);
+    Rect lensOf(int knob) => scaleAbout(thumbOf(knob), _restScale + (1 - _restScale) * lifts[knob]);
 
-    for (final knob in top == 0 ? const [1, 0] : const [0, 1]) {
-      final x = knob == 0 ? start : end;
-      final rect = Rect.fromCenter(center: Offset(x, _height / 2), width: _thumbWidth, height: _thumbHeight);
-      final scale = _restScale + (_pressScale - _restScale) * press[knob].value;
-      paintThumbChrome(canvas, rect: rect, scale: scale, lift: 0);
+    // The rail, and the fill running between the knobs' middles, rounded at
+    // both ends.
+    void paintTrack(Canvas canvas) {
+      final rail = RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, _trackTop, width, _trackHeight),
+        const Radius.circular(_trackHeight / 2),
+      );
+      canvas.drawRRect(rail, Paint()..color = theme.rail);
+      final fill = Rect.fromLTRB(
+        left - _trackHeight / 2,
+        _trackTop,
+        right + _trackHeight / 2,
+        _trackTop + _trackHeight,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(fill, const Radius.circular(_trackHeight / 2)),
+        Paint()..color = activeColor,
+      );
+    }
+
+    if (lensing.contains(true)) {
+      canvas.saveLayer(Rect.fromLTWH(-20, -20, width + 40, size.height + 40), Paint());
+      paintTrack(canvas);
+      for (final knob in const [0, 1]) {
+        if (lensing[knob]) cutOut(canvas, roundedRect(lensOf(knob), double.infinity));
+      }
+      canvas.restore();
+    } else {
+      paintTrack(canvas);
+    }
+
+    for (final (i, knob) in order.indexed) {
+      final lift = lifts[knob];
+      final lifted = lift.clamp(0.0, 1.0);
+      final scale = _restScale + (1 - _restScale) * lift;
+      final thumb = thumbOf(knob);
+      final lens = lensOf(knob);
+      if (lensing[knob]) {
+        // The knob beneath, if the knobs are close, is under this one's glass.
+        final other = 1 - knob;
+        final beneath = i > 0 ? (Path()..addRRect(roundedRect(lensOf(other), double.infinity))) : null;
+        _paintLens(canvas, size, knob: knob, thumb: thumb, lens: lens, lift: lift, scale: scale, beneath: beneath);
+      }
+      paintThumbChrome(canvas, rect: thumb, scale: scale, lift: lifted);
       if (focused == knob) {
         canvas.drawRRect(
-          roundedRect(scaleAbout(rect, scale), double.infinity).inflate(3),
+          roundedRect(lens, double.infinity).inflate(4),
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2
             ..color = theme.ring,
         );
       }
+    }
+  }
+
+  /// What a lifted knob shows in place of the track: the track a little
+  /// thicker, as if magnified, growing as the knob does, filled between the
+  /// knobs' middles as it is outside.
+  ///
+  /// The track is recorded once at its full thickness, bare and filled all
+  /// the way, and squashed to the thickness of the moment by where the image
+  /// is laid. The lens draws the filled one over the range and the bare one
+  /// beyond, so a drag records nothing.
+  ///
+  /// [beneath], the other knob where it lies under this one, hides the track
+  /// as it does outside the lens, so the lens shows the knob, not the track.
+  void _paintLens(
+    Canvas canvas,
+    Size size, {
+    required int knob,
+    required Rect thumb,
+    required Rect lens,
+    required double lift,
+    required double scale,
+    Path? beneath,
+  }) {
+    final width = size.width;
+    final lifted = lift.clamp(0.0, 1.0);
+    const centre = 20.0;
+    const fullLine = 8.0;
+    final bed = Rect.fromLTRB(-16, -4, width + 16, size.height + 4);
+    final line = fullLine * (0.6 + 0.4 * lifted);
+    final key = (bed.size, devicePixelRatio, theme.rail, activeColor);
+    final bar = Rect.fromLTWH(0, centre - fullLine / 2, width, fullLine);
+    void paintBar(Canvas canvas, {required bool filled}) {
+      canvas.translate(-bed.left, -bed.top);
+      canvas.drawRRect(roundedRect(bar, double.infinity), Paint()..color = theme.rail);
+      if (filled) canvas.drawRRect(roundedRect(bar, double.infinity), Paint()..color = activeColor);
+    }
+
+    final railImage = state._railBed.get(key, bed.size, devicePixelRatio, (c) => paintBar(c, filled: false));
+    final fillImage = state._fillBed.get(key, bed.size, devicePixelRatio, (c) => paintBar(c, filled: true));
+    final squash = line / fullLine;
+    final imageRect = Rect.fromLTRB(
+      bed.left,
+      centre + (bed.top - centre) * squash,
+      bed.right,
+      centre + (bed.bottom - centre) * squash,
+    );
+    final settled = 1 - lifted;
+    const spec = LensSpec.sliderThumb;
+    final shape = thumb.size;
+    final reach = spec.reachOf(shape, strengthOverride: theme.sliderBend, dark: theme.isDark) * scale;
+    final draw = LensDraw(
+      quality: theme.effectiveQuality,
+      rect: lens,
+      shape: shape,
+      radius: double.infinity,
+      spec: spec,
+      devicePixelRatio: devicePixelRatio,
+      reach: reach,
+      blur: 2 * settled + 0.5 * lifted,
+      brightness: 1 + 0.15 * settled,
+      saturation: 1.5,
+      shine: theme.lensShine,
+      light: theme.lensShine < 0 ? LensLight.light : LensLight.dark,
+    );
+    // The fill runs between the knobs' middles with rounded ends, as outside
+    // the lens; as the knobs meet, its ends draw in, so an empty range shows
+    // no fill under a lifted knob.
+    final left = math.min(start, end);
+    final right = math.max(start, end);
+    final cap = math.min(line / 2, right - left);
+    final everywhere = lens.inflate(4);
+    var filled =
+        cap > 0
+            ? (Path()..addRRect(
+              roundedRect(
+                Rect.fromLTRB(left - cap, centre - line / 2, right + cap, centre + line / 2),
+                double.infinity,
+              ),
+            ))
+            : Path();
+    var bare = Path.combine(PathOperation.difference, Path()..addRect(everywhere), filled);
+    if (beneath != null && beneath.getBounds().overlaps(everywhere)) {
+      filled = Path.combine(PathOperation.difference, filled, beneath);
+      bare = Path.combine(PathOperation.difference, bare, beneath);
+    }
+    canvas.save();
+    canvas.clipPath(filled);
+    paintContentLens(canvas, state._shaders[knob * 2]!, image: fillImage, imageRect: imageRect, draw: draw);
+    canvas.restore();
+    final railShader = state._shaders[knob * 2 + 1] ??= GlassShaders.create();
+    if (railShader != null) {
+      canvas.save();
+      canvas.clipPath(bare);
+      paintContentLens(canvas, railShader, image: railImage, imageRect: imageRect, draw: draw);
+      canvas.restore();
     }
   }
 
@@ -549,5 +744,6 @@ class _RangePainter extends CustomPainter {
       oldDelegate.end != end ||
       oldDelegate.top != top ||
       oldDelegate.focused != focused ||
-      oldDelegate.activeColor != activeColor;
+      oldDelegate.activeColor != activeColor ||
+      oldDelegate.devicePixelRatio != devicePixelRatio;
 }
