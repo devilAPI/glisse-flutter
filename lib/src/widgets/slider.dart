@@ -11,6 +11,7 @@ import '../rendering/content_lens.dart';
 import '../rendering/hit_padding.dart';
 import '../rendering/lens.dart';
 import '../rendering/shadows.dart';
+import 'thumb_frost.dart';
 
 // Sizes from Glisse's slider.
 const double _height = 40;
@@ -186,7 +187,7 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
     Widget result = LayoutBuilder(builder: (context, constraints) {
       final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
       _width = width;
-      return CustomPaint(
+      final paint = CustomPaint(
         size: Size(width, _height),
         painter: _SliderPainter(
           state: this,
@@ -197,6 +198,28 @@ class _GlassSliderState extends State<GlassSlider> with TickerProviderStateMixin
           focused: _focused,
           repaint: _repaint,
         ),
+      );
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // The page under the lifted thumb, frosted, under its lens.
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _repaint,
+              builder: (context, _) {
+                final lift = _lift.value;
+                if (lift <= 0.01) return const SizedBox.shrink();
+                final travel = math.max(0.0, width - 2 * _inset) * _progress;
+                final thumb = Rect.fromLTWH(travel - 12, 0, _thumbWidth, _thumbHeight);
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [ThumbFrost(rect: scaleAbout(thumb, 0.6 + 0.4 * lift), lift: lift)],
+                );
+              },
+            ),
+          ),
+          paint,
+        ],
       );
     });
     result = SizedBox(height: _height, child: result);

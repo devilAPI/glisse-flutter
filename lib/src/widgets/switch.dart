@@ -10,6 +10,7 @@ import '../rendering/content_lens.dart';
 import '../rendering/hit_padding.dart';
 import '../rendering/lens.dart';
 import '../rendering/shadows.dart';
+import 'thumb_frost.dart';
 
 // Sizes from Glisse's switch: --lg-scale 0.375 of Aave's 160 by 67 switch.
 const double _scale = 0.375;
@@ -183,16 +184,41 @@ class _GlassSwitchState extends State<GlassSwitch> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final theme = GlassTheme.of(context);
     final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
-    Widget result = CustomPaint(
-      size: const Size(_width, _height),
-      painter: _SwitchPainter(
-        state: this,
-        theme: theme,
-        activeColor: widget.activeColor ?? theme.on,
-        devicePixelRatio: dpr,
-        focused: _focused,
-        repaint: _repaint,
-      ),
+    Widget result = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // The page under the lifted thumb, frosted, under its lens.
+        Positioned.fill(
+          child: AnimatedBuilder(
+            animation: _repaint,
+            builder: (context, _) {
+              final lift = _lift.value;
+              if (lift <= 0.01) return const SizedBox.shrink();
+              final thumb = Rect.fromLTWH(
+                _thumbLeft + _position.value * _travel,
+                (_height - _thumbHeight) / 2,
+                _thumbWidth,
+                _thumbHeight,
+              );
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [ThumbFrost(rect: scaleAbout(thumb, 0.65 + 0.25 * lift), lift: lift)],
+              );
+            },
+          ),
+        ),
+        CustomPaint(
+          size: const Size(_width, _height),
+          painter: _SwitchPainter(
+            state: this,
+            theme: theme,
+            activeColor: widget.activeColor ?? theme.on,
+            devicePixelRatio: dpr,
+            focused: _focused,
+            repaint: _repaint,
+          ),
+        ),
+      ],
     );
     result = Listener(
       onPointerDown: _down,
